@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Collection - VastraVeda Jewelleries</title>
+    <meta name="description" content="Browse our exquisite collection of luxury jewelry at VastraVeda Jewelleries.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div id="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <a href="index.html"><img src="assets/IMG-20250812-WA0001.jpg" alt="VastraVeda Jewelleries Logo"></a>
+            </div>
+            <nav class="main-nav" aria-label="Main Navigation">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count">0</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="products-main">
+            <h1>Our Exquisite Collection</h1>
+            <div id="product-grid" class="product-grid">
+                </div>
+        </main>
+        
+        <aside id="cart-sidebar" class="cart-sidebar">
+             <div class="cart-header">
+                <h2>Your Bag</h2>
+                <button id="cart-close-btn" class="close-btn">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-price">₹0</span>
+                </div>
+                <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+            </div>
+        </aside>
+        <div id="sidebar-overlay"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

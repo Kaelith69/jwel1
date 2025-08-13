@@ -1,0 +1,176 @@
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #181818;
+    color: #fff;
+    margin: 0;
+}
+/* --- Global Styles --- */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #181818;
+    color: #fff;
+    margin: 0;
+}
+
+.glass-panel {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    padding: 30px;
+}
+
+.admin-button {
+    background: #d4af37;
+    color: #000;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.admin-button:hover {
+    background: #c7a032;
+}
+
+.admin-button.secondary {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+.admin-button.secondary:hover {
+    background: rgba(255,255,255,0.4);
+}
+.admin-button.danger {
+    background: #e53935;
+    color: #fff;
+}
+.admin-button.danger:hover {
+     background: #c62828;
+}
+
+.back-link {
+    color: #fff;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* --- Login Page --- */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-panel {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-panel h2 {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    color: #fff;
+}
+
+.error-message {
+    color: #ff4d4d;
+    margin-top: 15px;
+    height: 20px;
+}
+
+/* --- Dashboard --- */
+.admin-header {
+    background: rgba(0,0,0,0.3);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 30px;
+    padding: 30px;
+    align-items: start;
+}
+
+.form-panel, .list-panel {
+    width: 100%;
+}
+
+#product-form textarea {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    color: #fff;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.product-list-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.product-list-item:last-child {
+    border-bottom: none;
+}
+
+.product-list-details {
+    flex-grow: 1;
+}
+
+.product-list-details h4 {
+    margin: 0 0 5px;
+}
+
+.product-list-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.product-list-actions button {
+    padding: 8px 12px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}

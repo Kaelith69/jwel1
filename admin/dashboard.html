@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - VastraVeda Jewelleries</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>Admin Dashboard</h1>
+        <div>
+            <a href="/" class="back-link">← Back to Site</a>
+            <button id="logout-btn" class="admin-button secondary">Logout</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="glass-panel form-panel">
+            <h2 id="form-title">Add New Product</h2>
+            <form id="product-form">
+                <input type="hidden" id="product-id">
+                <div class="form-group">
+                    <label for="name">Product Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <select id="category" required>
+                        <option value="Antique Necklace">Antique Necklace</option>
+                        <option value="Antique Earrings">Antique Earrings</option>
+                        <option value="Bracelet">Bracelet</option>
+                        <option value="Bangles">Bangles</option>
+                        <option value="Earrings">Earrings</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="price">Price (Rs)</label>
+                    <input type="number" id="price" step="1" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="imageUrl">Image (choose from assets or paste URL)</label>
+                    <select id="imageAsset">
+                        <option value="">-- Select from assets --</option>
+                        <option value="assets/IMG-20250812-WA0001.jpg">IMG-20250812-WA0001.jpg</option>
+                        <option value="assets/IMG-20250812-WA0002.jpg">IMG-20250812-WA0002.jpg</option>
+                        <option value="assets/IMG-20250812-WA0003.jpg">IMG-20250812-WA0003.jpg</option>
+                        <option value="assets/IMG-20250812-WA0004.jpg">IMG-20250812-WA0004.jpg</option>
+                        <option value="assets/IMG-20250812-WA0005.jpg">IMG-20250812-WA0005.jpg</option>
+                        <option value="assets/IMG-20250812-WA0006.jpg">IMG-20250812-WA0006.jpg</option>
+                        <option value="assets/IMG-20250812-WA0007.jpg">IMG-20250812-WA0007.jpg</option>
+                        <option value="assets/IMG-20250812-WA0008.jpg">IMG-20250812-WA0008.jpg</option>
+                        <option value="assets/IMG-20250812-WA0009.jpg">IMG-20250812-WA0009.jpg</option>
+                        <option value="assets/IMG-20250812-WA0010.jpg">IMG-20250812-WA0010.jpg</option>
+                        <option value="assets/IMG-20250812-WA0011.jpg">IMG-20250812-WA0011.jpg</option>
+                        <option value="assets/IMG-20250812-WA0012.jpg">IMG-20250812-WA0012.jpg</option>
+                        <option value="assets/IMG-20250812-WA0013.jpg">IMG-20250812-WA0013.jpg</option>
+                    </select>
+                    <input type="url" id="imageUrl" placeholder="Or paste image URL" style="margin-top:8px;">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" id="submit-btn" class="admin-button">Add Product</button>
+                    <button type="button" id="cancel-btn" class="admin-button secondary" style="display: none;">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="glass-panel list-panel">
+            <h2>Existing Products</h2>
+            <div id="product-list" class="product-list"></div>
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>

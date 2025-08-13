@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VastraVeda Jewelleries - Luxury Redefined</title>
+    <meta name="description" content="VastraVeda Jewelleries - Luxury jewelry collection. Shop necklaces, rings, earrings, and bracelets online.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div id="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <a href="index.html"><img src="assets/IMG-20250812-WA0001.jpg" alt="VastraVeda Jewelleries Logo"></a>
+            </div>
+            <nav class="main-nav" aria-label="Main Navigation">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count">0</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="hero-section">
+            <div class="glass-panel">
+                <h1>VastraVeda Jewelleries</h1>
+                <p>Experience the art of elegance. Crafted for the discerning.</p>
+                <a href="products.html" class="cta-button">Explore Collection</a>
+            </div>
+        </main>
+        
+        <aside id="cart-sidebar" class="cart-sidebar">
+            <div class="cart-header">
+                <h2>Your Bag</h2>
+                <button id="cart-close-btn" class="close-btn">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items">
+                </div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-price">₹0</span>
+                </div>
+                <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+            </div>
+        </aside>
+        <div id="sidebar-overlay"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

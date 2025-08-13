@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - VastraVeda Jewelleries</title>
+    <meta name="description" content="Checkout securely at VastraVeda Jewelleries. Complete your luxury jewelry purchase.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div id="app-container">
+        <header class="main-header">
+            <div class="logo">
+                <a href="index.html"><img src="assets/IMG-20250812-WA0001.jpg" alt="VastraVeda Jewelleries Logo"></a>
+            </div>
+            <nav class="main-nav" aria-label="Main Navigation">
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="products.html">Products</a></li>
+                </ul>
+            </nav>
+            <div class="header-actions">
+                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count">0</span>
+                </button>
+            </div>
+        </header>
+
+        <main class="checkout-main">
+            <div class="glass-panel checkout-panel">
+                <h1>Checkout</h1>
+                <div id="checkout-summary" class="checkout-summary">
+                    <h2>Order Summary</h2>
+                    <div id="bill-items"></div>
+                    <div class="bill-total">
+                        <p>Subtotal: <span id="bill-subtotal">₹0</span></p>
+                        <p>Shipping: <span id="bill-shipping">₹500</span></p>
+                        <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
+                    </div>
+                </div>
+                <div class="payment-simulation">
+                    <h2>Payment Details</h2>
+                    <p>This is a demo. No real payment is required.</p>
+                    <button id="pay-now-btn" class="cta-button" aria-label="Complete payment">Pay Now</button>
+                </div>
+            </div>
+        </main>
+        
+        <aside id="cart-sidebar" class="cart-sidebar">
+            <div class="cart-header">
+                <h2>Your Bag</h2>
+                <button id="cart-close-btn" class="close-btn" type="button" aria-label="Close cart">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-price">₹0</span>
+                </div>
+                <button id="checkout-btn" class="checkout-button" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
+            </div>
+        </aside>
+        <div id="sidebar-overlay" role="presentation"></div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
