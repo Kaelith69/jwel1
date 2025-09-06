@@ -242,8 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('cart', JSON.stringify(cart));
     };
 
-    // WhatsApp order logic
-    const WHATSAPP_NUMBER = '919876543210'; // Update this with your actual business WhatsApp number
+    // WhatsApp order logic (dynamic from admin settings)
+    function getWhatsAppNumber(){
+        try { const cfg=JSON.parse(localStorage.getItem('adminSettings')||'{}'); if(cfg.whatsappNumber && /^[0-9]{10,15}$/.test(cfg.whatsappNumber)) return cfg.whatsappNumber; } catch {}
+        return '919876543210'; // fallback default
+    }
 
     function validateEmail(email) {
         // Simple email regex
@@ -375,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // WhatsApp redirect with small delay for better UX
             setTimeout(() => {
                 const encodedMsg = encodeURIComponent(message);
-                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
+                window.location.href = `https://wa.me/${getWhatsAppNumber()}?text=${encodedMsg}`;
                 // Clear cart after redirect
                 cart = [];
                 saveCart();

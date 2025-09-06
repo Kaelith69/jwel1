@@ -143,4 +143,11 @@
     renderOrdersList();
     renderOrdersTable();
     updatePreview();
+    // Settings page logic (WhatsApp number)
+    const SETTINGS_KEY='adminSettings';
+    const defaultSettings={ whatsappNumber:'919876543210' };
+    const loadSettings=()=>{ try { return { ...defaultSettings, ...(JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')) }; } catch { return { ...defaultSettings }; } };
+    const saveSettings=(s)=>localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+    const settingsForm=document.getElementById('settings-form');
+    if(settingsForm){ const waInput=document.getElementById('wa-number'); const statusEl=document.getElementById('settings-status'); const current=loadSettings(); if(waInput) waInput.value=current.whatsappNumber||''; settingsForm.addEventListener('submit',e=>{ e.preventDefault(); const val=waInput.value.trim(); if(!/^[0-9]{10,15}$/.test(val)){ alert('Enter 10-15 digit number without + or spaces.'); return; } const s=loadSettings(); s.whatsappNumber=val; saveSettings(s); if(statusEl){ statusEl.textContent='Saved'; setTimeout(()=>statusEl.textContent='',2500);} }); const resetBtn=document.getElementById('reset-settings-btn'); if(resetBtn) resetBtn.addEventListener('click',()=>{ const s=loadSettings(); waInput.value=s.whatsappNumber||''; }); }
 })();
