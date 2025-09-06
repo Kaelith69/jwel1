@@ -254,6 +254,10 @@ summary:focus-visible {
 .kpi-label { font-size:0.65rem; letter-spacing:.08em; text-transform:uppercase; opacity:.6; }
 .kpi-value { font-size:1.1rem; font-weight:600; }
 .kpi-sub { font-size:0.65rem; opacity:.6; }
+.kpi-delivered { color:#6fe0a0; }
+.kpi-cancelled { color:#f7aaaa; }
+.status-select { background:rgba(255,255,255,0.08); color:#fff; border:1px solid rgba(255,255,255,0.25); border-radius:6px; font-size:0.65rem; padding:2px 4px; margin-right:4px; }
+.status-select:focus { outline:2px solid #d4af37; outline-offset:2px; }
 .orders-table tbody tr.data-row { cursor:pointer; }
 .orders-table tbody tr.data-row:hover { background:rgba(255,255,255,0.08); }
 .order-detail-row td { background:rgba(255,255,255,0.04); border-top:1px solid rgba(255,255,255,0.15); }
