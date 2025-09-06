@@ -31,21 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- PRODUCT MANAGEMENT (CRUD) ---
-    let products = JSON.parse(localStorage.getItem('products')) || [
-        { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg' },
-        { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg' },
-        { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg' },
-        { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg' },
-        { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg' },
-        { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg' },
-        { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg' },
-        { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg' },
-        { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg' },
-        { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg' },
-        { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg' },
-        { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg' },
-        { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg' }
-    ];
+    // Reuse storefront seed if present to avoid divergence
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    if (!products.length) {
+        // Minimal seed (first few) - full seed lives in main.js
+        products = [
+            { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'Pear-cut diamond with halo setting.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Necklace' },
+            { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'Blue sapphire in white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Ring' }
+        ];
+        localStorage.setItem('products', JSON.stringify(products));
+    }
 
     const productForm = document.getElementById('product-form');
     const productList = document.getElementById('product-list');
@@ -93,13 +89,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleFormSubmit = (e) => {
         e.preventDefault();
         const id = document.getElementById('product-id').value;
-        const name = document.getElementById('name').value;
-        const price = parseInt(document.getElementById('price').value, 10);
-        const description = document.getElementById('description').value;
+        const name = document.getElementById('name').value.trim();
+        const priceRaw = document.getElementById('price').value.trim();
+        const price = parseInt(priceRaw, 10);
+        const description = document.getElementById('description').value.trim();
         const category = document.getElementById('category').value;
-        let imageUrl = document.getElementById('imageUrl').value;
+        let imageUrl = document.getElementById('imageUrl').value.trim();
         const imageAsset = document.getElementById('imageAsset').value;
         if (!imageUrl && imageAsset) imageUrl = imageAsset;
+
+        if (!name || name.length < 2) {
+            alert('Name must be at least 2 characters.');
+            return;
+        }
+        if (isNaN(price) || price < 0) {
+            alert('Enter a valid non-negative price.');
+            return;
+        }
+        if (!description || description.length < 5) {
+            alert('Description must be at least 5 characters.');
+            return;
+        }
+        if (!category) {
+            alert('Select a category.');
+            return;
+        }
+
         const newProductData = { name, price, description, category, imageUrl };
         if (id) { // Editing existing product
             const index = products.findIndex(p => p.id == id);
@@ -171,11 +186,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Edit and Delete buttons (using event delegation)
     if (productList) {
         productList.addEventListener('click', (e) => {
-            const id = parseInt(e.target.dataset.id);
-            if (e.target.classList.contains('edit-btn')) {
-                populateFormForEdit(id);
-            } else if (e.target.classList.contains('delete-btn')) {
-                handleDelete(id);
+            const editBtn = e.target.closest('.edit-btn');
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (editBtn) {
+                const id = parseInt(editBtn.dataset.id, 10);
+                if (!isNaN(id)) populateFormForEdit(id);
+            } else if (deleteBtn) {
+                const id = parseInt(deleteBtn.dataset.id, 10);
+                if (!isNaN(id)) handleDelete(id);
             }
         });
     }

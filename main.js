@@ -5,30 +5,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const productsInStorage = localStorage.getItem('products');
         if (!productsInStorage) {
             const defaultProducts = [
-                { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg' },
-                { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg' },
-                { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg' },
-                { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg' },
-                { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg' },
-                { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg' },
-                { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg' },
-                { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg' },
-                { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg' },
-                { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg' },
-                { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg' },
-                { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg' },
-                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg' },
-                { id: 14, name: 'Diamond Tennis Bracelet', price: 125000, description: 'A sparkling tennis bracelet with round-cut diamonds.', imageUrl: 'assets/IMG-20250812-WA0001.jpg' },
-                { id: 15, name: 'Sapphire Halo Pendant', price: 61000, description: 'A sapphire pendant surrounded by a halo of diamonds.', imageUrl: 'assets/IMG-20250812-WA0002.jpg' },
-                { id: 16, name: 'Pearl Drop Earrings', price: 27000, description: 'Classic pearl drop earrings with gold hooks.', imageUrl: 'assets/IMG-20250812-WA0003.jpg' },
-                { id: 17, name: 'Gold Leaf Anklet', price: 18000, description: 'A dainty gold anklet with leaf charms.', imageUrl: 'assets/IMG-20250812-WA0004.jpg' },
-                { id: 18, name: 'Emerald Cluster Ring', price: 73000, description: 'A cluster ring with emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0005.jpg' },
-                { id: 19, name: 'Ruby Bead Necklace', price: 56000, description: 'A necklace of ruby beads with gold spacers.', imageUrl: 'assets/IMG-20250812-WA0006.jpg' },
-                { id: 20, name: 'Diamond Stud Earrings', price: 47000, description: 'Simple and elegant diamond stud earrings.', imageUrl: 'assets/IMG-20250812-WA0007.jpg' },
-                { id: 21, name: 'Gold Filigree Pendant', price: 25000, description: 'A gold pendant with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0008.jpg' },
-                { id: 22, name: 'Sapphire and Pearl Maang Tikka', price: 39000, description: 'A traditional maang tikka with sapphires and pearls.', imageUrl: 'assets/IMG-20250812-WA0009.jpg' },
-                { id: 23, name: 'Antique Gold Kada', price: 68000, description: 'A bold antique gold kada with engraved motifs.', imageUrl: 'assets/IMG-20250812-WA0010.jpg' },
-                { id: 24, name: 'Diamond Nose Pin', price: 12000, description: 'A tiny nose pin with a single sparkling diamond.', imageUrl: 'assets/IMG-20250812-WA0011.jpg' }
+                { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Necklace' },
+                { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Ring' },
+                { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
+                { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Bracelet' },
+                { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Bangles' },
+                { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
+                { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Set' },
+                { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Ring' },
+                { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Pendant' },
+                { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Set' },
+                { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Studs' },
+                { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg', category: 'Earrings' },
+                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg', category: 'Brooch' },
+                { id: 14, name: 'Diamond Tennis Bracelet', price: 125000, description: 'A sparkling tennis bracelet with round-cut diamonds.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Bracelet' },
+                { id: 15, name: 'Sapphire Halo Pendant', price: 61000, description: 'A sapphire pendant surrounded by a halo of diamonds.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Pendant' },
+                { id: 16, name: 'Pearl Drop Earrings', price: 27000, description: 'Classic pearl drop earrings with gold hooks.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
+                { id: 17, name: 'Gold Leaf Anklet', price: 18000, description: 'A dainty gold anklet with leaf charms.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Anklet' },
+                { id: 18, name: 'Emerald Cluster Ring', price: 73000, description: 'A cluster ring with emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Ring' },
+                { id: 19, name: 'Ruby Bead Necklace', price: 56000, description: 'A necklace of ruby beads with gold spacers.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
+                { id: 20, name: 'Diamond Stud Earrings', price: 47000, description: 'Simple and elegant diamond stud earrings.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Studs' },
+                { id: 21, name: 'Gold Filigree Pendant', price: 25000, description: 'A gold pendant with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Pendant' },
+                { id: 22, name: 'Sapphire and Pearl Maang Tikka', price: 39000, description: 'A traditional maang tikka with sapphires and pearls.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Maang Tikka' },
+                { id: 23, name: 'Antique Gold Kada', price: 68000, description: 'A bold antique gold kada with engraved motifs.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Kada' },
+                { id: 24, name: 'Diamond Nose Pin', price: 12000, description: 'A tiny nose pin with a single sparkling diamond.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Nose Pin' }
             ];
             localStorage.setItem('products', JSON.stringify(defaultProducts));
             return defaultProducts;
@@ -83,10 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render items in the cart sidebar
     const renderCart = () => {
         if (!cartItemsContainer) return;
-
         cartItemsContainer.innerHTML = '';
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p>Your bag is empty.</p>';
+            cartItemsContainer.innerHTML = '<div class="cart-empty">Your bag is empty.</div>';
         } else {
             cart.forEach(item => {
                 const cartItemEl = document.createElement('div');
@@ -112,32 +111,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update cart count and total price
     const updateCartSummary = () => {
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    if (cartCountEl) {
-        cartCountEl.textContent = totalItems;
-        
-        // Show/hide cart icon based on item count
-        const cartIcon = document.querySelector('#cart-toggle .fas.fa-shopping-bag');
-        if (cartIcon) {
-            if (totalItems > 0) {
-                // Hide icon, show count as main content
-                cartIcon.style.display = 'none';
-                cartCountEl.style.display = 'flex';
-                cartCountEl.classList.add('show-as-main');
-            } else {
-                // Show icon, hide count
-                cartIcon.style.display = 'block';
-                cartCountEl.style.display = 'none';
-                cartCountEl.classList.remove('show-as-main');
-            }
+        if (cartCountEl) {
+            cartCountEl.textContent = totalItems;
+            cartCountEl.style.display = totalItems > 0 ? 'flex' : 'none';
+            cartCountEl.classList.toggle('show-as-main', totalItems > 0);
         }
-    }
-    if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
-
-    // Also save to localStorage
-    localStorage.setItem('cart', JSON.stringify(cart));
+        if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
+        saveCart();
     };
 
     // Render checkout page summary
@@ -203,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             cart.push({ ...productToAdd, quantity: 1 });
         }
+        saveCart();
         renderCart();
         // Don't auto-open cart - let user open it manually with cart button
     };
@@ -221,15 +205,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         }
+        saveCart();
         renderCart();
     };
     
     // Remove item from cart
     const removeFromCart = (productId) => {
         cart = cart.filter(item => item.id !== productId);
+        saveCart();
         renderCart();
     };
     
+    // Save cart to localStorage
+    const saveCart = () => {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    };
+
     // WhatsApp order logic
     const WHATSAPP_NUMBER = '919876543210'; // Update this with your actual business WhatsApp number
 
@@ -353,16 +344,22 @@ document.addEventListener('DOMContentLoaded', () => {
             orders.push(order);
             localStorage.setItem('proJetOrders', JSON.stringify(orders));
 
-            // Clear cart
-            cart = [];
-            localStorage.removeItem('cart');
-            updateCartSummary();
-            renderCheckoutSummary();
+            // Show confirmation message
+            if (checkoutError) {
+                checkoutError.textContent = 'Order placed! Please complete your order in WhatsApp.';
+                checkoutError.style.display = 'block';
+                checkoutError.style.color = '#080';
+            }
 
             // WhatsApp redirect with small delay for better UX
             setTimeout(() => {
                 const encodedMsg = encodeURIComponent(message);
                 window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
+                // Clear cart after redirect
+                cart = [];
+                saveCart();
+                updateCartSummary();
+                renderCheckoutSummary();
             }, 1000);
             
         } catch (error) {
@@ -399,21 +396,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event delegation for dynamically created buttons
     document.body.addEventListener('click', (e) => {
-        // Add to cart button on product cards
-        if (e.target.matches('.add-to-cart-btn')) {
-            const id = parseInt(e.target.dataset.id);
-            addToCart(id);
+        // Use closest() so clicks on child elements (like icons) still work
+        const addBtn = e.target.closest('.add-to-cart-btn');
+        if (addBtn) {
+            const id = parseInt(addBtn.dataset.id, 10);
+            if (!isNaN(id)) addToCart(id);
+            return; // Prevent falling through to other handlers
         }
-        // Quantity buttons in cart
-        if (e.target.matches('.quantity-btn')) {
-            const id = parseInt(e.target.dataset.id);
-            const action = e.target.dataset.action;
-            updateQuantity(id, action);
+
+        const qtyBtn = e.target.closest('.quantity-btn');
+        if (qtyBtn) {
+            const id = parseInt(qtyBtn.dataset.id, 10);
+            const action = qtyBtn.dataset.action;
+            if (!isNaN(id) && action) updateQuantity(id, action);
+            return;
         }
-        // Remove from cart button
-        if (e.target.matches('.remove-item-btn')) {
-            const id = parseInt(e.target.dataset.id);
-            removeFromCart(id);
+
+        const removeBtn = e.target.closest('.remove-item-btn');
+        if (removeBtn) {
+            const id = parseInt(removeBtn.dataset.id, 10);
+            if (!isNaN(id)) removeFromCart(id);
         }
     });
 
@@ -435,4 +437,9 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProducts();
     renderCart();
     renderCheckoutSummary();
+
+    // Hide 'Proceed to Checkout' button on checkout page
+    if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {
+        checkoutBtn.style.display = 'none';
+    }
 });
