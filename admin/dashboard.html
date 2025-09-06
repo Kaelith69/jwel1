@@ -77,6 +77,15 @@
             <h2>Existing Products</h2>
             <div id="product-list" class="product-list"></div>
         </div>
+
+        <div class="glass-panel list-panel" style="grid-column:1 / -1;">
+            <h2>Orders</h2>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+                <button id="clear-orders-btn" type="button" class="admin-button danger" style="background:#5a1a1a;">Clear All Orders</button>
+                <small style="opacity:.7">(Local only; WhatsApp flow already sent)</small>
+            </div>
+            <div id="orders-list" class="orders-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+        </div>
     </main>
 
     <script src="admin.js"></script>

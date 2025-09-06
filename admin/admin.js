@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const formTitle = document.getElementById('form-title');
     const submitBtn = document.getElementById('submit-btn');
     const cancelBtn = document.getElementById('cancel-btn');
+    // Orders elements (optional, may not exist if HTML not updated yet)
+    const ordersContainer = document.getElementById('orders-list');
+    const clearOrdersBtn = document.getElementById('clear-orders-btn');
 
     const saveProducts = () => {
         localStorage.setItem('products', JSON.stringify(products));
@@ -201,6 +204,49 @@ document.addEventListener('DOMContentLoaded', () => {
     // Cancel Edit button
     if (cancelBtn) {
         cancelBtn.addEventListener('click', resetForm);
+    }
+
+    // --- ORDERS MANAGEMENT ---
+    const fetchOrders = () => JSON.parse(localStorage.getItem('proJetOrders') || '[]');
+    const saveOrders = (orders) => localStorage.setItem('proJetOrders', JSON.stringify(orders));
+
+    const renderOrders = () => {
+        if (!ordersContainer) return;
+        const orders = fetchOrders().sort((a,b)=> new Date(b.date)-new Date(a.date));
+        if (!orders.length) { ordersContainer.innerHTML = '<p style="opacity:.7">No orders yet.</p>'; return; }
+        ordersContainer.innerHTML = orders.map(o => {
+            const date = new Date(o.date).toLocaleString();
+            const items = o.items.map(it => `${it.name} x${it.quantity}`).join(', ');
+            return `<div class="order-item" data-id="${o.orderId}">
+                <div class="order-meta"><strong>${o.orderId}</strong> <span>${date}</span></div>
+                <div class="order-items">${items}</div>
+                <div class="order-total">Total: ₹${o.total.toLocaleString('en-IN')}</div>
+                <button class="admin-button danger order-delete-btn" data-id="${o.orderId}">Delete</button>
+            </div>`;
+        }).join('');
+    };
+
+    if (ordersContainer) {
+        ordersContainer.addEventListener('click', (e)=> {
+            const delBtn = e.target.closest('.order-delete-btn');
+            if (delBtn) {
+                const id = delBtn.dataset.id;
+                if (confirm('Delete order '+id+'?')) {
+                    const remaining = fetchOrders().filter(o => o.orderId !== id);
+                    saveOrders(remaining);
+                    renderOrders();
+                }
+            }
+        });
+    }
+
+    if (clearOrdersBtn) {
+        clearOrdersBtn.addEventListener('click', ()=> {
+            if (confirm('Clear ALL orders? This cannot be undone.')) {
+                saveOrders([]);
+                renderOrders();
+            }
+        });
     }
     
     // --- INITIAL LOAD ---

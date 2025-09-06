@@ -169,6 +169,20 @@ body {
     padding: 8px 12px;
 }
 
+/* Orders list */
+.orders-list .order-item {
+    border:1px solid rgba(255,255,255,0.15);
+    padding:12px;
+    border-radius:10px;
+    background:rgba(255,255,255,0.05);
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+}
+.orders-list .order-meta { display:flex; justify-content:space-between; font-size:0.9em; opacity:.85; }
+.orders-list .order-items { font-size:0.95em; }
+.orders-list .order-total { font-weight:600; margin-top:4px; }
+
 @media (max-width: 900px) {
     .dashboard-container {
         grid-template-columns: 1fr;

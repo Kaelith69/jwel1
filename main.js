@@ -36,7 +36,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return JSON.parse(productsInStorage);
     };
 
-    const products = initializeProducts();
+    // Category normalization mapping (canonical categories)
+    const CATEGORY_MAP = {
+        'earring': 'Earrings', 'earrings': 'Earrings',
+        'stud': 'Studs', 'studs': 'Studs',
+        'ring': 'Ring', 'rings': 'Ring',
+        'necklace': 'Necklace', 'necklaces': 'Necklace',
+        'bracelet': 'Bracelet', 'bracelets': 'Bracelet',
+        'bangle': 'Bangles', 'bangles': 'Bangles',
+        'pendant': 'Pendant', 'pendants': 'Pendant',
+        'brooch': 'Brooch', 'brooches': 'Brooch',
+        'set': 'Set', 'sets': 'Set',
+        'maang tikka': 'Maang Tikka', 'tikha': 'Maang Tikka',
+        'kada': 'Kada', 'nose pin': 'Nose Pin', 'anklet': 'Anklet'
+    };
+
+    const normalizeCategory = (cat) => {
+        if (!cat) return 'Other';
+        const key = cat.toLowerCase().trim();
+        return CATEGORY_MAP[key] || cat; // keep original if not mapped so we don't lose intent
+    };
+
+    const products = initializeProducts().map(p => ({ ...p, category: normalizeCategory(p.category) }));
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
     // --- DOM Elements ---
