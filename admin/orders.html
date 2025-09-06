@@ -28,25 +28,40 @@
             <header class="panel-head">
                 <h2 id="orders-title" style="margin:0;">Orders</h2>
                 <div class="toolbar" style="flex-wrap:wrap;">
+                    <input type="text" id="order-search" placeholder="Search order ID / customer" aria-label="Search orders" style="min-width:170px;">
                     <label>Date From <input type="date" id="order-date-start"></label>
                     <label>Date To <input type="date" id="order-date-end"></label>
+                    <select id="order-status-filter" aria-label="Filter by status">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
                     <select id="order-sort" aria-label="Sort orders">
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
                     </select>
-                    <button id="order-filters-reset" class="admin-button secondary" type="button">Reset Filters</button>
+                    <button id="order-filters-reset" class="admin-button secondary" type="button">Reset</button>
                     <button id="export-orders" class="admin-button secondary" type="button">Export CSV</button>
                     <button id="clear-orders-btn" class="admin-button danger" type="button" style="margin-left:auto;">Clear All</button>
                 </div>
             </header>
+            <div class="kpi-cards" id="kpi-cards" aria-label="Revenue summary">
+                <div class="kpi-card" id="kpi-today"><span class="kpi-label">Today</span><span class="kpi-value">₹0</span><span class="kpi-sub" id="kpi-today-count">0 orders</span></div>
+                <div class="kpi-card" id="kpi-week"><span class="kpi-label">Last 7 Days</span><span class="kpi-value">₹0</span><span class="kpi-sub" id="kpi-week-count">0 orders</span></div>
+                <div class="kpi-card" id="kpi-month"><span class="kpi-label">This Month</span><span class="kpi-value">₹0</span><span class="kpi-sub" id="kpi-month-count">0 orders</span></div>
+                <div class="kpi-card" id="kpi-total"><span class="kpi-label">Total</span><span class="kpi-value">₹0</span><span class="kpi-sub" id="kpi-total-count">0 orders</span></div>
+            </div>
             <div class="table-wrapper" role="region" aria-label="Orders table">
                 <table class="data-table orders-table" id="orders-table">
                     <thead>
                         <tr>
                             <th scope="col">Order ID</th>
                             <th scope="col">Date / Time</th>
-                            <th scope="col">Customer</th>
-                            <th scope="col">Items</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Customer / Items</th>
                             <th scope="col">Total (₹)</th>
                             <th scope="col">Actions</th>
                         </tr>
@@ -54,6 +69,13 @@
                     <tbody id="orders-table-body"></tbody>
                 </table>
             </div>
+            <template id="order-detail-template">
+                <tr class="order-detail-row"><td colspan="6"><div class="order-detail">
+                    <div class="od-section"><h4>Customer</h4><div class="od-customer"></div></div>
+                    <div class="od-section"><h4>Items</h4><ul class="od-items"></ul></div>
+                    <div class="od-section"><h4>Meta</h4><div class="od-meta"></div></div>
+                </div></td></tr>
+            </template>
             <p id="orders-empty" style="display:none;opacity:.7;">No orders match your filters.</p>
         </section>
         <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>

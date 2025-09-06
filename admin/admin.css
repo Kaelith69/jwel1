@@ -242,6 +242,28 @@ summary:focus-visible {
 .orders-table .customer-block { font-size:0.72rem; opacity:.85; line-height:1.3; max-width:220px; }
 .muted { opacity:.6; }
 .truncate { max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Order status & KPI */
+.status-badge { padding:2px 8px; border-radius:14px; font-size:0.65rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; display:inline-block; }
+.status-pending { background:#665400; color:#f5d772; }
+.status-processing { background:#004a66; color:#7fd4ff; }
+.status-shipped { background:#2e4d00; color:#b7f574; }
+.status-delivered { background:#073f1e; color:#6fe0a0; }
+.status-cancelled { background:#5a1010; color:#f7aaaa; }
+.kpi-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; margin:18px 0 6px; }
+.kpi-card { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:14px; padding:12px 14px; display:flex; flex-direction:column; gap:4px; }
+.kpi-label { font-size:0.65rem; letter-spacing:.08em; text-transform:uppercase; opacity:.6; }
+.kpi-value { font-size:1.1rem; font-weight:600; }
+.kpi-sub { font-size:0.65rem; opacity:.6; }
+.orders-table tbody tr.data-row { cursor:pointer; }
+.orders-table tbody tr.data-row:hover { background:rgba(255,255,255,0.08); }
+.order-detail-row td { background:rgba(255,255,255,0.04); border-top:1px solid rgba(255,255,255,0.15); }
+.order-detail { display:grid; gap:18px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); }
+.order-detail h4 { margin:0 0 6px; font-size:0.75rem; letter-spacing:.07em; text-transform:uppercase; opacity:.7; }
+.od-items { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; font-size:0.75rem; }
+.od-items li { line-height:1.2; }
+.od-customer, .od-meta { font-size:0.7rem; line-height:1.3; opacity:.85; }
+.toggle-indicator { font-size:0.8rem; opacity:.5; margin-left:4px; }
+@media (max-width:600px){ .order-detail { grid-template-columns:1fr; } }
 
 @media (max-width: 900px) {
     .dashboard-container {
