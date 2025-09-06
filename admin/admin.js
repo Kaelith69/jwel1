@@ -32,19 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PRODUCT MANAGEMENT (CRUD) ---
     let products = JSON.parse(localStorage.getItem('products')) || [
-        { id: 1, name: 'Antique Diamond Necklace', category: 'Antique Necklace', price: 1200, description: 'A stunning antique necklace with intricate diamond work.', imageUrl: 'assets/IMG-20250812-WA0001.jpg' },
-        { id: 2, name: 'Antique Gold Earrings', category: 'Antique Earrings', price: 950, description: 'Classic antique gold earrings with filigree design.', imageUrl: 'assets/IMG-20250812-WA0002.jpg' },
-        { id: 3, name: 'Emerald Bracelet', category: 'Bracelet', price: 780, description: 'Elegant bracelet with emerald stones and gold finish.', imageUrl: 'assets/IMG-20250812-WA0003.jpg' },
-        { id: 4, name: 'Traditional Bangles', category: 'Bangles', price: 1500, description: 'Set of traditional gold bangles with detailed patterns.', imageUrl: 'assets/IMG-20250812-WA0004.jpg' },
-        { id: 5, name: 'Pearl Drop Earrings', category: 'Earrings', price: 1100, description: 'Beautiful pearl drop earrings for special occasions.', imageUrl: 'assets/IMG-20250812-WA0005.jpg' },
-        { id: 6, name: 'Antique Ruby Necklace', category: 'Antique Necklace', price: 1600, description: 'Antique necklace with ruby stones and gold work.', imageUrl: 'assets/IMG-20250812-WA0006.jpg' },
-        { id: 7, name: 'Kundan Bangles', category: 'Bangles', price: 1350, description: 'Kundan stone bangles with a royal touch.', imageUrl: 'assets/IMG-20250812-WA0007.jpg' },
-        { id: 8, name: 'Classic Gold Bracelet', category: 'Bracelet', price: 850, description: 'Classic gold bracelet, perfect for daily wear.', imageUrl: 'assets/IMG-20250812-WA0008.jpg' },
-        { id: 9, name: 'Antique Jhumka Earrings', category: 'Antique Earrings', price: 900, description: 'Traditional antique jhumka earrings with pearls.', imageUrl: 'assets/IMG-20250812-WA0009.jpg' },
-        { id: 10, name: 'Designer Stud Earrings', category: 'Earrings', price: 700, description: 'Modern designer stud earrings in gold.', imageUrl: 'assets/IMG-20250812-WA0010.jpg' },
-        { id: 11, name: 'Antique Choker Necklace', category: 'Antique Necklace', price: 1800, description: 'Antique choker necklace with intricate detailing.', imageUrl: 'assets/IMG-20250812-WA0011.jpg' },
-        { id: 12, name: 'Gold Kada Bangle', category: 'Bangles', price: 1200, description: 'Heavy gold kada bangle for festive occasions.', imageUrl: 'assets/IMG-20250812-WA0012.jpg' },
-        { id: 13, name: 'Elegant Hoop Earrings', category: 'Earrings', price: 650, description: 'Elegant gold hoop earrings for everyday style.', imageUrl: 'assets/IMG-20250812-WA0013.jpg' }
+        { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg' },
+        { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg' },
+        { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg' },
+        { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg' },
+        { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg' },
+        { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg' },
+        { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg' },
+        { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg' },
+        { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg' },
+        { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg' },
+        { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg' },
+        { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg' },
+        { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg' }
     ];
 
     const productForm = document.getElementById('product-form');

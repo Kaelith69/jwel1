@@ -50,7 +50,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartTotalPriceEl = document.getElementById('cart-total-price');
     const checkoutBtn = document.getElementById('checkout-btn');
     const checkoutSummaryContainer = document.getElementById('bill-items');
-    const payNowBtn = document.getElementById('pay-now-btn');
+    const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
+    const customerDetailsForm = document.getElementById('customer-details-form');
+    const checkoutError = document.getElementById('checkout-error');
 
     // --- RENDER FUNCTIONS ---
 
@@ -58,18 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderProducts = () => {
         if (!productGrid) return;
         productGrid.innerHTML = products.map(product => `
-            <div class="flip-card-container">
-                <div class="flip-card-inner">
-                    <div class="glass-card flip-card-front">
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
+            <div class="product-card">
+                <div class="glass-card">
+                    <div class="product-image-container">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
                     </div>
-                    <div class="glass-card flip-card-back">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-description">${product.description}</p>
-                        <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
-                        <button class="cta-button add-to-cart-btn" data-id="${product.id}">Add to Bag</button>
+                    <div class="product-bottom">
+                        <div class="product-info">
+                            <h3 class="product-name">${product.name}</h3>
+                            <p class="product-description">${product.description}</p>
+                            <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
+                        </div>
+                        <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -88,13 +92,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
                 cartItemEl.innerHTML = `
-                    <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img">
+                    <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
                     <div class="cart-item-info">
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                         <div class="cart-item-quantity">
                             <button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
-                            <input type="number" value="${item.quantity}" min="1" readonly>
+                            <span class="quantity-display">${item.quantity}</span>
                             <button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button>
                         </div>
                     </div>
@@ -111,7 +115,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    if (cartCountEl) cartCountEl.textContent = totalItems;
+    if (cartCountEl) {
+        cartCountEl.textContent = totalItems;
+        
+        // Show/hide cart icon based on item count
+        const cartIcon = document.querySelector('#cart-toggle .fas.fa-shopping-bag');
+        if (cartIcon) {
+            if (totalItems > 0) {
+                // Hide icon, show count as main content
+                cartIcon.style.display = 'none';
+                cartCountEl.style.display = 'flex';
+                cartCountEl.classList.add('show-as-main');
+            } else {
+                // Show icon, hide count
+                cartIcon.style.display = 'block';
+                cartCountEl.style.display = 'none';
+                cartCountEl.classList.remove('show-as-main');
+            }
+        }
+    }
     if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
 
     // Also save to localStorage
@@ -145,8 +167,30 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Toggle cart sidebar
     const toggleCart = () => {
-        cartSidebar.classList.toggle('open');
-        sidebarOverlay.classList.toggle('active');
+        const isOpen = cartSidebar.classList.contains('open');
+        
+        if (isOpen) {
+            cartSidebar.classList.remove('open');
+            document.body.style.overflow = ''; // Restore scrolling
+            // Remove focus trap for accessibility
+            document.removeEventListener('keydown', handleCartKeydown);
+        } else {
+            cartSidebar.classList.add('open');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            // Add focus trap for accessibility
+            document.addEventListener('keydown', handleCartKeydown);
+            // Focus on close button for accessibility
+            setTimeout(() => {
+                cartCloseBtn?.focus();
+            }, 100);
+        }
+    };
+
+    // Handle keyboard navigation in cart
+    const handleCartKeydown = (e) => {
+        if (e.key === 'Escape') {
+            toggleCart();
+        }
     };
 
     // Add product to cart
@@ -160,10 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cart.push({ ...productToAdd, quantity: 1 });
         }
         renderCart();
-        // Open cart for user feedback
-        if (!cartSidebar.classList.contains('open')) {
-            toggleCart();
-        }
+        // Don't auto-open cart - let user open it manually with cart button
     };
 
     // Update item quantity in cart
@@ -189,27 +230,172 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCart();
     };
     
-    // Simulate payment
-    const handlePayment = () => {
-        if(cart.length === 0) {
-            alert("Your cart is empty!");
+    // WhatsApp order logic
+    const WHATSAPP_NUMBER = '919876543210'; // Update this with your actual business WhatsApp number
+
+    function validateEmail(email) {
+        // Simple email regex
+        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    }
+
+    function validateMobile(mobile) {
+        // Validate 10-digit mobile number
+        return /^[0-9]{10}$/.test(mobile);
+    }
+
+    function validatePincode(pincode) {
+        // Validate 6-digit PIN code
+        return /^[0-9]{6}$/.test(pincode);
+    }
+
+    function handleWhatsAppOrder(e) {
+        if (e) e.preventDefault();
+        
+        // Clear any previous errors
+        if (checkoutError) {
+            checkoutError.style.display = 'none';
+            checkoutError.textContent = '';
+        }
+        
+        if (!cart || cart.length === 0) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Your cart is empty. Please add some items before checkout.';
+                checkoutError.style.display = 'block';
+            }
             return;
         }
-        const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0) + 500; // Including shipping
-        alert(`Thank you for your purchase! Payment of ₹${total.toLocaleString('en-IN')} was successful.`);
-        cart = [];
-        localStorage.removeItem('cart');
-        updateCartSummary();
-        renderCheckoutSummary();
-        window.location.href = 'products.html';
-        window.location.href = 'products.html';
-    };
+        
+        const name = document.getElementById('customer-name')?.value.trim();
+        const mobile = document.getElementById('customer-mobile')?.value.trim();
+        const email = document.getElementById('customer-email')?.value.trim();
+        const address = document.getElementById('customer-address')?.value.trim();
+        const pincode = document.getElementById('customer-pincode')?.value.trim();
+        
+        // Validate required fields (email is optional)
+        if (!name || !mobile || !address || !pincode) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please fill in all required fields: Name, Mobile Number, Address, and PIN Code.';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Validate mobile number
+        if (!validateMobile(mobile)) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please enter a valid 10-digit mobile number.';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Validate PIN code
+        if (!validatePincode(pincode)) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please enter a valid 6-digit PIN code.';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Validate email only if provided (optional field)
+        if (email && !validateEmail(email)) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please enter a valid email address (example: name@example.com).';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        
+        if (name.length < 2) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please enter a valid name (at least 2 characters).';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        
+        if (address.length < 10) {
+            if (checkoutError) {
+                checkoutError.textContent = 'Please enter a complete address (at least 10 characters).';
+                checkoutError.style.display = 'block';
+            }
+            return;
+        }
+        if (checkoutError) checkoutError.style.display = 'none';
+
+        // Show loading state
+        const submitButton = document.getElementById('whatsapp-order-btn');
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing Order...';
+        }
+
+        try {
+            // Prepare order summary
+            const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const shipping = subtotal > 0 ? 500 : 0;
+            const grandTotal = subtotal + shipping;
+            let orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
+
+            const message =
+`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
+
+            // Save order to localStorage
+            const order = {
+                orderId: 'ORD-' + Date.now(),
+                customer: { name, mobile, email, address, pincode },
+                items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+                total: grandTotal,
+                date: new Date().toISOString()
+            };
+            let orders = JSON.parse(localStorage.getItem('proJetOrders') || '[]');
+            orders.push(order);
+            localStorage.setItem('proJetOrders', JSON.stringify(orders));
+
+            // Clear cart
+            cart = [];
+            localStorage.removeItem('cart');
+            updateCartSummary();
+            renderCheckoutSummary();
+
+            // WhatsApp redirect with small delay for better UX
+            setTimeout(() => {
+                const encodedMsg = encodeURIComponent(message);
+                window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Error processing order:', error);
+            if (checkoutError) {
+                checkoutError.textContent = 'An error occurred while processing your order. Please try again.';
+                checkoutError.style.display = 'block';
+            }
+        } finally {
+            // Reset button state
+            if (submitButton) {
+                setTimeout(() => {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Place Order on WhatsApp';
+                }, 2000);
+            }
+        }
+    }
 
     // --- EVENT LISTENERS ---
 
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
-    if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleCart);
+    
+    // Improved overlay click handling
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function(e) {
+            // Only close if click is directly on the overlay, not inside the sidebar
+            if (e.target === sidebarOverlay) {
+                toggleCart();
+            }
+        });
+    }
 
     // Event delegation for dynamically created buttons
     document.body.addEventListener('click', (e) => {
@@ -241,22 +427,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (payNowBtn) {
-        payNowBtn.addEventListener('click', handlePayment);
+    if (customerDetailsForm) {
+        customerDetailsForm.addEventListener('submit', handleWhatsAppOrder);
     }
     
     // --- INITIAL LOAD ---
     renderProducts();
     renderCart();
     renderCheckoutSummary();
-
-    if (sidebarOverlay && cartSidebar) {
-        sidebarOverlay.addEventListener('click', function(e) {
-            // Only close if click is directly on the overlay, not inside the sidebar
-            if (e.target === sidebarOverlay) {
-                cartSidebar.classList.remove('open');
-                sidebarOverlay.classList.remove('active');
-            }
-        });
-    }
 });

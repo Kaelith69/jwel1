@@ -40,11 +40,31 @@
                         <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
                     </div>
                 </div>
-                <div class="payment-simulation">
-                    <h2>Payment Details</h2>
-                    <p>This is a demo. No real payment is required.</p>
-                    <button id="pay-now-btn" class="cta-button" aria-label="Complete payment">Pay Now</button>
-                </div>
+                <form id="customer-details-form" class="customer-details-form">
+                    <h2>Customer Details</h2>
+                    <div class="form-group">
+                        <label for="customer-name">Full Name *</label>
+                        <input type="text" id="customer-name" name="customer-name" required autocomplete="name">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-mobile">Mobile Number *</label>
+                        <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-email">Email (Optional)</label>
+                        <input type="email" id="customer-email" name="customer-email" autocomplete="email" placeholder="your.email@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-address">Shipping Address *</label>
+                        <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="Complete address including landmark"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-pincode">PIN Code *</label>
+                        <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" pattern="[0-9]{6}" placeholder="6-digit PIN code">
+                    </div>
+                    <div id="checkout-error" class="checkout-error" style="display:none;color:#c00;margin-bottom:1em;"></div>
+                    <button id="whatsapp-order-btn" class="cta-button" type="submit" aria-label="Place order on WhatsApp">Place Order on WhatsApp</button>
+                </form>
             </div>
         </main>
         
