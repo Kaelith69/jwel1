@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Orders - VastraVeda Jewelleries</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="admin-header with-nav">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html" aria-current="page">Orders</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
+            <a href="../index.html" class="back-link">← Site</a>
+            <button id="logout-btn" class="admin-button secondary">Logout</button>
+        </div>
+    </header>
+    <main id="main" class="page-container" tabindex="-1">
+        <section class="glass-panel" aria-labelledby="orders-title">
+            <header class="panel-head">
+                <h2 id="orders-title" style="margin:0;">Orders</h2>
+                <div class="toolbar" style="flex-wrap:wrap;">
+                    <label>Date From <input type="date" id="order-date-start"></label>
+                    <label>Date To <input type="date" id="order-date-end"></label>
+                    <select id="order-sort" aria-label="Sort orders">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+                    <button id="order-filters-reset" class="admin-button secondary" type="button">Reset Filters</button>
+                    <button id="export-orders" class="admin-button secondary" type="button">Export CSV</button>
+                    <button id="clear-orders-btn" class="admin-button danger" type="button" style="margin-left:auto;">Clear All</button>
+                </div>
+            </header>
+            <div class="table-wrapper" role="region" aria-label="Orders table">
+                <table class="data-table orders-table" id="orders-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Order ID</th>
+                            <th scope="col">Date / Time</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Items</th>
+                            <th scope="col">Total (₹)</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body"></tbody>
+                </table>
+            </div>
+            <p id="orders-empty" style="display:none;opacity:.7;">No orders match your filters.</p>
+        </section>
+        <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script src="admin.js"></script>
+</body>
+</html>

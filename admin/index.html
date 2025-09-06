@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-    <div class="login-container">
+    <a href="#login-main" class="skip-link">Skip to login form</a>
+    <div class="login-container" id="login-main" role="main">
         <div class="glass-panel login-panel">
             <h2>Admin Login</h2>
             <p>Demo Password: <strong>admin123</strong></p>
@@ -16,8 +17,8 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" required>
                 </div>
-                <button type="submit" class="admin-button">Login</button>
-                <p id="error-message" class="error-message"></p>
+                <button type="submit" class="admin-button" aria-describedby="error-message">Login</button>
+                <p id="error-message" class="error-message" role="alert" aria-live="assertive"></p>
             </form>
             <a href="../index.html" class="back-link">← Back to Site</a>
         </div>

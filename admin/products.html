@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Products - VastraVeda Jewelleries</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="admin-header with-nav">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="products.html" aria-current="page">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
+            <a href="../index.html" class="back-link">← Site</a>
+            <button id="logout-btn" class="admin-button secondary">Logout</button>
+        </div>
+    </header>
+
+    <main id="main" class="page-container" tabindex="-1">
+        <section class="glass-panel" aria-labelledby="products-title">
+            <header class="panel-head">
+                <h2 id="products-title" style="margin:0;">Products</h2>
+                <div class="inline-stats" id="product-count" aria-live="polite"></div>
+            </header>
+            <div class="toolbar" role="region" aria-label="Product filters and tools">
+                <input type="text" id="product-search" placeholder="Search name or description..." aria-label="Search products">
+                <select id="category-filter" aria-label="Filter by category">
+                    <option value="">All Categories</option>
+                    <option value="Necklace">Necklace</option>
+                    <option value="Ring">Ring</option>
+                    <option value="Earrings">Earrings</option>
+                    <option value="Bracelet">Bracelet</option>
+                    <option value="Bangles">Bangles</option>
+                    <option value="Pendant">Pendant</option>
+                    <option value="Brooch">Brooch</option>
+                    <option value="Set">Set</option>
+                    <option value="Studs">Studs</option>
+                </select>
+                <button type="button" id="clear-filters" class="admin-button secondary">Reset</button>
+                <a class="admin-button" href="add-product.html">➕ Add Product</a>
+            </div>
+            <div class="table-wrapper" role="region" aria-label="Products table">
+                <table class="data-table products-table" id="products-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Price (₹)</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+        <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script src="admin.js"></script>
+</body>
+</html>

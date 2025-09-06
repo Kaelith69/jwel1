@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add / Edit Product - VastraVeda Jewelleries</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="admin-header with-nav">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="add-product.html" aria-current="page">Add Product</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
+            <a href="../index.html" class="back-link">← Site</a>
+            <button id="logout-btn" class="admin-button secondary">Logout</button>
+        </div>
+    </header>
+    <main id="main" class="page-container" tabindex="-1">
+        <section class="glass-panel" aria-labelledby="form-title">
+            <h2 id="form-title" style="margin-top:0;">Add New Product</h2>
+            <form id="product-form" autocomplete="off">
+                <input type="hidden" id="product-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Product Name</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" required>
+                            <option value="Necklace">Necklace</option>
+                            <option value="Ring">Ring</option>
+                            <option value="Earrings">Earrings</option>
+                            <option value="Bracelet">Bracelet</option>
+                            <option value="Bangles">Bangles</option>
+                            <option value="Pendant">Pendant</option>
+                            <option value="Brooch">Brooch</option>
+                            <option value="Set">Set</option>
+                            <option value="Studs">Studs</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Price (Rs)</label>
+                        <input type="number" id="price" step="1" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" rows="4" required></textarea>
+                </div>
+                <details class="image-select-group">
+                    <summary>Image (choose / paste / upload / drag & drop)</summary>
+                    <div class="form-group no-margin">
+                        <label for="imageUrl" class="visually-hidden">Image URL</label>
+                        <input type="url" id="imageUrl" placeholder="Paste external image URL">
+                    </div>
+                    <div class="form-group no-margin">
+                        <label for="imageAsset" class="visually-hidden">Select Asset</label>
+                        <select id="imageAsset">
+                            <option value="">-- Select from assets --</option>
+                            <option value="assets/IMG-20250812-WA0001.jpg">IMG-20250812-WA0001.jpg</option>
+                            <option value="assets/IMG-20250812-WA0002.jpg">IMG-20250812-WA0002.jpg</option>
+                            <option value="assets/IMG-20250812-WA0003.jpg">IMG-20250812-WA0003.jpg</option>
+                            <option value="assets/IMG-20250812-WA0004.jpg">IMG-20250812-WA0004.jpg</option>
+                            <option value="assets/IMG-20250812-WA0005.jpg">IMG-20250812-WA0005.jpg</option>
+                            <option value="assets/IMG-20250812-WA0006.jpg">IMG-20250812-WA0006.jpg</option>
+                            <option value="assets/IMG-20250812-WA0007.jpg">IMG-20250812-WA0007.jpg</option>
+                            <option value="assets/IMG-20250812-WA0008.jpg">IMG-20250812-WA0008.jpg</option>
+                            <option value="assets/IMG-20250812-WA0009.jpg">IMG-20250812-WA0009.jpg</option>
+                            <option value="assets/IMG-20250812-WA0010.jpg">IMG-20250812-WA0010.jpg</option>
+                            <option value="assets/IMG-20250812-WA0011.jpg">IMG-20250812-WA0011.jpg</option>
+                            <option value="assets/IMG-20250812-WA0012.jpg">IMG-20250812-WA0012.jpg</option>
+                            <option value="assets/IMG-20250812-WA0013.jpg">IMG-20250812-WA0013.jpg</option>
+                        </select>
+                    </div>
+                    <div id="image-preview-wrapper" class="image-preview-wrapper">
+                        <strong class="preview-label">Preview:</strong>
+                        <img id="image-preview" alt="Preview" class="image-preview" />
+                        <span id="image-preview-placeholder" class="image-preview-placeholder">No image selected.</span>
+                    </div>
+                    <div class="upload-split">
+                        <div class="file-picker-group">
+                            <label for="imageFile" class="visually-hidden">Upload Image</label>
+                            <input type="file" id="imageFile" accept="image/*">
+                            <small class="hint">Max 2MB. JPEG/PNG/WebP recommended.</small>
+                        </div>
+                        <div id="image-dropzone" class="image-dropzone" tabindex="0" role="button" aria-label="Drop image file here or press Enter to browse">
+                            <span class="dz-instructions"><strong>Drag & Drop</strong> image here<br><em>or click / press Enter</em></span>
+                        </div>
+                    </div>
+                    <p class="hint" style="margin:6px 0 0;font-size:0.7rem;opacity:.65;">Uploaded images are stored locally in this browser only (data URL). For production, replace with real file storage.</p>
+                </details>
+                <div class="form-actions">
+                    <button type="submit" id="submit-btn" class="admin-button">Add Product</button>
+                    <a href="products.html" class="admin-button secondary">Back</a>
+                </div>
+            </form>
+        </section>
+        <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    </main>
+    <script src="admin.js"></script>
+</body>
+</html>

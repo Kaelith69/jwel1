@@ -7,18 +7,50 @@
     <link rel="stylesheet" href="admin.css">
 </head>
 <body>
-    <header class="admin-header">
-        <h1>Admin Dashboard</h1>
-        <div>
-            <a href="../index.html" class="back-link">← Back to Site</a>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="admin-header with-nav">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="dashboard.html" aria-current="page">Dashboard</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
+            <a href="../index.html" class="back-link">← Site</a>
             <button id="logout-btn" class="admin-button secondary">Logout</button>
         </div>
     </header>
 
-    <main class="dashboard-container">
-        <div class="glass-panel form-panel">
-            <h2 id="form-title">Add New Product</h2>
-            <form id="product-form">
+    <main id="main-content" class="dashboard-container" tabindex="-1">
+        <div class="top-bar glass-panel" style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                <button type="button" id="toggle-form-btn" class="admin-button" aria-expanded="false" aria-controls="product-form-wrapper">➕ Add Product</button>
+                <div class="filter-group">
+                    <input type="text" id="product-search" placeholder="Search products..." aria-label="Search products">
+                    <select id="category-filter" aria-label="Filter by category">
+                        <option value="">All Categories</option>
+                        <option value="Necklace">Necklace</option>
+                        <option value="Ring">Ring</option>
+                        <option value="Earrings">Earrings</option>
+                        <option value="Bracelet">Bracelet</option>
+                        <option value="Bangles">Bangles</option>
+                        <option value="Pendant">Pendant</option>
+                        <option value="Brooch">Brooch</option>
+                        <option value="Set">Set</option>
+                        <option value="Studs">Studs</option>
+                    </select>
+                    <button type="button" id="clear-filters" class="admin-button secondary" aria-label="Clear filters">Reset</button>
+                </div>
+            </div>
+            <div id="product-count" class="stat-chip" aria-live="polite"></div>
+        </div>
+
+        <div class="glass-panel form-panel collapsed" id="product-form-wrapper">
+            <h2 id="form-title" style="margin-top:0;">Add New Product</h2>
+            <form id="product-form" autocomplete="off">
                 <input type="hidden" id="product-id">
                 <div class="form-group">
                     <label for="name">Product Name</label>
@@ -36,10 +68,6 @@
                         <option value="Brooch">Brooch</option>
                         <option value="Set">Set</option>
                         <option value="Studs">Studs</option>
-                        <option value="Anklet">Anklet</option>
-                        <option value="Maang Tikka">Maang Tikka</option>
-                        <option value="Kada">Kada</option>
-                        <option value="Nose Pin">Nose Pin</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -50,31 +78,37 @@
                     <label for="description">Description</label>
                     <textarea id="description" rows="3" required></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="imageUrl">Image (choose from assets or paste URL)</label>
-                    <select id="imageAsset">
-                        <option value="">-- Select from assets --</option>
-                        <option value="assets/IMG-20250812-WA0001.jpg">IMG-20250812-WA0001.jpg</option>
-                        <option value="assets/IMG-20250812-WA0002.jpg">IMG-20250812-WA0002.jpg</option>
-                        <option value="assets/IMG-20250812-WA0003.jpg">IMG-20250812-WA0003.jpg</option>
-                        <option value="assets/IMG-20250812-WA0004.jpg">IMG-20250812-WA0004.jpg</option>
-                        <option value="assets/IMG-20250812-WA0005.jpg">IMG-20250812-WA0005.jpg</option>
-                        <option value="assets/IMG-20250812-WA0006.jpg">IMG-20250812-WA0006.jpg</option>
-                        <option value="assets/IMG-20250812-WA0007.jpg">IMG-20250812-WA0007.jpg</option>
-                        <option value="assets/IMG-20250812-WA0008.jpg">IMG-20250812-WA0008.jpg</option>
-                        <option value="assets/IMG-20250812-WA0009.jpg">IMG-20250812-WA0009.jpg</option>
-                        <option value="assets/IMG-20250812-WA0010.jpg">IMG-20250812-WA0010.jpg</option>
-                        <option value="assets/IMG-20250812-WA0011.jpg">IMG-20250812-WA0011.jpg</option>
-                        <option value="assets/IMG-20250812-WA0012.jpg">IMG-20250812-WA0012.jpg</option>
-                        <option value="assets/IMG-20250812-WA0013.jpg">IMG-20250812-WA0013.jpg</option>
-                    </select>
-                    <input type="url" id="imageUrl" placeholder="Or paste image URL" style="margin-top:8px;">
-                    <div id="image-preview-wrapper" style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
-                        <strong style="font-size:0.8em;opacity:.75;">Preview:</strong>
-                        <img id="image-preview" alt="Preview" style="max-width:140px;max-height:140px;object-fit:cover;border:1px solid rgba(255,255,255,0.2);border-radius:8px;display:none;" />
-                        <span id="image-preview-placeholder" style="font-size:0.75em;opacity:.6;">No image selected.</span>
+                <details class="image-select-group">
+                    <summary>Image (choose from assets or paste URL)</summary>
+                    <div class="form-group no-margin">
+                        <label for="imageUrl" class="visually-hidden">Image URL</label>
+                        <input type="url" id="imageUrl" placeholder="Paste external image URL">
                     </div>
-                </div>
+                    <div class="form-group no-margin">
+                        <label for="imageAsset" class="visually-hidden">Select Asset</label>
+                        <select id="imageAsset">
+                            <option value="">-- Select from assets --</option>
+                            <option value="assets/IMG-20250812-WA0001.jpg">IMG-20250812-WA0001.jpg</option>
+                            <option value="assets/IMG-20250812-WA0002.jpg">IMG-20250812-WA0002.jpg</option>
+                            <option value="assets/IMG-20250812-WA0003.jpg">IMG-20250812-WA0003.jpg</option>
+                            <option value="assets/IMG-20250812-WA0004.jpg">IMG-20250812-WA0004.jpg</option>
+                            <option value="assets/IMG-20250812-WA0005.jpg">IMG-20250812-WA0005.jpg</option>
+                            <option value="assets/IMG-20250812-WA0006.jpg">IMG-20250812-WA0006.jpg</option>
+                            <option value="assets/IMG-20250812-WA0007.jpg">IMG-20250812-WA0007.jpg</option>
+                            <option value="assets/IMG-20250812-WA0008.jpg">IMG-20250812-WA0008.jpg</option>
+                            <option value="assets/IMG-20250812-WA0009.jpg">IMG-20250812-WA0009.jpg</option>
+                            <option value="assets/IMG-20250812-WA0010.jpg">IMG-20250812-WA0010.jpg</option>
+                            <option value="assets/IMG-20250812-WA0011.jpg">IMG-20250812-WA0011.jpg</option>
+                            <option value="assets/IMG-20250812-WA0012.jpg">IMG-20250812-WA0012.jpg</option>
+                            <option value="assets/IMG-20250812-WA0013.jpg">IMG-20250812-WA0013.jpg</option>
+                        </select>
+                    </div>
+                    <div id="image-preview-wrapper" class="image-preview-wrapper">
+                        <strong class="preview-label">Preview:</strong>
+                        <img id="image-preview" alt="Preview" class="image-preview" />
+                        <span id="image-preview-placeholder" class="image-preview-placeholder">No image selected.</span>
+                    </div>
+                </details>
                 <div class="form-actions">
                     <button type="submit" id="submit-btn" class="admin-button">Add Product</button>
                     <button type="button" id="cancel-btn" class="admin-button secondary" style="display: none;">Cancel</button>
@@ -82,12 +116,12 @@
             </form>
         </div>
 
-        <div class="glass-panel list-panel">
-            <h2>Existing Products</h2>
-            <div id="product-list" class="product-list"></div>
+    <div class="glass-panel list-panel" id="products-panel" aria-describedby="product-count">
+            <h2 style="margin-top:0;">Products</h2>
+            <div id="product-list" class="product-list" aria-live="polite"></div>
         </div>
 
-        <div class="glass-panel list-panel" style="grid-column:1 / -1;">
+    <div class="glass-panel list-panel" style="grid-column:1 / -1;">
             <h2>Orders</h2>
             <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
                 <button id="clear-orders-btn" type="button" class="admin-button danger" style="background:#5a1a1a;">Clear All Orders</button>
@@ -95,6 +129,7 @@
             </div>
             <div id="orders-list" class="orders-list" style="display:flex;flex-direction:column;gap:12px;"></div>
         </div>
+    <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </main>
 
     <script src="admin.js"></script>
