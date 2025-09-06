@@ -26,10 +26,47 @@
     </header>
 
     <main id="main-content" class="dashboard-container" tabindex="-1">
-        <div class="top-bar glass-panel" style="grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
-            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                <button type="button" id="toggle-form-btn" class="admin-button" aria-expanded="false" aria-controls="product-form-wrapper">➕ Add Product</button>
-                <div class="filter-group">
+        <section class="glass-panel" style="grid-column:1/-1;" id="dashboard-kpis" aria-label="Key performance indicators">
+            <header style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+                <h2 style="margin:0;font-size:1.15rem;">Overview</h2>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="orders.html" class="admin-button secondary">View Orders</a>
+                    <button type="button" id="toggle-form-btn" class="admin-button" aria-expanded="false" aria-controls="product-form-wrapper">➕ Add Product</button>
+                </div>
+            </header>
+            <div class="kpi-cards dashboard-kpis">
+                <div class="kpi-card"><span class="kpi-label">Products</span><span class="kpi-value" id="db-kpi-products">0</span><span class="kpi-sub" id="db-kpi-products-sub">Total</span></div>
+                <div class="kpi-card"><span class="kpi-label">Orders (Month)</span><span class="kpi-value" id="db-kpi-orders">0</span><span class="kpi-sub" id="db-kpi-orders-sub">₹0</span><div class="sparkline-wrapper"><svg id="revenue-sparkline" class="sparkline" role="img" aria-label="Revenue last 12 months"></svg></div></div>
+                <div class="kpi-card"><span class="kpi-label">Pending</span><span class="kpi-value" id="db-kpi-pending">0</span><span class="kpi-sub" id="db-kpi-pending-sub">Awaiting</span></div>
+                <div class="kpi-card"><span class="kpi-label">Delivered</span><span class="kpi-value" id="db-kpi-delivered">0</span><span class="kpi-sub" id="db-kpi-delivered-sub">This Month</span></div>
+            </div>
+        </section>
+
+        <section class="glass-panel" style="grid-column:1/-1;" aria-label="Recent orders">
+            <header style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                <h2 style="margin:0;font-size:1.05rem;">Recent Orders</h2>
+                <a href="orders.html" class="admin-button secondary" style="font-size:.75rem;">All Orders →</a>
+            </header>
+            <div class="table-wrapper" style="margin-top:10px;">
+                <table class="data-table compact-table" aria-label="Recent orders table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-orders-body"></tbody>
+                </table>
+                <p id="recent-orders-empty" style="display:none;opacity:.65;font-size:.75rem;margin:8px 4px;">No orders yet.</p>
+            </div>
+        </section>
+
+        <section class="glass-panel" aria-labelledby="products-panel-title" style="grid-column:1/-1;">
+            <header style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+                <h2 id="products-panel-title" style="margin:0;font-size:1.05rem;">Products</h2>
+                <div class="filter-group" style="flex:1;max-width:560px;">
                     <input type="text" id="product-search" placeholder="Search products..." aria-label="Search products">
                     <select id="category-filter" aria-label="Filter by category">
                         <option value="">All Categories</option>
@@ -45,11 +82,12 @@
                     </select>
                     <button type="button" id="clear-filters" class="admin-button secondary" aria-label="Clear filters">Reset</button>
                 </div>
-            </div>
-            <div id="product-count" class="stat-chip" aria-live="polite"></div>
-        </div>
+                <div id="product-count" class="stat-chip" aria-live="polite"></div>
+            </header>
+            <div id="product-list" class="product-list" aria-live="polite" style="margin-top:14px;"></div>
+        </section>
 
-        <div class="glass-panel form-panel collapsed" id="product-form-wrapper">
+        <div class="glass-panel form-panel collapsed" id="product-form-wrapper" style="grid-column:1/-1;">
             <h2 id="form-title" style="margin-top:0;">Add New Product</h2>
             <form id="product-form" autocomplete="off">
                 <input type="hidden" id="product-id">
@@ -117,19 +155,7 @@
             </form>
         </div>
 
-    <div class="glass-panel list-panel" id="products-panel" aria-describedby="product-count">
-            <h2 style="margin-top:0;">Products</h2>
-            <div id="product-list" class="product-list" aria-live="polite"></div>
-        </div>
-
-    <div class="glass-panel list-panel" style="grid-column:1 / -1;">
-            <h2>Orders</h2>
-            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
-                <button id="clear-orders-btn" type="button" class="admin-button danger" style="background:#5a1a1a;">Clear All Orders</button>
-                <small style="opacity:.7">(Local only; WhatsApp flow already sent)</small>
-            </div>
-            <div id="orders-list" class="orders-list" style="display:flex;flex-direction:column;gap:12px;"></div>
-        </div>
+    <!-- Legacy simple orders list removed from dashboard (orders now summarized above). -->
     <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </main>
 

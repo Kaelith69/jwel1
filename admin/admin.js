@@ -15,6 +15,25 @@
     let products=JSON.parse(localStorage.getItem('products')||'[]');
     if(!products.length){products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];localStorage.setItem('products',JSON.stringify(products));}
     const saveProducts=()=>localStorage.setItem('products',JSON.stringify(products));
+    const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Studs'];
+    const refreshCategoryOptions=()=>{
+        const unique=new Set(BASE_CATEGORIES);
+        products.forEach(p=>{ if(p.category) unique.add(p.category); });
+        const cats=[...unique];
+        // Filter select(s)
+        const filterSel=document.getElementById('category-filter');
+        if(filterSel){
+            const current=filterSel.value;
+            filterSel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+            if(cats.includes(current)) filterSel.value=current; else filterSel.value='';
+        }
+        // Form selects (could be multiple on different pages)
+        document.querySelectorAll('select#category').forEach(sel=>{
+            const current=sel.value;
+            sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+            if(current && cats.includes(current)) sel.value=current;
+        });
+    };
 
     // Elements
     const productSearch=document.getElementById('product-search');
@@ -36,7 +55,7 @@
     const renderTable=()=>{ if(!productsTableBody) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productsTableBody.innerHTML='<tr><td colspan="7" style="opacity:.7;">No products match your filters.</td></tr>';return;} productsTableBody.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}">`:'<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#222;border-radius:8px;">🖼️</div>'; return `<tr data-id="${p.id}"><td class="nowrap">${p.id}</td><td>${img}</td><td><strong>${p.name}</strong><div class="muted" style="font-size:.7rem;margin-top:2px;">${p.category||''}</div></td><td class="nowrap"><span class="badge">${p.category||''}</span></td><td class="nowrap">${p.price.toLocaleString('en-IN')}</td><td class="clamp">${p.description}</td><td class="actions-cell"><a class="admin-button secondary" href="add-product.html?edit=${p.id}">Edit</a><button class="admin-button danger delete-btn" data-id="${p.id}">Delete</button></td></tr>`;}).join(''); };
 
     const resetForm=()=>{ if(!productForm) return; productForm.reset(); const idEl=document.getElementById('product-id'); if(idEl) idEl.value=''; if(formTitle) formTitle.textContent='Add New Product'; if(submitBtn) submitBtn.textContent='Add Product'; if(cancelBtn) cancelBtn.style.display='none'; };
-    const handleFormSubmit=e=>{ e.preventDefault(); const id=document.getElementById('product-id').value; const name=document.getElementById('name').value.trim(); const price=parseInt(document.getElementById('price').value.trim(),10); const description=document.getElementById('description').value.trim(); const category=document.getElementById('category').value; let imageUrl=(document.getElementById('imageUrl')?.value||'').trim(); const asset=document.getElementById('imageAsset')?.value||''; if(!imageUrl && asset) imageUrl=asset; if(!name||name.length<2) return alert('Name must be at least 2 characters.'); if(isNaN(price)||price<0) return alert('Invalid price'); if(!description||description.length<5) return alert('Description too short'); if(!category) return alert('Select category'); const data={name,price,description,category,imageUrl}; if(id){const idx=products.findIndex(p=>p.id==id); if(idx!==-1) products[idx]={...products[idx],...data}; if(liveStatus) liveStatus.textContent=`Updated product ${name}`;} else {data.id=Date.now(); products.push(data); if(liveStatus) liveStatus.textContent=`Added product ${name}`;} saveProducts(); renderCards(); renderTable(); if(window.location.pathname.endsWith('add-product.html')){ setTimeout(()=>location.href='products.html',300); return; } resetForm(); if(toggleFormBtn && productFormWrapper && !productFormWrapper.classList.contains('collapsed')){ productFormWrapper.classList.add('collapsed'); toggleFormBtn.textContent='➕ Add Product'; toggleFormBtn.setAttribute('aria-expanded','false'); toggleFormBtn.focus(); }};
+    const handleFormSubmit=e=>{ e.preventDefault(); const id=document.getElementById('product-id').value; const name=document.getElementById('name').value.trim(); const price=parseInt(document.getElementById('price').value.trim(),10); const description=document.getElementById('description').value.trim(); const category=document.getElementById('category').value; let imageUrl=(document.getElementById('imageUrl')?.value||'').trim(); const asset=document.getElementById('imageAsset')?.value||''; if(!imageUrl && asset) imageUrl=asset; if(!name||name.length<2) return alert('Name must be at least 2 characters.'); if(isNaN(price)||price<0) return alert('Invalid price'); if(!description||description.length<5) return alert('Description too short'); if(!category) return alert('Select category'); const data={name,price,description,category,imageUrl}; if(id){const idx=products.findIndex(p=>p.id==id); if(idx!==-1) products[idx]={...products[idx],...data}; if(liveStatus) liveStatus.textContent=`Updated product ${name}`;} else {data.id=Date.now(); products.push(data); if(liveStatus) liveStatus.textContent=`Added product ${name}`;} saveProducts(); refreshCategoryOptions(); renderCards(); renderTable(); if(window.location.pathname.endsWith('add-product.html')){ setTimeout(()=>location.href='products.html',300); return; } resetForm(); if(toggleFormBtn && productFormWrapper && !productFormWrapper.classList.contains('collapsed')){ productFormWrapper.classList.add('collapsed'); toggleFormBtn.textContent='➕ Add Product'; toggleFormBtn.setAttribute('aria-expanded','false'); toggleFormBtn.focus(); }};
     const handleDelete=id=>{ if(!confirm('Delete this product?')) return; products=products.filter(p=>p.id!==id); saveProducts(); renderCards(); renderTable(); };
 
     if(productForm) productForm.addEventListener('submit',handleFormSubmit);
@@ -138,11 +157,58 @@
     const params=new URLSearchParams(window.location.search); const edit=params.get('edit'); if(edit && productForm){ const id=parseInt(edit,10); if(!isNaN(id)){ const p=products.find(pp=>pp.id===id); if(p){ document.getElementById('product-id').value=p.id; document.getElementById('name').value=p.name; document.getElementById('price').value=p.price; document.getElementById('description').value=p.description; document.getElementById('category').value=p.category||''; const iu=document.getElementById('imageUrl'); if(iu) iu.value=p.imageUrl||''; const ia=document.getElementById('imageAsset'); if(ia && p.imageUrl?.startsWith('assets/')) ia.value=p.imageUrl; if(formTitle) formTitle.textContent='Edit Product'; if(submitBtn) submitBtn.textContent='Update Product'; updatePreview(); } }}
 
     // Initial renders
+    refreshCategoryOptions();
     renderCards();
     renderTable();
     renderOrdersList();
     renderOrdersTable();
     updatePreview();
+    // Dashboard KPIs & Recent Orders (only if elements exist)
+    (function initDashboard(){
+        const kpiProducts=document.getElementById('db-kpi-products');
+        if(!kpiProducts) return; // not on dashboard
+        kpiProducts.textContent=products.length;
+        const monthOrdersEl=document.getElementById('db-kpi-orders');
+        const monthOrdersSub=document.getElementById('db-kpi-orders-sub');
+        const pendingEl=document.getElementById('db-kpi-pending');
+        const pendingSub=document.getElementById('db-kpi-pending-sub');
+        const deliveredEl=document.getElementById('db-kpi-delivered');
+        const deliveredSub=document.getElementById('db-kpi-delivered-sub');
+        const orders=fetchOrders();
+        const now=new Date();
+        const startOfMonth=new Date(now.getFullYear(),now.getMonth(),1);
+        let monthCount=0,monthRevenue=0,pendingCount=0,deliveredCount=0;
+        orders.forEach(o=>{ const d=new Date(o.date); if(d>=startOfMonth){ monthCount++; monthRevenue+=o.total||0; if(o.status==='Delivered') deliveredCount++; if(o.status==='Pending'||o.status==='Processing'||o.status==='Shipped') pendingCount++; }});
+        if(monthOrdersEl) monthOrdersEl.textContent=monthCount;
+        if(monthOrdersSub) monthOrdersSub.textContent='₹'+monthRevenue.toLocaleString('en-IN');
+        if(pendingEl) pendingEl.textContent=pendingCount;
+        if(pendingSub) pendingSub.textContent='Open';
+        if(deliveredEl) deliveredEl.textContent=deliveredCount;
+        if(deliveredSub) deliveredSub.textContent='This Month';
+        // Sparkline: revenue per month for last 12 months
+        const svg=document.getElementById('revenue-sparkline');
+        if(svg){
+            const nowM=new Date();
+            const months=[]; // [{label:'2025-01', total:1234}]
+            for(let i=11;i>=0;i--){ const d=new Date(nowM.getFullYear(),nowM.getMonth()-i,1); const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); months.push({ key, date:new Date(d.getFullYear(),d.getMonth(),1), total:0 }); }
+            orders.forEach(o=>{ const d=new Date(o.date); const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); const bucket=months.find(m=>m.key===key); if(bucket) bucket.total+=o.total||0; });
+            const w=160, h=38, padX=4, padY=4; svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.innerHTML='';
+            const max=Math.max(...months.map(m=>m.total),1); const min=Math.min(...months.map(m=>m.total));
+            const xStep=(w-2*padX)/(months.length-1);
+            const pts=months.map((m,i)=>{ const x=padX+i*xStep; const y=h-padY-( (m.total/max)*(h-2*padY) ); return {x,y,total:m.total}; });
+            const lineD=pts.map((p,i)=> (i? 'L':'M')+p.x.toFixed(2)+','+p.y.toFixed(2)).join(' ');
+            const areaD=lineD+' L '+pts[pts.length-1].x.toFixed(2)+','+(h-padY)+' L '+pts[0].x.toFixed(2)+','+(h-padY)+' Z';
+            const area=document.createElementNS('http://www.w3.org/2000/svg','path'); area.setAttribute('class','area'); area.setAttribute('d',areaD); svg.appendChild(area);
+            const path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','line'); path.setAttribute('d',lineD); svg.appendChild(path);
+            pts.forEach((p,i)=>{ if(i===pts.length-1 || i===pts.length-2){ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('class','dot'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',2.4); c.setAttribute('data-value',p.total); svg.appendChild(c);} });
+            // Optional min/max labels
+            if(max!==min){ const minP=pts.reduce((a,b)=>b.total<a.total?b:a); const maxP=pts.reduce((a,b)=>b.total>a.total?b:a); const tMin=document.createElementNS('http://www.w3.org/2000/svg','text'); tMin.setAttribute('class','minimax'); tMin.setAttribute('x',minP.x+2); tMin.setAttribute('y',Math.min(h-2, minP.y+7)); tMin.textContent='₹'+minP.total.toLocaleString('en-IN'); svg.appendChild(tMin); const tMax=document.createElementNS('http://www.w3.org/2000/svg','text'); tMax.setAttribute('class','minimax'); tMax.setAttribute('x',maxP.x+2); tMax.setAttribute('y',Math.max(7, maxP.y-2)); tMax.textContent='₹'+maxP.total.toLocaleString('en-IN'); svg.appendChild(tMax); }
+        }
+        // Recent orders list (table)
+        const recentBody=document.getElementById('recent-orders-body');
+        const recentEmpty=document.getElementById('recent-orders-empty');
+        if(recentBody){ const recent=orders.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8); if(!recent.length){ if(recentEmpty) recentEmpty.style.display='block'; } else { if(recentEmpty) recentEmpty.style.display='none'; recentBody.innerHTML=recent.map(o=>`<tr><td>${o.orderId}</td><td>${new Date(o.date).toLocaleDateString()}<br><span style='opacity:.6;font-size:.55rem;'>${new Date(o.date).toLocaleTimeString()}</span></td><td><span class='status-badge status-${o.status.toLowerCase()}'>${o.status}</span></td><td>₹${o.total.toLocaleString('en-IN')}</td></tr>`).join(''); }}
+    })();
     // Settings page logic (WhatsApp number)
     const SETTINGS_KEY='adminSettings';
     const defaultSettings={ whatsappNumber:'919876543210' };

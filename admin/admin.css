@@ -4,6 +4,8 @@ body {
     color: #fff;
     margin: 0;
 }
+/* Force dark form controls for better native dropdown visibility */
+:root { color-scheme: dark; }
 /* --- Global Styles --- */
 
 body {
@@ -136,6 +138,7 @@ summary:focus-visible {
 .top-bar { padding:16px 20px; display:flex; gap:16px; }
 .filter-group { display:flex; gap:8px; flex-wrap:wrap; }
 .filter-group input, .filter-group select { padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; font:inherit; }
+.filter-group select { min-width:140px; }
 .filter-group input:focus, .filter-group select:focus { outline:2px solid #d4af37; outline-offset:1px; }
 .stat-chip { background:rgba(212,175,55,0.15); padding:6px 12px; border-radius:20px; font-size:.85rem; font-weight:600; }
 #product-form-wrapper.collapsed { display:none; }
@@ -224,6 +227,25 @@ summary:focus-visible {
 .panel-head { display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; }
 .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 .toolbar input[type="text"], .toolbar select, .toolbar input[type="date"] { padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; font:inherit; }
+
+/* Enhanced dropdown (select) visibility */
+select {
+    background:#1d1d1d;
+    color:#fff;
+    border:1px solid #444;
+    padding-right:34px;
+    min-height:38px;
+}
+select:focus { border-color:#d4af37; }
+option { background:#1d1d1d; color:#fff; }
+/* High contrast for hovered/selected options in some browsers */
+@supports selector(option:checked) {
+    option:checked { background:#333 !important; color:#fff !important; }
+}
+/* Windows specific clarity tweak */
+@media screen and (-ms-high-contrast: active), screen and (forced-colors: active) {
+    select, option { forced-color-adjust:none; }
+}
 .inline-stats { font-size:.85rem; opacity:.75; }
 .table-wrapper { overflow-x:auto; margin-top:14px; }
 .data-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
@@ -316,6 +338,22 @@ summary:focus-visible {
     }
     .data-table th, .data-table td { padding:8px 8px; }
     .customer-block { max-width:160px; }
+
+    /* Dashboard refinements */
+    .dashboard-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:26px; align-items:start; }
+    .dashboard-kpis .kpi-card { min-height:86px; }
+    .compact-table th, .compact-table td { padding:6px 10px; font-size:0.7rem; }
+    .compact-table tbody tr:hover { background:rgba(255,255,255,0.05); }
+    .compact-table { width:100%; border-collapse:collapse; }
+    .compact-table thead { background:rgba(255,255,255,0.05); }
+    .compact-table th { font-weight:600; letter-spacing:.05em; text-transform:uppercase; font-size:0.6rem; }
+    /* Sparkline */
+    .sparkline-wrapper { margin-top:6px; height:38px; }
+    .sparkline { width:100%; height:38px; overflow:visible; }
+    .sparkline path.line { fill:none; stroke:#d4af37; stroke-width:2; vector-effect:non-scaling-stroke; }
+    .sparkline path.area { fill:rgba(212,175,55,0.18); stroke:none; }
+    .sparkline circle.dot { fill:#d4af37; stroke:#181818; stroke-width:1; }
+    .sparkline text.minimax { font-size:6px; fill:#aaa; }
 }
 
 @media (max-width: 400px) {
