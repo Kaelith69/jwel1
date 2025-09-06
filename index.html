@@ -36,9 +36,9 @@
             </div>
         </main>
         
-        <aside id="cart-sidebar" class="cart-sidebar">
+        <aside id="cart-sidebar" class="cart-sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="cart-title">
             <div class="cart-header">
-                <h2>Your Bag</h2>
+                <h2 id="cart-title">Your Bag</h2>
                 <button id="cart-close-btn" class="close-btn">&times;</button>
             </div>
             <div id="cart-items" class="cart-items">
@@ -48,7 +48,10 @@
                     <span>Total:</span>
                     <span id="cart-total-price">₹0</span>
                 </div>
-                <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    <button id="clear-cart-btn" class="checkout-button" type="button" style="background:#5a1a1a;">Clear</button>
+                    <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+                </div>
             </div>
         </aside>
         <div id="sidebar-overlay"></div>

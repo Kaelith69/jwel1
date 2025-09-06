@@ -30,13 +30,26 @@
 
         <main class="products-main">
             <h1>Our Exquisite Collection</h1>
+            <div class="product-filters" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:1rem;align-items:flex-end;">
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label for="filter-category" style="font-size:.75em;opacity:.7;">Category</label>
+                    <select id="filter-category" style="min-width:160px;">
+                        <option value="">All</option>
+                    </select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label for="filter-search" style="font-size:.75em;opacity:.7;">Search</label>
+                    <input type="text" id="filter-search" placeholder="Search products..." style="min-width:220px;">
+                </div>
+                <button id="filter-clear" class="checkout-button" type="button" style="align-self:center;">Clear</button>
+            </div>
             <div id="product-grid" class="product-grid">
                 </div>
         </main>
         
-        <aside id="cart-sidebar" class="cart-sidebar">
-             <div class="cart-header">
-                <h2>Your Bag</h2>
+    <aside id="cart-sidebar" class="cart-sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="cart-title">
+         <div class="cart-header">
+        <h2 id="cart-title">Your Bag</h2>
                 <button id="cart-close-btn" class="close-btn">&times;</button>
             </div>
             <div id="cart-items" class="cart-items"></div>
@@ -45,7 +58,10 @@
                     <span>Total:</span>
                     <span id="cart-total-price">₹0</span>
                 </div>
-                <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                    <button id="clear-cart-btn" class="checkout-button" type="button" style="background:#5a1a1a;">Clear</button>
+                    <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+                </div>
             </div>
         </aside>
         <div id="sidebar-overlay"></div>

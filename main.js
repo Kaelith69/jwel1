@@ -74,13 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
+    // Newly referenced filter elements (present only on products page)
+    const filterCategorySelect = document.getElementById('filter-category');
+    const filterSearchInput = document.getElementById('filter-search');
+    const filterClearBtn = document.getElementById('filter-clear');
 
-    // --- RENDER FUNCTIONS ---
+    // --- RENDER & FILTER FUNCTIONS ---
 
     // Render products on the products page
-    const renderProducts = () => {
+    const renderProducts = (list = products) => {
         if (!productGrid) return;
-        productGrid.innerHTML = products.map(product => `
+        if (!list.length) {
+            productGrid.innerHTML = '<div style="grid-column:1/-1;padding:1rem;opacity:.7;">No products match your filters.</div>';
+            return;
+        }
+        productGrid.innerHTML = list.map(product => `
             <div class="product-card">
                 <div class="glass-card">
                     <div class="product-image-container">
@@ -97,8 +105,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         </button>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </div>`).join('');
+    };
+
+    const applyFilters = () => {
+        if (!productGrid) return; // not on products page
+        const cat = (filterCategorySelect?.value || '').trim();
+        const term = (filterSearchInput?.value || '').trim().toLowerCase();
+        let filtered = products;
+        if (cat) filtered = filtered.filter(p => p.category === cat);
+        if (term) {
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(term) ||
+                p.description.toLowerCase().includes(term) ||
+                p.category.toLowerCase().includes(term)
+            );
+        }
+        renderProducts(filtered);
+    };
+
+    const populateCategoryFilter = () => {
+        if (!filterCategorySelect) return;
+        const uniqueCats = Array.from(new Set(products.map(p => p.category))).sort();
+        filterCategorySelect.innerHTML = '<option value="">All</option>' + uniqueCats.map(c => `<option value="${c}">${c}</option>`).join('');
     };
 
     // Render items in the cart sidebar
@@ -141,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cartCountEl.classList.toggle('show-as-main', totalItems > 0);
         }
         if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
+        if (checkoutBtn && !window.location.pathname.endsWith('checkout.html')) {
+            checkoutBtn.disabled = totalItems === 0;
+        }
         saveCart();
     };
 
@@ -167,26 +199,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
     };
 
-    // --- EVENT HANDLERS ---
-    
-    // Toggle cart sidebar
+    // Toggle cart accessibility improvements
     const toggleCart = () => {
         const isOpen = cartSidebar.classList.contains('open');
-        
         if (isOpen) {
             cartSidebar.classList.remove('open');
-            document.body.style.overflow = ''; // Restore scrolling
-            // Remove focus trap for accessibility
+            document.body.style.overflow = '';
             document.removeEventListener('keydown', handleCartKeydown);
+            cartSidebar.setAttribute('aria-hidden', 'true');
         } else {
             cartSidebar.classList.add('open');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            // Add focus trap for accessibility
+            document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleCartKeydown);
-            // Focus on close button for accessibility
-            setTimeout(() => {
-                cartCloseBtn?.focus();
-            }, 100);
+            setTimeout(() => cartCloseBtn?.focus(), 100);
+            cartSidebar.setAttribute('aria-hidden', 'false');
         }
     };
 
@@ -240,6 +266,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save cart to localStorage
     const saveCart = () => {
         localStorage.setItem('cart', JSON.stringify(cart));
+    };
+
+    // Clear cart
+    const clearCart = () => {
+        if (!cart.length) return;
+        cart = [];
+        saveCart();
+        renderCart();
     };
 
     // WhatsApp order logic
@@ -372,16 +406,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.style.color = '#080';
             }
 
-            // WhatsApp redirect with small delay for better UX
+            // Clear cart BEFORE redirect for reliability, then redirect shortly after
+            cart = [];
+            saveCart();
+            updateCartSummary();
+            renderCheckoutSummary();
             setTimeout(() => {
                 const encodedMsg = encodeURIComponent(message);
                 window.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMsg}`;
-                // Clear cart after redirect
-                cart = [];
-                saveCart();
-                updateCartSummary();
-                renderCheckoutSummary();
-            }, 1000);
+            }, 850);
             
         } catch (error) {
             console.error('Error processing order:', error);
@@ -404,16 +437,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
-    
-    // Improved overlay click handling
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function(e) {
-            // Only close if click is directly on the overlay, not inside the sidebar
-            if (e.target === sidebarOverlay) {
-                toggleCart();
-            }
-        });
-    }
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    if (clearCartBtn) clearCartBtn.addEventListener('click', clearCart);
+
+    if (filterCategorySelect) filterCategorySelect.addEventListener('change', applyFilters);
+    if (filterSearchInput) filterSearchInput.addEventListener('input', applyFilters);
+    if (filterClearBtn) filterClearBtn.addEventListener('click', () => {
+        if (filterCategorySelect) filterCategorySelect.value = '';
+        if (filterSearchInput) filterSearchInput.value = '';
+        renderProducts(products);
+    });
 
     // Event delegation for dynamically created buttons
     document.body.addEventListener('click', (e) => {
@@ -454,13 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
         customerDetailsForm.addEventListener('submit', handleWhatsAppOrder);
     }
     
-    // --- INITIAL LOAD ---
+    // --- INITIAL LOAD AUGMENTATIONS ---
     renderProducts();
     renderCart();
     renderCheckoutSummary();
-
-    // Hide 'Proceed to Checkout' button on checkout page
-    if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {
-        checkoutBtn.style.display = 'none';
-    }
+    populateCategoryFilter();
+    updateCartSummary();
+    if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) checkoutBtn.style.display = 'none';
 });

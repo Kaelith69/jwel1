@@ -89,6 +89,25 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelBtn.style.display = 'none';
         };
         
+    const CATEGORY_MAP = {
+        'earring': 'Earrings', 'earrings': 'Earrings',
+        'stud': 'Studs', 'studs': 'Studs',
+        'ring': 'Ring', 'rings': 'Ring',
+        'necklace': 'Necklace', 'necklaces': 'Necklace',
+        'bracelet': 'Bracelet', 'bracelets': 'Bracelet',
+        'bangle': 'Bangles', 'bangles': 'Bangles',
+        'pendant': 'Pendant', 'pendants': 'Pendant',
+        'brooch': 'Brooch', 'brooches': 'Brooch',
+        'set': 'Set', 'sets': 'Set',
+        'maang tikka': 'Maang Tikka', 'tikha': 'Maang Tikka',
+        'kada': 'Kada', 'nose pin': 'Nose Pin', 'anklet': 'Anklet'
+    };
+    const normalizeCategory = (cat) => {
+        if (!cat) return '';
+        const key = cat.toLowerCase().trim();
+        return CATEGORY_MAP[key] || cat;
+    };
+
     const handleFormSubmit = (e) => {
         e.preventDefault();
         const id = document.getElementById('product-id').value;
@@ -96,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const priceRaw = document.getElementById('price').value.trim();
         const price = parseInt(priceRaw, 10);
         const description = document.getElementById('description').value.trim();
-        const category = document.getElementById('category').value;
+        const category = normalizeCategory(document.getElementById('category').value);
         let imageUrl = document.getElementById('imageUrl').value.trim();
         const imageAsset = document.getElementById('imageAsset').value;
         if (!imageUrl && imageAsset) imageUrl = imageAsset;
@@ -248,8 +267,33 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Image preview logic
+    const imageUrlInput = document.getElementById('imageUrl');
+    const imageAssetSelect = document.getElementById('imageAsset');
+    const imagePreview = document.getElementById('image-preview');
+    const imagePreviewPlaceholder = document.getElementById('image-preview-placeholder');
+
+    const updatePreview = () => {
+        if (!imagePreview || !imagePreviewPlaceholder) return;
+        let src = imageUrlInput?.value.trim();
+        if (!src && imageAssetSelect?.value) src = imageAssetSelect.value;
+        if (src) {
+            imagePreview.src = src;
+            imagePreview.style.display='block';
+            imagePreviewPlaceholder.style.display='none';
+        } else {
+            imagePreview.src='';
+            imagePreview.style.display='none';
+            imagePreviewPlaceholder.style.display='inline';
+        }
+    };
+    if (imageUrlInput) imageUrlInput.addEventListener('input', updatePreview);
+    if (imageAssetSelect) imageAssetSelect.addEventListener('change', updatePreview);
     
     // --- INITIAL LOAD ---
     checkAuth();
     renderProductList();
+    renderOrders();
+    updatePreview && updatePreview();
 });
