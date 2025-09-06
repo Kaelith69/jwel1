@@ -74,13 +74,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
+    // Product filter UI (only present on products page)
+    const filterCategorySelect = document.getElementById('filter-category');
+    const filterSearchInput = document.getElementById('filter-search');
+    const filterClearBtn = document.getElementById('filter-clear');
+
+    let currentFilters = { category: '', search: '' };
 
     // --- RENDER FUNCTIONS ---
 
     // Render products on the products page
+    const getFilteredProducts = () => {
+        const term = currentFilters.search.toLowerCase();
+        return products.filter(p => {
+            const okCategory = !currentFilters.category || p.category === currentFilters.category;
+            if (!okCategory) return false;
+            if (!term) return true;
+            return (
+                p.name.toLowerCase().includes(term) ||
+                p.description.toLowerCase().includes(term)
+            );
+        });
+    };
+
+    const populateCategoryFilter = () => {
+        if (!filterCategorySelect) return;
+        // Collect unique categories from products (sorted alpha, stable)
+        const cats = Array.from(new Set(products.map(p => p.category))).sort((a,b)=>a.localeCompare(b));
+        const prev = filterCategorySelect.value;
+        filterCategorySelect.innerHTML = '<option value="">All</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (cats.includes(prev)) filterCategorySelect.value = prev; else filterCategorySelect.value = '';
+    };
+
     const renderProducts = () => {
         if (!productGrid) return;
-        productGrid.innerHTML = products.map(product => `
+        const list = getFilteredProducts();
+        if (!list.length) {
+            productGrid.innerHTML = '<div style="grid-column:1/-1;padding:1rem;opacity:.7;font-size:.9rem;">No products match your filters.</div>';
+            return;
+        }
+        productGrid.innerHTML = list.map(product => `
             <div class="product-card">
                 <div class="glass-card">
                     <div class="product-image-container">
@@ -92,8 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="product-description">${product.description}</p>
                             <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
                         </div>
-                        <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart">
-                            <i class="fas fa-plus"></i>
+                        <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart" aria-label="Add ${product.name} to cart">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -137,8 +170,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cartCountEl) {
             cartCountEl.textContent = totalItems;
-            cartCountEl.style.display = totalItems > 0 ? 'flex' : 'none';
-            cartCountEl.classList.toggle('show-as-main', totalItems > 0);
+            // Always show count when there are items, hide when zero
+            if (totalItems > 0) {
+                cartCountEl.style.display = 'flex';
+                cartCountEl.classList.add('show-as-main');
+                // Update cart button to show count instead of icon
+                const cartIcon = cartToggle?.querySelector('i');
+                if (cartIcon) cartIcon.style.display = 'none';
+            } else {
+                cartCountEl.style.display = 'none';
+                cartCountEl.classList.remove('show-as-main');
+                // Show cart icon when no items
+                const cartIcon = cartToggle?.querySelector('i');
+                if (cartIcon) cartIcon.style.display = 'block';
+            }
         }
         if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
         saveCart();
@@ -171,22 +216,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Toggle cart sidebar
     const toggleCart = () => {
+        if (!cartSidebar) return;
         const isOpen = cartSidebar.classList.contains('open');
-        
         if (isOpen) {
             cartSidebar.classList.remove('open');
-            document.body.style.overflow = ''; // Restore scrolling
-            // Remove focus trap for accessibility
+            cartSidebar.setAttribute('aria-hidden', 'true');
+            cartToggle?.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
             document.removeEventListener('keydown', handleCartKeydown);
+            cartToggle?.focus();
         } else {
             cartSidebar.classList.add('open');
-            document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            // Add focus trap for accessibility
+            cartSidebar.setAttribute('aria-hidden', 'false');
+            cartToggle?.setAttribute('aria-expanded', 'true');
+            document.body.style.overflow = 'hidden';
             document.addEventListener('keydown', handleCartKeydown);
-            // Focus on close button for accessibility
-            setTimeout(() => {
-                cartCloseBtn?.focus();
-            }, 100);
+            setTimeout(() => { cartCloseBtn?.focus(); }, 60);
         }
     };
 
@@ -199,17 +244,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add product to cart
     const addToCart = (productId) => {
-        const productToAdd = products.find(p => p.id === productId);
-        const existingItem = cart.find(item => item.id === productId);
+        try {
+            const productToAdd = products.find(p => p.id === productId);
+            if (!productToAdd) {
+                console.error('Product not found:', productId);
+                return;
+            }
+            
+            const existingItem = cart.find(item => item.id === productId);
 
-        if (existingItem) {
-            existingItem.quantity++;
-        } else {
-            cart.push({ ...productToAdd, quantity: 1 });
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                cart.push({ ...productToAdd, quantity: 1 });
+            }
+            
+            saveCart();
+            renderCart();
+            
+            // Show brief success feedback
+            const addButton = document.querySelector(`[data-id="${productId}"]`);
+            if (addButton) {
+                const originalText = addButton.innerHTML;
+                addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
+                addButton.style.background = '#2e7d32';
+                setTimeout(() => {
+                    addButton.innerHTML = originalText;
+                    addButton.style.background = '';
+                }, 800);
+            }
+        } catch (error) {
+            console.error('Error adding to cart:', error);
         }
-        saveCart();
-        renderCart();
-        // Don't auto-open cart - let user open it manually with cart button
     };
 
     // Update item quantity in cart
@@ -240,6 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Save cart to localStorage
     const saveCart = () => {
         localStorage.setItem('cart', JSON.stringify(cart));
+    };
+
+    // Clear entire cart
+    const clearCart = () => {
+        if (cart.length === 0) return;
+        
+        if (confirm('Are you sure you want to clear your entire cart?')) {
+            cart = [];
+            saveCart();
+            renderCart();
+        }
     };
 
     // WhatsApp order logic (dynamic from admin settings)
@@ -289,8 +366,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // Validate required fields (email is optional)
         if (!name || !mobile || !address || !pincode) {
             if (checkoutError) {
-                checkoutError.textContent = 'Please fill in all required fields: Name, Mobile Number, Address, and PIN Code.';
+                checkoutError.textContent = 'Please fill in all required fields marked with *';
                 checkoutError.style.display = 'block';
+                checkoutError.style.color = '#e53935';
+                
+                // Highlight empty required fields
+                [
+                    {field: document.getElementById('customer-name'), value: name},
+                    {field: document.getElementById('customer-mobile'), value: mobile},
+                    {field: document.getElementById('customer-address'), value: address},
+                    {field: document.getElementById('customer-pincode'), value: pincode}
+                ].forEach(({field, value}) => {
+                    if (field && !value) {
+                        field.style.borderColor = '#e53935';
+                        field.addEventListener('input', function handler() {
+                            field.style.borderColor = '';
+                            field.removeEventListener('input', handler);
+                        });
+                    }
+                });
             }
             return;
         }
@@ -453,14 +547,58 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Clear cart button
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', clearCart);
+    }
+
     if (customerDetailsForm) {
         customerDetailsForm.addEventListener('submit', handleWhatsAppOrder);
     }
     
+    // Filter listeners (only on products page)
+    if (filterCategorySelect) {
+        filterCategorySelect.addEventListener('change', () => {
+            currentFilters.category = filterCategorySelect.value;
+            renderProducts();
+        });
+    }
+    if (filterSearchInput) {
+        let searchDebounce;
+        filterSearchInput.addEventListener('input', () => {
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(() => {
+                currentFilters.search = filterSearchInput.value.trim();
+                renderProducts();
+            }, 150);
+        });
+    }
+    if (filterClearBtn) {
+        filterClearBtn.addEventListener('click', () => {
+            currentFilters = { category: '', search: '' };
+            if (filterCategorySelect) filterCategorySelect.value = '';
+            if (filterSearchInput) filterSearchInput.value = '';
+            renderProducts();
+        });
+    }
+
     // --- INITIAL LOAD ---
+    populateCategoryFilter();
     renderProducts();
     renderCart();
     renderCheckoutSummary();
+
+    // Initial ARIA state for cart
+    if (cartSidebar) {
+        cartSidebar.setAttribute('role', 'dialog');
+        cartSidebar.setAttribute('aria-hidden', 'true');
+        cartSidebar.setAttribute('aria-modal', 'true');
+    }
+    if (cartToggle) {
+        cartToggle.setAttribute('aria-controls', 'cart-sidebar');
+        cartToggle.setAttribute('aria-expanded', 'false');
+    }
 
     // Hide 'Proceed to Checkout' button on checkout page
     if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {

@@ -1,0 +1,129 @@
+/* VastraVeda Jewelleries - Consistent Styles Override
+ * This file provides consistent styling overrides to ensure
+ * uniform appearance across all pages and components.
+ */
+
+/* Consistent button sizing for better touch targets */
+.cta-button, .admin-button, .checkout-button {
+    min-width: 120px;
+    min-height: 44px;
+    padding: 0.8em 1.5em;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Consistent form field styling */
+input[type="text"], 
+input[type="email"], 
+input[type="tel"], 
+input[type="password"], 
+textarea, 
+select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    border-radius: 8px;
+    border: 2px solid var(--input-border, #e0e0e0);
+    padding: 12px 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--accent-color, #d4af37);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+}
+
+/* Consistent card styling */
+.glass-card, .glass-panel {
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Consistent typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Rozha One', serif;
+    line-height: 1.3;
+    margin-bottom: 0.8em;
+}
+
+/* Consistent spacing for better visual hierarchy */
+.product-card + .product-card,
+.admin-section + .admin-section,
+.form-group + .form-group {
+    margin-top: 1.5rem;
+}
+
+/* Consistent error and success message styling */
+.error-message {
+    color: #e53935;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: rgba(229, 57, 53, 0.1);
+    border-left: 3px solid #e53935;
+}
+
+.success-message {
+    color: #2e7d32;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    background: rgba(46, 125, 50, 0.1);
+    border-left: 3px solid #2e7d32;
+}
+
+/* Consistent loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid var(--accent-color, #d4af37);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Consistent mobile optimizations */
+@media (max-width: 768px) {
+    .cta-button, .admin-button, .checkout-button {
+        min-width: 100px;
+        font-size: 0.9rem;
+        padding: 0.7em 1.2em;
+    }
+    
+    .glass-card, .glass-panel {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    input[type="text"], 
+    input[type="email"], 
+    input[type="tel"], 
+    input[type="password"], 
+    textarea, 
+    select {
+        padding: 10px 14px;
+    }
+}

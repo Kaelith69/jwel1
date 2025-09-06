@@ -6,13 +6,14 @@
     <title>Our Collection - VastraVeda Jewelleries</title>
     <meta name="description" content="Browse our exquisite collection of luxury jewelry at VastraVeda Jewelleries.">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-consistent.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div id="app-container">
         <header class="main-header">
             <div class="logo">
-                <a href="index.html"><img src="assets/IMG-20250812-WA0001.jpg" alt="VastraVeda Jewelleries Logo"></a>
+                <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Home"></a>
             </div>
             <nav class="main-nav" aria-label="Main Navigation">
                 <ul>
@@ -47,7 +48,7 @@
                 </div>
         </main>
         
-        <aside id="cart-sidebar" class="cart-sidebar">
+    <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
              <div class="cart-header">
                 <h2>Your Bag</h2>
                 <button id="cart-close-btn" class="close-btn">&times;</button>
@@ -64,8 +65,11 @@
                 </div>
             </div>
         </aside>
-        <div id="sidebar-overlay"></div>
+        <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
     </div>
+    <script src="js/cart.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
     <script src="main.js"></script>
 </body>
 </html>

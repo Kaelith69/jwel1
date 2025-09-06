@@ -43,6 +43,16 @@
     box-sizing: border-box;
 }
 
+/* Respect user reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 html {
     scroll-behavior: smooth;
 }
@@ -191,8 +201,8 @@ input[type=number] {
 
 /* Unified button style for all buttons */
 .cta-button, .admin-button, .checkout-button, .quantity-btn, .remove-item-btn, .cart-button, .close-btn {
-    background: var(--accent-color) !important;
-    color: #fff !important;
+    background: var(--accent-color);
+    color: #fff;
     border: none;
     border-radius: var(--border-radius);
     font-weight: bold;
@@ -201,6 +211,10 @@ input[type=number] {
     overflow: hidden;
     transition: box-shadow 0.4s, background 0.4s, filter 0.4s, transform 0.2s;
     cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* Button shine effect for all buttons */
@@ -220,7 +234,7 @@ input[type=number] {
 
 /* Button hover for all buttons */
 .cta-button:hover, .admin-button:hover, .checkout-button:hover, .quantity-btn:hover, .remove-item-btn:hover, .cart-button:hover, .close-btn:hover {
-    background: #bfa12b !important;
+    background: #bfa12b;
     box-shadow: 0 8px 24px rgba(212,175,55,0.18);
     filter: brightness(1.08) saturate(1.1);
     transition: box-shadow 0.4s, background 0.4s, filter 0.4s;
@@ -232,7 +246,8 @@ input[type=number] {
 /* Button focus for all buttons */
 .cta-button:focus-visible, .admin-button:focus-visible, .checkout-button:focus-visible, .quantity-btn:focus-visible, .remove-item-btn:focus-visible, .cart-button:focus-visible, .close-btn:focus-visible {
     outline: 3px solid var(--accent-color);
-    box-shadow: 0 0 0 8px rgba(191,167,106,0.18);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(191,167,106,0.18);
 }
 /* --- End Liquid Glassmorphism (iOS-inspired) --- */
 
@@ -242,8 +257,6 @@ input[type=number] {
     top: 0;
     left: 0;
     width: 100vw;
-    min-height: var(--header-height);
-    max-width: 100vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -251,13 +264,60 @@ input[type=number] {
     color: var(--primary-color);
     border-bottom: 2px solid var(--accent-color);
     box-shadow: var(--shadow-dark);
-    padding: 0.5rem 2vw;
+    padding: 0.15rem 1.4vw; /* Even slimmer bar */
     z-index: 1000;
-    transition: background 0.3s, box-shadow 0.3s;
+    transition: background 0.3s, box-shadow 0.3s, padding 0.3s, transform 0.3s;
+    overflow: visible; /* Allow larger logo to flow without cropping */
 }
 
 .logo img {
     height: 40px;
+}
+
+/* Keep header logo size constant (no nav height jump) */
+.main-header .logo { line-height: 0; display:flex; align-items:center; }
+.main-header .logo a { display:flex; align-items:center; }
+.main-header .logo img {
+    height: 64px; /* Increased size */
+    width: auto;
+    max-width: 100%;
+    display: block;
+    object-fit: contain; /* Ensure no cropping */
+    padding: 2px 0; /* Prevent clipping top/bottom */
+}
+
+/* Compact nav link padding to compensate for taller logo */
+.main-header .main-nav a {
+        padding: 0.35em 0.9em;
+}
+
+/* Responsive tuning for medium screens */
+@media (max-width: 900px) {
+    .main-header .logo img { height: 58px; }
+    .main-header .main-nav a { padding: 0.32em 0.75em; }
+}
+@media (max-width: 600px) {
+    .main-header .logo img { height: 52px; }
+    .main-header .main-nav a { padding: 0.30em 0.6em; }
+}
+@media (max-width: 420px) {
+    .main-header .logo img { height: 46px; }
+    .main-header .main-nav a { padding: 0.28em 0.55em; font-size: var(--font-size-sm); }
+}
+@media (max-width: 340px) {
+    .main-header .logo img { height: 42px; }
+    .main-header .main-nav a { padding: 0.25em 0.5em; }
+}
+
+/* Larger responsive logo specifically in the hero glass panel (homepage) */
+.hero-section .glass-panel .logo img {
+    height: clamp(90px, 18vw, 200px); /* Bigger but bounded */
+    width: auto;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto 1.2rem auto;
+    object-fit: contain; /* Prevent unintended cropping */
+    image-rendering: -webkit-optimize-contrast;
 }
 
 .main-nav ul {
@@ -457,6 +517,14 @@ input[type=number] {
     position: relative;
 }
 
+.product-grid > .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 1.25rem 1rem;
+    font-size: 0.95rem;
+    opacity: .7;
+}
+
 /* Product Card */
 
 .product-card {
@@ -604,6 +672,10 @@ input[type=number] {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* Hide cart when aria-hidden true (additional safety) */
+.cart-sidebar[aria-hidden="true"] { visibility: hidden; }
+.cart-sidebar[aria-hidden="false"] { visibility: visible; }
 
 /* Remove old desktop/tablet/mobile cart-sidebar media queries - now using full screen for all devices */
 
@@ -1234,15 +1306,14 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
 /* Mobile Portrait (320px to 479px) */
 @media (max-width: 479px) {
     .main-header {
-        flex-direction: row;
+        padding: 0.25rem 2vw;
         gap: 0.4rem;
-        padding: 0.4rem 1vw;
-        min-height: var(--mobile-header-height);
     }
     
-    .logo img {
-        height: 32px;
-    }
+    /* Keep header logo consistent */
+    .main-header .logo img { height: 40px; }
+    /* Scale hero logo gently for small screens */
+    .hero-section .glass-panel .logo img { height: clamp(80px, 38vw, 160px); }
     
     .main-nav ul {
         gap: 0.4rem;
@@ -1442,6 +1513,7 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
         font-size: 0.9rem;
         padding: 6px;
     }
+    .hero-section .glass-panel .logo img { height: clamp(70px, 46vw, 150px); }
     
     #cart-count {
         width: 14px;
@@ -1491,9 +1563,8 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
         gap: 0.3rem;
     }
     
-    .logo img {
-        height: 20px;
-    }
+    .main-header .logo img { height: 34px; }
+    .hero-section .glass-panel .logo img { height: clamp(65px, 50vw, 140px); }
     
     .main-nav ul {
         gap: 0.3rem;
