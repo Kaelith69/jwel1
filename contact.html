@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="styles-consistent.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body {
+            background: #f7f6f3;
+            margin: 0;
+            padding: 0;
+        }
+        .contact-container {
+            max-width: 420px;
+            margin: 60px auto 0 auto;
+        }
+        .contact-card {
+            /* Use glass-card style from consistent CSS */
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 4px 24px rgba(212,175,55,0.08);
+            border-radius: 16px;
+            padding: 32px 24px 28px 24px;
+            border: 1px solid #e0e0e0;
+        }
+        .contact-title {
+            text-align: center;
+            font-family: 'Rozha One', serif;
+            font-size: 2.2rem;
+            color: #b08d23;
+            margin-bottom: 1.2em;
+            letter-spacing: 1px;
+        }
+        .contact-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .contact-list li {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 1.3em;
+            font-size: 1.13rem;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 4px rgba(212,175,55,0.04);
+            padding: 12px 18px;
+            transition: box-shadow 0.2s;
+        }
+        .contact-list li:hover {
+            box-shadow: 0 2px 12px rgba(212,175,55,0.13);
+        }
+        .contact-list i {
+            font-size: 1.7rem;
+            color: #d4af37;
+            width: 36px;
+            text-align: center;
+        }
+        .contact-list a {
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .contact-list a:hover {
+            color: #b08d23;
+        }
+        @media (max-width: 600px) {
+            .contact-container {
+                margin: 24px 2vw 0 2vw;
+            }
+            .contact-card {
+                padding: 12px 2vw 10px 2vw;
+            }
+            .contact-title {
+                font-size: 1.1rem;
+            }
+            .contact-list li {
+                font-size: 0.97rem;
+                padding: 8px 4px;
+            }
+            .cta-button {
+                min-width: 90px !important;
+                font-size: 0.97rem;
+                padding: 0.7em 1em;
+                border-radius: 32px !important;
+                text-decoration: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contact-container">
+        <div class="contact-card glass-card">
+            <div class="contact-title">Contact Us</div>
+            <ul class="contact-list">
+                <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/yourprofile" target="_blank">@yourprofile</a></li>
+                <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/1234567890" target="_blank">+1 234 567 890</a></li>
+                <li><i class="fas fa-phone"></i> <a href="tel:+1234567890">+1 234 567 890</a></li>
+                <li><i class="fas fa-envelope"></i> <a href="mailto:info@example.com">info@example.com</a></li>
+            </ul>
+            <div style="text-align:center;margin-top:2.2em;">
+                <a href="products.html" class="cta-button" style="background:#d4af37;color:#fff;min-width:140px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:32px;text-decoration:none;padding:1em 1.5em;">
+                    <i class="fas fa-arrow-left" style="margin:0 auto 4px auto;display:block;font-size:1.3em;"></i>
+                    <span style="display:block;">Back to Products</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

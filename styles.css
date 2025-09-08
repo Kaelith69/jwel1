@@ -311,11 +311,12 @@ input[type=number] {
 
 /* Larger responsive logo specifically in the hero glass panel (homepage) */
 .hero-section .glass-panel .logo img {
-    height: clamp(90px, 18vw, 200px); /* Bigger but bounded */
+    height: clamp(110px, 22vw, 220px); /* Bigger but bounded */
     width: auto;
     max-width: 100%;
     display: block;
-    margin: 0 auto 1.2rem auto;
+    margin: 2.5rem auto 1.2rem auto;
+    padding-top: 0.5rem;
     object-fit: contain; /* Prevent unintended cropping */
     image-rendering: -webkit-optimize-contrast;
 }
@@ -425,7 +426,7 @@ input[type=number] {
     background: var(--glass-bg);
     box-shadow: var(--shadow-dark);
     text-align: center;
-    padding: 4vw 2vw;
+    padding: 5vw 2vw 5vw 2vw;
     border: 2px solid var(--accent-color);
     border-radius: var(--border-radius);
     max-width: 600px;
@@ -496,13 +497,14 @@ input[type=number] {
 
 /* --- Products Page --- */
 .products-main {
-    padding: 80px 0 40px;
+    padding: 80px 2vw 40px;
     text-align: center;
 }
 
 .products-main h1 {
     font-size: 3rem;
-    margin-bottom: 50px;
+    margin-bottom: 2.5rem;
+    padding: 0.5em 0.5em 0.5em 0.5em;
 }
 
 
