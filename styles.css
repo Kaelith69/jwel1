@@ -1,3 +1,20 @@
+/* WhatsApp Order Button - Green Style */
+.cta-button#whatsapp-order-btn {
+    background: #1fb757;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    transition: background 0.18s, box-shadow 0.18s;
+}
+.cta-button#whatsapp-order-btn:hover,
+.cta-button#whatsapp-order-btn:focus {
+    background: #1ebe5d;
+    color: #fff;
+}
+.cta-button#whatsapp-order-btn:active {
+    background: #7fffd4;
+    color: #232323;
+}
 /* Floating Order Now Button */
 .floating-order-btn {
     position: fixed;
@@ -934,7 +951,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
 }
 
 .checkout-button:hover {
-    background: #c19b28;
+    background: #008d13;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
 }
