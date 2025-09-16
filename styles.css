@@ -572,6 +572,23 @@ input[type=number] {
     position: relative;
 }
 
+/* Tablet view - 2 cards per row */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 900px;
+    }
+}
+
+/* Desktop view - 3 cards per row */
+@media (min-width: 1024px) {
+    .product-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        padding: 0 15px;
+    }
+}
+
 .product-grid > .empty-state {
     grid-column: 1 / -1;
     text-align: center;
