@@ -23,6 +23,9 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .admin-button {
@@ -100,16 +103,18 @@ summary:focus-visible {
 .form-group {
     margin-bottom: 20px;
     text-align: left;
+    max-width: 800px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    font-size: 1rem;
 }
 
 .form-group input {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 5px;
@@ -137,6 +142,8 @@ summary:focus-visible {
     gap: 30px;
     padding: 30px;
     align-items: start;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 /* --- Simplified enhancements --- */
@@ -188,6 +195,9 @@ summary:focus-visible {
 
 .form-panel, .list-panel {
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 #product-form textarea {
@@ -228,7 +238,7 @@ summary:focus-visible {
 .admin-nav a:hover, .admin-nav a:focus-visible { background:rgba(255,255,255,0.18); }
 .admin-nav a[aria-current="page"] { background:#d4af37; color:#000; }
 .admin-header-actions { display:flex; gap:10px; align-items:center; }
-.page-container { padding:30px; display:flex; flex-direction:column; gap:30px; }
+.page-container { padding:30px; display:flex; flex-direction:column; gap:30px; max-width:1600px; margin:0 auto; }
 .panel-head { display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; }
 .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; width: 100%; }
 .toolbar input[type="text"], .toolbar select, .toolbar input[type="date"] { padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#fff; font:inherit; }
@@ -252,17 +262,22 @@ option { background:#1d1d1d; color:#fff; }
     select, option { forced-color-adjust:none; }
 }
 .inline-stats { font-size:.85rem; opacity:.75; }
-.table-wrapper { overflow-x:auto; margin-top:14px; }
+.table-wrapper { overflow-x:auto; margin-top:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; }
 .data-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
 .data-table thead { background:rgba(255,255,255,0.08); }
-.data-table th, .data-table td { padding:10px 12px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.12); vertical-align:top; }
+.data-table th, .data-table td { padding:14px 16px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.12); vertical-align:top; }
 .data-table tbody tr:hover { background:rgba(255,255,255,0.05); }
 .products-table img { width:60px; height:60px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.2); }
 .badge { background:rgba(74,144,226,0.15); padding:2px 8px; border-radius:14px; font-size:0.7rem; text-transform:uppercase; letter-spacing:.05em; }
 .actions-cell { display:flex; gap:6px; flex-wrap:wrap; }
 .nowrap { white-space:nowrap; }
 .clamp { max-width:320px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:3; line-clamp:3; -webkit-box-orient:vertical; }
-.form-row { display:flex; gap:20px; flex-wrap:wrap; }
+.form-row { 
+    display:flex; 
+    gap:20px; 
+    flex-wrap:wrap; 
+    margin-bottom: 20px;
+}
 .orders-table td { font-size:0.85rem; }
 .orders-table .order-items-list { display:flex; flex-direction:column; gap:2px; margin:0; padding:0; list-style:none; }
 .orders-table .order-items-list li { line-height:1.2; }
@@ -499,5 +514,51 @@ option { background:#1d1d1d; color:#fff; }
     .pc-head h4 { font-size:0.9em; }
     .back-link {
         font-size: 0.85em;
+    }
+}
+
+/* Large Desktop Screens */
+@media (min-width: 1600px) {
+    .page-container {
+        padding: 40px;
+        gap: 40px;
+        max-width: 1800px;
+    }
+    
+    .dashboard-container {
+        grid-template-columns: 450px 1fr;
+        gap: 40px;
+        padding: 40px;
+        max-width: 1800px;
+    }
+    
+    .glass-panel, .form-panel, .list-panel {
+        padding: 40px;
+        max-width: 1600px;
+    }
+    
+    .data-table {
+        font-size: 1rem;
+    }
+    
+    .data-table th, .data-table td {
+        padding: 16px 20px;
+    }
+    
+    .admin-button {
+        font-size: 1.05rem;
+        padding: 14px 24px;
+    }
+    
+    .form-group label {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 14px;
+        font-size: 1.05rem;
     }
 }
