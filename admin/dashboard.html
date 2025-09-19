@@ -17,20 +17,20 @@
                 <li><a href="orders.html">Orders</a></li>
                 <li><a href="add-product.html">Add Product</a></li>
                 <li><a href="settings.html">Settings</a></li>
-                <ul>
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="../contact.html">Contact</a></li>
-                </ul>
+                <li><a href="../index.html">Site Home</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
             <button id="logout-btn" class="admin-button secondary">Logout</button>
         </div>
     </header>
 
     <main id="main-content" class="dashboard-container" tabindex="-1">
-        <section class="glass-panel" style="grid-column:1/-1;" id="dashboard-kpis" aria-label="Key performance indicators">
-            <header style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-                <h2 style="margin:0;font-size:1.15rem;">Overview</h2>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <section class="glass-panel full-span" id="dashboard-kpis" aria-label="Key performance indicators">
+            <header class="panel-header">
+                <h2 class="title-compact title-lg">Overview</h2>
+                <div class="actions-row">
                     <a href="orders.html" class="admin-button secondary">View Orders</a>
                     <button type="button" id="toggle-form-btn" class="admin-button" aria-expanded="false" aria-controls="product-form-wrapper">➕ Add Product</button>
                 </div>
@@ -43,12 +43,12 @@
             </div>
         </section>
 
-        <section class="glass-panel" style="grid-column:1/-1;" aria-label="Recent orders">
-            <header style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                <h2 style="margin:0;font-size:1.05rem;">Recent Orders</h2>
-                <a href="orders.html" class="admin-button secondary" style="font-size:.75rem;">All Orders →</a>
+        <section class="glass-panel full-span" aria-label="Recent orders">
+            <header class="panel-header">
+                <h2 class="title-compact title-md">Recent Orders</h2>
+                <a href="orders.html" class="admin-button secondary small-text">All Orders →</a>
             </header>
-            <div class="table-wrapper" style="margin-top:10px;">
+            <div class="table-wrapper mt-10">
                 <table class="data-table compact-table" aria-label="Recent orders table">
                     <thead>
                         <tr>
@@ -60,14 +60,14 @@
                     </thead>
                     <tbody id="recent-orders-body"></tbody>
                 </table>
-                <p id="recent-orders-empty" style="display:none;opacity:.65;font-size:.75rem;margin:8px 4px;">No orders yet.</p>
+                <p id="recent-orders-empty" class="hidden opacity-65 small-text mt-10">No orders yet.</p>
             </div>
         </section>
 
-        <section class="glass-panel" aria-labelledby="products-panel-title" style="grid-column:1/-1;">
-            <header style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
-                <h2 id="products-panel-title" style="margin:0;font-size:1.05rem;">Products</h2>
-                <div class="filter-group" style="flex:1;max-width:560px;">
+        <section class="glass-panel full-span" aria-labelledby="products-panel-title">
+            <header class="panel-header">
+                <h2 id="products-panel-title" class="title-compact title-md">Products</h2>
+                <div class="filter-group filter-group-limited">
                     <input type="text" id="product-search" placeholder="Search products..." aria-label="Search products">
                     <select id="category-filter" aria-label="Filter by category">
                         <option value="">All Categories</option>
@@ -85,11 +85,11 @@
                 </div>
                 <div id="product-count" class="stat-chip" aria-live="polite"></div>
             </header>
-            <div id="product-list" class="product-list" aria-live="polite" style="margin-top:14px;"></div>
+            <div id="product-list" class="product-list mt-14" aria-live="polite"></div>
         </section>
 
-        <div class="glass-panel form-panel collapsed" id="product-form-wrapper" style="grid-column:1/-1;">
-            <h2 id="form-title" style="margin-top:0;">Add New Product</h2>
+        <div class="glass-panel form-panel collapsed full-span" id="product-form-wrapper">
+            <h2 id="form-title" class="title-compact">Add New Product</h2>
             <form id="product-form" autocomplete="off">
                 <input type="hidden" id="product-id">
                 <div class="form-group">
@@ -151,7 +151,7 @@
                 </details>
                 <div class="form-actions">
                     <button type="submit" id="submit-btn" class="admin-button">Add Product</button>
-                    <button type="button" id="cancel-btn" class="admin-button secondary" style="display: none;">Cancel</button>
+                    <button type="button" id="cancel-btn" class="admin-button secondary hidden">Cancel</button>
                 </div>
             </form>
         </div>

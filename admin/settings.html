@@ -17,30 +17,30 @@
         <li><a href="add-product.html">Add Product</a></li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="settings.html" aria-current="page">Settings</a></li>
-        <ul>
-          <li><a href="../index.html">Home</a></li>
-          <li><a href="products.html">Products</a></li>
-          <li><a href="../contact.html">Contact</a></li>
-        </ul>
+        <li><a href="../index.html">Site Home</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="admin-header-actions">
       <button id="logout-btn" class="admin-button secondary">Logout</button>
     </div>
   </header>
   <main id="main" class="page-container" tabindex="-1">
     <section class="glass-panel" aria-labelledby="settings-title">
-      <h2 id="settings-title" style="margin-top:0;">Settings</h2>
-      <form id="settings-form" class="settings-form" autocomplete="off" style="max-width:480px;display:flex;flex-direction:column;gap:18px;">
-        <fieldset style="border:1px solid rgba(255,255,255,.2);padding:16px 18px;border-radius:12px;">
-          <legend style="padding:0 6px;font-size:.9rem;letter-spacing:.05em;">WhatsApp Configuration</legend>
-          <p style="font-size:.7rem;opacity:.7;margin-top:0;">Set the business WhatsApp number used for order redirection. Include country code, no leading + or spaces (e.g. 919876543210).</p>
+      <h2 id="settings-title" class="title-compact">Settings</h2>
+  <form id="settings-form" class="settings-form settings-form-layout" autocomplete="off">
+        <fieldset class="form-fieldset">
+          <legend class="legend-compact">WhatsApp Configuration</legend>
+          <p class="note-text">Set the business WhatsApp number used for order redirection. Include country code, no leading + or spaces (e.g. 919876543210).</p>
           <div class="form-group">
             <label for="wa-number">WhatsApp Number</label>
             <input type="text" id="wa-number" placeholder="e.g. 919876543210" required pattern="[0-9]{10,15}" />
             <small class="hint">Digits only. 10–15 digits.</small>
           </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <div class="actions-row">
             <button type="submit" class="admin-button" id="save-settings-btn">Save</button>
             <button type="button" class="admin-button secondary" id="reset-settings-btn">Reset</button>
-            <span id="settings-status" aria-live="polite" style="font-size:.7rem;opacity:.7;"></span>
+            <span id="settings-status" aria-live="polite" class="status-note"></span>
           </div>
         </fieldset>
       </form>

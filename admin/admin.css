@@ -17,8 +17,8 @@ body {
 
 .glass-panel {
     background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
     border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
@@ -81,6 +81,28 @@ summary:focus-visible {
     display: inline-block;
     margin-top: 20px;
 }
+
+/* --- Utilities & Layout helpers --- */
+.full-span { grid-column: 1 / -1; }
+.panel-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+.title-compact { margin:0; }
+.title-lg { font-size:1.15rem; }
+.title-md { font-size:1.05rem; }
+.actions-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.mt-10 { margin-top: 10px; }
+.mt-14 { margin-top: 14px; }
+.small-text { font-size:.75rem; }
+.opacity-65 { opacity:.65; }
+.opacity-70 { opacity:.7; }
+.hidden { display:none !important; }
+.filter-group-limited { flex:1; max-width:560px; }
+.ml-auto { margin-left:auto; }
+#order-search { min-width:170px; }
+fieldset.form-fieldset { border:1px solid rgba(255,255,255,.2); padding:16px 18px; border-radius:12px; }
+.legend-compact { padding:0 6px; font-size:.9rem; letter-spacing:.05em; }
+.note-text { font-size:.7rem; opacity:.7; margin-top:0; }
+.status-note { font-size:.7rem; opacity:.7; }
+.hint { margin:6px 0 0; font-size:0.7rem; opacity:.65; }
 
 /* --- Login Page --- */
 .login-container {
@@ -257,9 +279,10 @@ option { background:#1d1d1d; color:#fff; }
 @supports selector(option:checked) {
     option:checked { background:#333 !important; color:#fff !important; }
 }
-/* Windows specific clarity tweak */
+/* Windows specific clarity tweak - limited browser support */
+/* High-contrast mode hints for legacy MS browsers; modern browsers ignore */
 @media screen and (-ms-high-contrast: active), screen and (forced-colors: active) {
-    select, option { forced-color-adjust:none; }
+    select, option { outline: 1px solid #888; }
 }
 .inline-stats { font-size:.85rem; opacity:.75; }
 .table-wrapper { overflow-x:auto; margin-top:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; }
@@ -303,6 +326,7 @@ option { background:#1d1d1d; color:#fff; }
 /* Settings */
 .settings-form input[type="text"] { width:100%; padding:10px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); border-radius:6px; color:#fff; }
 .settings-form input[type="text"]:focus { outline:2px solid #4A90E2; outline-offset:2px; }
+.settings-form-layout { max-width:480px; display:flex; flex-direction:column; gap:18px; }
 .orders-table tbody tr.data-row { cursor:pointer; }
 .orders-table tbody tr.data-row:hover { background:rgba(255,255,255,0.08); }
 .order-detail-row td { background:rgba(255,255,255,0.04); border-top:1px solid rgba(255,255,255,0.15); }

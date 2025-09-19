@@ -3,9 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
-    <link rel="stylesheet" href="styles-consistent.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Contact Us - VastraVeda Jewelleries</title>
+    <meta name="description" content="Get in touch with VastraVeda Jewelleries via Instagram, WhatsApp, phone, or email.">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="icon" href="logo/logo.png" sizes="any">
+    <meta property="og:title" content="Contact - VastraVeda Jewelleries">
+    <meta property="og:description" content="Reach us on Instagram, WhatsApp, phone, or email.">
+    <meta property="og:image" content="logo/logo.png">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             background: #f7f6f3;
@@ -92,22 +99,67 @@
     </style>
 </head>
 <body>
-    <div class="contact-container">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="main-header">
+        <div class="logo">
+            <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Home" width="64" height="64" loading="eager" decoding="async"></a>
+        </div>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+        <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="contact.html" aria-current="page">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="header-actions">
+            <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                <span id="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+    <div id="app-container">
+    <div class="contact-container" id="main-content" role="main">
         <div class="contact-card glass-card">
             <div class="contact-title">Contact Us</div>
             <ul class="contact-list">
-                <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/yourprofile" target="_blank">@yourprofile</a></li>
-                <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/1234567890" target="_blank">+1 234 567 890</a></li>
+                <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener">@yourprofile</a></li>
+                <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/1234567890" target="_blank" rel="noopener">+1 234 567 890</a></li>
                 <li><i class="fas fa-phone"></i> <a href="tel:+1234567890">+1 234 567 890</a></li>
                 <li><i class="fas fa-envelope"></i> <a href="mailto:info@example.com">info@example.com</a></li>
             </ul>
-            <div style="text-align:center;margin-top:2.2em;">
-                <a href="products.html" class="cta-button" style="background:#d4af37;color:#fff;min-width:140px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:32px;text-decoration:none;padding:1em 1.5em;">
-                    <i class="fas fa-arrow-left" style="margin:0 auto 4px auto;display:block;font-size:1.3em;"></i>
-                    <span style="display:block;">Back to Products</span>
+            <div class="back-to-products-container">
+                <a href="products.html" class="cta-button back-to-products-button">
+                    <i class="fas fa-arrow-left back-to-products-icon"></i>
+                    <span class="back-to-products-text">Back to Products</span>
                 </a>
             </div>
         </div>
     </div>
+    <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-header">
+            <h2>Your Bag</h2>
+            <button id="cart-close-btn" class="close-btn" type="button" aria-label="Close cart">&times;</button>
+        </div>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">₹0</span>
+            </div>
+            <div class="cart-footer-actions">
+                <button id="clear-cart-btn" class="checkout-button clear-cart-btn" type="button">Clear</button>
+                <button id="checkout-btn" class="checkout-button" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
+            </div>
+        </div>
+    </aside>
+    <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
+    </div>
+    <script src="js/utils.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="main.js" defer></script>
 </body>
 </html>

@@ -118,7 +118,7 @@ class CartManager {
 
         this.cartItemsContainer.innerHTML = this.cart.map(item => `
             <div class="cart-item">
-                <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" 
+             <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async"
                      onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
                 <div class="cart-item-info">
                     <p class="cart-item-name">${item.name}</p>

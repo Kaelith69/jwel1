@@ -5,17 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - VastraVeda Jewelleries</title>
     <meta name="description" content="Checkout securely at VastraVeda Jewelleries. Complete your luxury jewelry purchase.">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="icon" href="logo/logo.png" sizes="any">
+    <meta property="og:title" content="Checkout - VastraVeda Jewelleries">
+    <meta property="og:description" content="Secure checkout for your order.">
+    <meta property="og:image" content="logo/logo.png">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="styles-consistent.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="app-container">
         <header class="main-header">
             <div class="logo">
-                <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Home"></a>
+                <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Home" width="64" height="64" loading="eager" decoding="async"></a>
             </div>
-            <nav class="main-nav" aria-label="Main Navigation">
+            <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+            <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
                     <li><a href="index.html">Home</a></li>
                     <li><a href="products.html">Products</a></li>
@@ -23,13 +32,13 @@
             </nav>
             <div class="header-actions">
                 <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                     <span id="cart-count">0</span>
                 </button>
             </div>
         </header>
 
-        <main class="checkout-main">
+        <main class="checkout-main" id="main-content" role="main">
             <div class="glass-panel checkout-panel">
                 <h1>Checkout</h1>
                 <div id="checkout-summary" class="checkout-summary">
@@ -41,29 +50,33 @@
                         <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
                     </div>
                 </div>
-                <form id="customer-details-form" class="customer-details-form">
+                <form id="customer-details-form" class="customer-details-form" novalidate>
                     <h2>Customer Details</h2>
                     <div class="form-group">
                         <label for="customer-name">Full Name *</label>
-                        <input type="text" id="customer-name" name="customer-name" required autocomplete="name">
+                        <input type="text" id="customer-name" name="customer-name" required autocomplete="name" spellcheck="false">
+                        <p id="hint-name" class="hint">As per delivery address</p>
                     </div>
                     <div class="form-group">
                         <label for="customer-mobile">Mobile Number *</label>
-                        <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                        <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile number" aria-describedby="hint-mobile">
+                        <p id="hint-mobile" class="hint">India numbers only, no spaces or dashes</p>
                     </div>
                     <div class="form-group">
                         <label for="customer-email">Email (Optional)</label>
-                        <input type="email" id="customer-email" name="customer-email" autocomplete="email" placeholder="your.email@example.com">
+                        <input type="email" id="customer-email" name="customer-email" autocomplete="email" placeholder="your.email@example.com" spellcheck="false">
                     </div>
                     <div class="form-group">
                         <label for="customer-address">Shipping Address *</label>
-                        <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="Complete address including landmark"></textarea>
+                        <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="Complete address including landmark" rows="3" aria-describedby="hint-address"></textarea>
+                        <p id="hint-address" class="hint">Include house/flat no., area, city, and landmark</p>
                     </div>
                     <div class="form-group">
                         <label for="customer-pincode">PIN Code *</label>
-                        <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" pattern="[0-9]{6}" placeholder="6-digit PIN code">
+                        <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="6-digit PIN code" aria-describedby="hint-pincode">
+                        <p id="hint-pincode" class="hint">For example: 560001</p>
                     </div>
-                    <div id="checkout-error" class="checkout-error" style="display:none;color:#c00;margin-bottom:1em;"></div>
+            <div id="checkout-error" class="checkout-error" role="alert" aria-live="assertive"></div>
                     <button id="whatsapp-order-btn" class="cta-button" type="submit" aria-label="Place order on WhatsApp">Place Order on WhatsApp</button>
                 </form>
             </div>
@@ -80,17 +93,16 @@
                     <span>Total:</span>
                     <span id="cart-total-price">₹0</span>
                 </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                    <button id="clear-cart-btn" class="checkout-button" type="button" style="background:#5a1a1a;">Clear</button>
+                <div class="cart-footer-actions">
+                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn" type="button">Clear</button>
                     <button id="checkout-btn" class="checkout-button" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
                 </div>
             </div>
         </aside>
         <div id="sidebar-overlay" role="presentation"></div>
     </div>
-    <script src="js/cart.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="main.js"></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="main.js" defer></script>
 </body>
 </html>

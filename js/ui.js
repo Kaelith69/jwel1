@@ -20,28 +20,8 @@ class UIManager {
 
     // Setup cart sidebar functionality
     setupCartSidebar() {
-        if (this.cartToggle) {
-            this.cartToggle.addEventListener('click', () => this.toggleCart());
-        }
-        
-        if (this.cartCloseBtn) {
-            this.cartCloseBtn.addEventListener('click', () => this.toggleCart());
-        }
-        
-        if (this.sidebarOverlay) {
-            this.sidebarOverlay.addEventListener('click', (e) => {
-                if (e.target === this.sidebarOverlay) {
-                    this.toggleCart();
-                }
-            });
-        }
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.cartSidebar?.classList.contains('open')) {
-                this.toggleCart();
-            }
-        });
+        // Avoid binding cart toggle handlers here to prevent duplication with main.js
+        // We only ensure ARIA attributes are set in setupAccessibility().
     }
 
     // Toggle cart sidebar
@@ -215,6 +195,10 @@ class UIManager {
 
     // Setup skip navigation links
     setupSkipLinks() {
+        // If a skip link already exists in the DOM, don't add another
+        const existing = document.querySelector('a.skip-link');
+        if (existing) return;
+        
         const skipLink = document.createElement('a');
         skipLink.className = 'skip-link';
         skipLink.href = '#main-content';

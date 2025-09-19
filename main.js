@@ -1,9 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize UI manager for accessibility, skip links, and cart sidebar behavior
+    if (window.UIManager) {
+        try { new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
+    }
     // --- DATA ---
     // Initialize products from localStorage or use default data
     const initializeProducts = () => {
         const productsInStorage = localStorage.getItem('products');
-        if (!productsInStorage) {
+        const dataVersion = localStorage.getItem('productsDataVersion');
+        const currentVersion = '2.0'; // Updated version to force refresh
+        
+        // If no products or old version, use new default data
+        if (!productsInStorage || dataVersion !== currentVersion) {
             const defaultProducts = [
                 { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Necklace' },
                 { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Ring' },
@@ -17,20 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Set' },
                 { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Studs' },
                 { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg', category: 'Earrings' },
-                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg', category: 'Brooch' },
-                { id: 14, name: 'Diamond Tennis Bracelet', price: 125000, description: 'A sparkling tennis bracelet with round-cut diamonds.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Bracelet' },
-                { id: 15, name: 'Sapphire Halo Pendant', price: 61000, description: 'A sapphire pendant surrounded by a halo of diamonds.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Pendant' },
-                { id: 16, name: 'Pearl Drop Earrings', price: 27000, description: 'Classic pearl drop earrings with gold hooks.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
-                { id: 17, name: 'Gold Leaf Anklet', price: 18000, description: 'A dainty gold anklet with leaf charms.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Anklet' },
-                { id: 18, name: 'Emerald Cluster Ring', price: 73000, description: 'A cluster ring with emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Ring' },
-                { id: 19, name: 'Ruby Bead Necklace', price: 56000, description: 'A necklace of ruby beads with gold spacers.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
-                { id: 20, name: 'Diamond Stud Earrings', price: 47000, description: 'Simple and elegant diamond stud earrings.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Studs' },
-                { id: 21, name: 'Gold Filigree Pendant', price: 25000, description: 'A gold pendant with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Pendant' },
-                { id: 22, name: 'Sapphire and Pearl Maang Tikka', price: 39000, description: 'A traditional maang tikka with sapphires and pearls.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Maang Tikka' },
-                { id: 23, name: 'Antique Gold Kada', price: 68000, description: 'A bold antique gold kada with engraved motifs.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Kada' },
-                { id: 24, name: 'Diamond Nose Pin', price: 12000, description: 'A tiny nose pin with a single sparkling diamond.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Nose Pin' }
+                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg', category: 'Brooch' }
             ];
             localStorage.setItem('products', JSON.stringify(defaultProducts));
+            localStorage.setItem('productsDataVersion', currentVersion);
             return defaultProducts;
         }
         return JSON.parse(productsInStorage);
@@ -76,8 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutError = document.getElementById('checkout-error');
     // Product filter UI (only present on products page)
     const filterCategorySelect = document.getElementById('filter-category');
-    const filterSearchInput = document.getElementById('filter-search');
     const filterClearBtn = document.getElementById('filter-clear');
+    const filterSearchInput = document.getElementById('filter-search');
+    // Product detail modal elements
+    const productDetailModal = document.getElementById('product-detail-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalProductImage = document.getElementById('modal-product-image');
+    const modalProductName = document.getElementById('modal-product-name');
+    const modalProductCategory = document.getElementById('modal-product-category');
+    const modalProductDescription = document.getElementById('modal-product-description');
+    const modalProductPrice = document.getElementById('modal-product-price');
+    const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
     let currentFilters = { category: '', search: '' };
 
@@ -85,15 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render products on the products page
     const getFilteredProducts = () => {
-        const term = currentFilters.search.toLowerCase();
+        const q = (currentFilters.search || '').toLowerCase().trim();
         return products.filter(p => {
             const okCategory = !currentFilters.category || p.category === currentFilters.category;
-            if (!okCategory) return false;
-            if (!term) return true;
-            return (
-                p.name.toLowerCase().includes(term) ||
-                p.description.toLowerCase().includes(term)
-            );
+            const okSearch = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+            return okCategory && okSearch;
         });
     };
 
@@ -110,56 +113,85 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!productGrid) return;
         const list = getFilteredProducts();
         if (!list.length) {
-            productGrid.innerHTML = '<div style="grid-column:1/-1;padding:1rem;opacity:.7;font-size:.9rem;">No products match your filters.</div>';
+            productGrid.innerHTML = '<div class="no-products-message">No products match your filters.</div>';
             return;
         }
         productGrid.innerHTML = list.map(product => `
-            <div class="product-card">
-                <div class="glass-card">
+            <div class="product-card" data-product-id="${product.id}">
+                <!-- Clean Image Section -->
+                <div class="product-image-section">
                     <div class="product-image-container">
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy" decoding="async" width="600" height="600" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
                     </div>
-                    <div class="product-bottom">
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${product.description}</p>
-                            <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
-                        </div>
-                        <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart" aria-label="Add ${product.name} to cart">
-                            <i class="fas fa-plus" aria-hidden="true"></i>
-                        </button>
+                </div>
+                
+                <!-- Text Section Below Image -->
+                <div class="product-text-section">
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
+                        <p class="product-description">${product.description}</p>
+                        <p class="product-description-secondary" style="display: none;">${product.category} • Premium Quality</p>
                     </div>
+                    
+                    <!-- Full-width Cart Button -->
+                    <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart" aria-label="Add ${product.name} to cart">
+                        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                        <span class="btn-text">Add to Cart</span>
+                    </button>
                 </div>
             </div>
         `).join('');
     };
 
+    // Show skeletons helper
+    const showSkeletons = (count = 6) => {
+        if (!productGrid) return;
+        const skeletons = Array.from({ length: count }).map(() => `
+            <div class="skeleton-card">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-text medium"></div>
+                <div class="skeleton-text small"></div>
+            </div>
+        `).join('');
+        productGrid.innerHTML = `<div class="skeleton-grid">${skeletons}</div>`;
+    };
+
     // Render items in the cart sidebar
     const renderCart = () => {
         if (!cartItemsContainer) return;
+        
+        // Clear existing content
         cartItemsContainer.innerHTML = '';
+        
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<div class="cart-empty">Your bag is empty.</div>';
         } else {
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            
             cart.forEach(item => {
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
                 cartItemEl.innerHTML = `
-                    <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                    <img src="${item.imageUrl || 'assets/IMG-20250812-WA0001.jpg'}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
                     <div class="cart-item-info">
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                         <div class="cart-item-quantity">
-                            <button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                            <button class="quantity-btn" data-id="${item.id}" data-action="decrease" aria-label="Decrease quantity">-</button>
                             <span class="quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                            <button class="quantity-btn" data-id="${item.id}" data-action="increase" aria-label="Increase quantity">+</button>
                         </div>
                     </div>
-                    <button class="remove-item-btn" data-id="${item.id}">&times;</button>
+                    <button class="remove-item-btn" data-id="${item.id}" aria-label="Remove item">&times;</button>
                 `;
-                cartItemsContainer.appendChild(cartItemEl);
+                fragment.appendChild(cartItemEl);
             });
+            
+            cartItemsContainer.appendChild(fragment);
         }
+        
         updateCartSummary();
     };
 
@@ -170,19 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cartCountEl) {
             cartCountEl.textContent = totalItems;
-            // Always show count when there are items, hide when zero
             if (totalItems > 0) {
                 cartCountEl.style.display = 'flex';
                 cartCountEl.classList.add('show-as-main');
-                // Update cart button to show count instead of icon
-                const cartIcon = cartToggle?.querySelector('i');
-                if (cartIcon) cartIcon.style.display = 'none';
             } else {
                 cartCountEl.style.display = 'none';
                 cartCountEl.classList.remove('show-as-main');
-                // Show cart icon when no items
-                const cartIcon = cartToggle?.querySelector('i');
-                if (cartIcon) cartIcon.style.display = 'block';
             }
         }
         if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
@@ -319,6 +344,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- PRODUCT DETAIL MODAL FUNCTIONS ---
+    
+    // Open product detail modal
+    const openProductModal = (productId) => {
+        const product = products.find(p => p.id === productId);
+        if (!product || !productDetailModal) return;
+
+        // Populate modal with product data
+        if (modalProductImage) {
+            modalProductImage.loading = 'lazy';
+            modalProductImage.decoding = 'async';
+            modalProductImage.src = product.imageUrl;
+            modalProductImage.alt = product.name;
+        }
+        if (modalProductName) modalProductName.textContent = product.name;
+        if (modalProductCategory) modalProductCategory.textContent = product.category;
+        if (modalProductDescription) modalProductDescription.textContent = product.description;
+        if (modalProductPrice) modalProductPrice.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+        
+        // Set up the modal add to cart button
+        if (modalAddToCartBtn) {
+            modalAddToCartBtn.onclick = () => {
+                addToCart(productId);
+                closeProductModal();
+            };
+        }
+
+        // Show modal
+        productDetailModal.style.display = 'flex';
+        setTimeout(() => {
+            productDetailModal.classList.add('active');
+        }, 10);
+        
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Close product detail modal
+    const closeProductModal = () => {
+        if (!productDetailModal) return;
+        
+        productDetailModal.classList.remove('active');
+        setTimeout(() => {
+            productDetailModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 300);
+    };
+
     // WhatsApp order logic (dynamic from admin settings)
     function getWhatsAppNumber(){
         try { const cfg=JSON.parse(localStorage.getItem('adminSettings')||'{}'); if(cfg.whatsappNumber && /^[0-9]{10,15}$/.test(cfg.whatsappNumber)) return cfg.whatsappNumber; } catch {}
@@ -326,18 +399,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function validateEmail(email) {
-        // Simple email regex
-        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+        // Simple email regex with null check
+        if (!email || typeof email !== 'string') return false;
+        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
     }
 
     function validateMobile(mobile) {
-        // Validate 10-digit mobile number
-        return /^[0-9]{10}$/.test(mobile);
+        // Validate 10-digit mobile number with null check
+        if (!mobile || typeof mobile !== 'string') return false;
+        return /^[0-9]{10}$/.test(mobile.trim());
     }
 
     function validatePincode(pincode) {
-        // Validate 6-digit PIN code
-        return /^[0-9]{6}$/.test(pincode);
+        // Validate 6-digit PIN code with null check
+        if (!pincode || typeof pincode !== 'string') return false;
+        return /^[0-9]{6}$/.test(pincode.trim());
     }
 
     function handleWhatsAppOrder(e) {
@@ -378,8 +454,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     {field: document.getElementById('customer-pincode'), value: pincode}
                 ].forEach(({field, value}) => {
                     if (field && !value) {
+                        field.setAttribute('aria-invalid', 'true');
                         field.style.borderColor = '#e53935';
                         field.addEventListener('input', function handler() {
+                            field.removeAttribute('aria-invalid');
                             field.style.borderColor = '';
                             field.removeEventListener('input', handler);
                         });
@@ -395,6 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.textContent = 'Please enter a valid 10-digit mobile number.';
                 checkoutError.style.display = 'block';
             }
+            const f = document.getElementById('customer-mobile');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
+            }
             return;
         }
         
@@ -403,6 +487,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkoutError) {
                 checkoutError.textContent = 'Please enter a valid 6-digit PIN code.';
                 checkoutError.style.display = 'block';
+            }
+            const f = document.getElementById('customer-pincode');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
         }
@@ -413,6 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.textContent = 'Please enter a valid email address (example: name@example.com).';
                 checkoutError.style.display = 'block';
             }
+            const f = document.getElementById('customer-email');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
+            }
             return;
         }
         
@@ -421,6 +517,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.textContent = 'Please enter a valid name (at least 2 characters).';
                 checkoutError.style.display = 'block';
             }
+            const f = document.getElementById('customer-name');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
+            }
             return;
         }
         
@@ -428,6 +530,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkoutError) {
                 checkoutError.textContent = 'Please enter a complete address (at least 10 characters).';
                 checkoutError.style.display = 'block';
+            }
+            const f = document.getElementById('customer-address');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
         }
@@ -499,8 +607,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENT LISTENERS ---
 
+    // Mobile nav toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav = document.getElementById('site-main-nav');
+    if (navToggle && mainNav) {
+        navToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = mainNav.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            
+            // Handle body scroll
+            if (isOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close nav when clicking outside
+        document.addEventListener('click', (e) => {
+            if (mainNav.classList.contains('open') && 
+                !mainNav.contains(e.target) && 
+                !navToggle.contains(e.target)) {
+                mainNav.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close nav with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mainNav.classList.contains('open')) {
+                mainNav.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
+    
+    // Product detail modal event listeners
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeProductModal);
+    if (productDetailModal) {
+        productDetailModal.addEventListener('click', (e) => {
+            // Close modal when clicking on the overlay (not the modal content)
+            if (e.target === productDetailModal || e.target.classList.contains('modal-overlay')) {
+                closeProductModal();
+            }
+        });
+    }
+    
+    // Keyboard event handling for modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && productDetailModal && productDetailModal.classList.contains('active')) {
+            closeProductModal();
+        }
+    });
     
     // Improved overlay click handling
     if (sidebarOverlay) {
@@ -514,6 +679,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event delegation for dynamically created buttons
     document.body.addEventListener('click', (e) => {
+        // Product card click to open modal (but not for add-to-cart button)
+        const productCard = e.target.closest('.product-card');
+        if (productCard && !e.target.closest('.add-to-cart-btn')) {
+            const productId = parseInt(productCard.dataset.productId, 10);
+            if (!isNaN(productId)) {
+                openProductModal(productId);
+                return;
+            }
+        }
+
         // Use closest() so clicks on child elements (like icons) still work
         const addBtn = e.target.closest('.add-to-cart-btn');
         if (addBtn) {
@@ -561,17 +736,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterCategorySelect) {
         filterCategorySelect.addEventListener('change', () => {
             currentFilters.category = filterCategorySelect.value;
-            renderProducts();
-        });
-    }
-    if (filterSearchInput) {
-        let searchDebounce;
-        filterSearchInput.addEventListener('input', () => {
-            clearTimeout(searchDebounce);
-            searchDebounce = setTimeout(() => {
-                currentFilters.search = filterSearchInput.value.trim();
-                renderProducts();
-            }, 150);
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
         });
     }
     if (filterClearBtn) {
@@ -579,13 +745,31 @@ document.addEventListener('DOMContentLoaded', () => {
             currentFilters = { category: '', search: '' };
             if (filterCategorySelect) filterCategorySelect.value = '';
             if (filterSearchInput) filterSearchInput.value = '';
-            renderProducts();
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
+        });
+    }
+
+    if (filterSearchInput) {
+        const doSearch = () => {
+            currentFilters.search = filterSearchInput.value || '';
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
+        };
+        filterSearchInput.addEventListener('input', () => {
+            // Debounce lightweight: wait a tick
+            clearTimeout(filterSearchInput._t);
+            filterSearchInput._t = setTimeout(doSearch, 200);
+        });
+        filterSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
         });
     }
 
     // --- INITIAL LOAD ---
     populateCategoryFilter();
-    renderProducts();
+    showSkeletons(6);
+    setTimeout(renderProducts, 250);
     renderCart();
     renderCheckoutSummary();
 
@@ -604,4 +788,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {
         checkoutBtn.style.display = 'none';
     }
+
+    // Make functions globally accessible for onclick handlers
+    window.addToCart = addToCart;
+    window.removeFromCart = removeFromCart;
+    window.updateQuantity = updateQuantity;
+    window.openProductDetail = openProductModal; // Map to the correct function name
 });
