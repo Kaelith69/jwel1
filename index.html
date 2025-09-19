@@ -5,65 +5,625 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VastraVeda Jewelleries - Luxury Redefined</title>
     <meta name="description" content="VastraVeda Jewelleries - Luxury jewelry collection. Shop necklaces, rings, earrings, and bracelets online.">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="styles-consistent.css">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="icon" href="logo/logo.png" sizes="any">
+    <meta property="og:title" content="VastraVeda Jewelleries - Luxury Redefined">
+    <meta property="og:description" content="Shop necklaces, rings, earrings, and bracelets online.">
+    <meta property="og:image" content="logo/logo.png">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gold: #d4a853;
+            --dark-gold: #b8941f;
+            --text-dark: #2c3e50;
+            --text-light: #6c757d;
+            --bg-light: #f8f9fa;
+            --white: #ffffff;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-light);
+            height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Skip link for accessibility */
+        .skip-link {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .skip-link:focus {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            width: auto;
+            height: auto;
+            background: var(--primary-gold);
+            color: var(--white);
+            padding: 8px 16px;
+            text-decoration: none;
+            border-radius: 4px;
+            z-index: 9999;
+        }
+
+        /* Header - Compact and Mobile Optimized */
+        .main-header {
+            background: var(--white);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px var(--shadow);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            height: 60px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+        }
+
+        .brand-text {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 16px;
+            text-decoration: none;
+        }
+
+        /* Navigation - Hidden on mobile, controlled by toggle */
+        .main-nav {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            box-shadow: 0 4px 12px var(--shadow);
+            z-index: 999;
+        }
+
+        .main-nav.open {
+            display: block;
+        }
+
+        .main-nav ul {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .main-nav li {
+            padding: 0 16px;
+        }
+
+        .main-nav a {
+            display: block;
+            padding: 12px 0;
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            border-bottom: 1px solid #f1f3f4;
+            transition: color 0.3s ease;
+        }
+
+        .main-nav a:hover {
+            color: var(--primary-gold);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-toggle,
+        .cart-button {
+            background: none;
+            border: none;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            color: var(--text-dark);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-toggle:active,
+        .cart-button:active {
+            background: #f1f3f4;
+            transform: scale(0.95);
+        }
+
+        #cart-count {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--primary-gold);
+            color: var(--white);
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 8px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        /* Main Content - Centered and Rearranged */
+        .hero-section {
+            margin-top: 60px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: calc(100vh - 60px);
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Decorative border */
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 16px;
+            right: 16px;
+            bottom: 20px;
+            border: 2px solid var(--primary-gold);
+            border-radius: 20px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .glass-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .glass-panel .logo {
+            margin-bottom: 32px;
+            gap: 0;
+        }
+
+        .glass-panel .logo img {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 16px;
+            display: block;
+            border-radius: 50%;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Brand name visible */
+        .glass-panel::after {
+            content: 'VastraVeda';
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .glass-panel p {
+            color: var(--text-light);
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
+            margin: 32px 0 40px;
+            max-width: 280px;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary-gold), var(--dark-gold));
+            color: var(--white);
+            text-decoration: none;
+            padding: 16px 48px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .cta-button:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow: 0 2px 8px rgba(212, 168, 83, 0.4);
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: var(--white);
+            z-index: 1001;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.open {
+            right: 0;
+        }
+
+        #sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--white);
+        }
+
+        .cart-header h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--text-dark);
+            font-size: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+            padding: 4px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .close-btn:active {
+            transform: scale(0.9);
+        }
+
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            background: var(--white);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+
+        .cart-footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .checkout-button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .checkout-button:active {
+            transform: scale(0.98);
+        }
+
+        .clear-cart-btn {
+            background: var(--text-light);
+            color: var(--white);
+        }
+
+        .clear-cart-btn:active {
+            background: #495057;
+        }
+
+        .checkout-button:not(.clear-cart-btn) {
+            background: var(--primary-gold);
+            color: var(--white);
+        }
+
+        .checkout-button:not(.clear-cart-btn):active {
+            background: var(--dark-gold);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 375px) {
+            .hero-section {
+                padding: 16px 12px;
+            }
+            
+            .glass-panel .logo img {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .glass-panel::after {
+                font-size: 22px;
+            }
+            
+            .glass-panel p {
+                font-size: 15px;
+                max-width: 250px;
+            }
+            
+            .cta-button {
+                padding: 14px 40px;
+                font-size: 15px;
+            }
+
+            .cart-sidebar {
+                max-width: 100%;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Touch optimization */
+        @media (hover: none) and (pointer: coarse) {
+            .cta-button:active {
+                background: linear-gradient(135deg, var(--dark-gold), #a67c00);
+            }
+        }
+
+        /* Prevent text selection on UI elements */
+        .glass-panel::after,
+        .glass-panel p,
+        .cta-button,
+        .brand-text {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Empty cart message */
+        .cart-empty {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="app-container">
         <header class="main-header">
             <div class="logo">
-                <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Logo"></a>
+                <a href="index.html">
+                    <img src="logo/logo.png" alt="VastraVeda Jewelleries Logo" width="36" height="36" loading="eager" decoding="async">
+                </a>
+                <a href="index.html" class="brand-text">VastraVeda</a>
             </div>
-            <nav class="main-nav" aria-label="Main Navigation">
+            <div class="header-actions">
+                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                    <span id="cart-count">0</span>
+                </button>
+                <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
+                    <i class="fas fa-bars" aria-hidden="true"></i>
+                </button>
+            </div>
+            <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
                     <li><a href="index.html">Home</a></li>
                     <li><a href="products.html">Products</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
-            <div class="header-actions">
-                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
-                    <i class="fas fa-shopping-bag"></i>
-                    <span id="cart-count">0</span>
-                </button>
-            </div>
         </header>
 
-        <main class="hero-section">
+        <main class="hero-section" id="main-content" role="main">
             <div class="glass-panel">
                 <div class="logo">
-                    <img src="logo/logo.png" alt="VastraVeda Jewelleries Logo">
+                    <img src="logo/logo.png" alt="VastraVeda Jewelleries Logo" width="120" height="120" loading="eager" decoding="async">
                 </div>
-               
+                <h1 class="visually-hidden">VastraVeda Jewelleries</h1>
                 <p>Experience the art of elegance. Crafted for the discerning.</p>
                 <a href="products.html" class="cta-button">Explore Collection</a>
             </div>
         </main>
         
-    <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
+        <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
             <div class="cart-header">
                 <h2>Your Bag</h2>
-                <button id="cart-close-btn" class="close-btn">&times;</button>
+                <button id="cart-close-btn" class="close-btn" aria-label="Close cart">&times;</button>
             </div>
             <div id="cart-items" class="cart-items">
-                </div>
+                <p class="cart-empty">Your cart is empty</p>
+            </div>
             <div class="cart-footer">
                 <div class="cart-total">
                     <span>Total:</span>
                     <span id="cart-total-price">₹0</span>
                 </div>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                    <button id="clear-cart-btn" class="checkout-button" type="button" style="background:#5a1a1a;">Clear</button>
+                <div class="cart-footer-actions">
+                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn" type="button">Clear</button>
                     <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
                 </div>
             </div>
         </aside>
         <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
     </div>
-    <script src="js/cart.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="main.js"></script>
+
+    <script>
+        // Mobile navigation toggle
+        const navToggle = document.getElementById('nav-toggle');
+        const mainNav = document.getElementById('site-main-nav');
+        const cartToggle = document.getElementById('cart-toggle');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const cartCloseBtn = document.getElementById('cart-close-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+        // Navigation toggle
+        navToggle.addEventListener('click', function() {
+            const isOpen = mainNav.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', isOpen);
+            navToggle.style.background = isOpen ? '#f1f3f4' : 'none';
+        });
+
+        // Close navigation when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navToggle.contains(e.target) && !mainNav.contains(e.target)) {
+                mainNav.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.style.background = 'none';
+            }
+        });
+
+        // Cart functionality
+        function openCart() {
+            cartSidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+            cartSidebar.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCart() {
+            cartSidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            cartSidebar.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        cartToggle.addEventListener('click', openCart);
+        cartCloseBtn.addEventListener('click', closeCart);
+        sidebarOverlay.addEventListener('click', closeCart);
+
+        // Prevent zoom on double tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Header button interactions with haptic feedback
+        document.querySelectorAll('.nav-toggle, .cart-button').forEach(btn => {
+            btn.addEventListener('touchstart', function() {
+                this.style.background = '#f1f3f4';
+            });
+            
+            btn.addEventListener('touchend', function() {
+                if (!mainNav.classList.contains('open')) {
+                    setTimeout(() => {
+                        this.style.background = 'none';
+                    }, 100);
+                }
+            });
+
+            btn.addEventListener('click', function() {
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+        });
+
+        // CTA button with haptic feedback
+        document.querySelector('.cta-button').addEventListener('click', function() {
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+        });
+
+        // Clear cart functionality
+        document.getElementById('clear-cart-btn').addEventListener('click', function() {
+            if (confirm('Clear all items from cart?')) {
+                document.getElementById('cart-items').innerHTML = '<p class="cart-empty">Your cart is empty</p>';
+                document.getElementById('cart-total-price').textContent = '₹0';
+                document.getElementById('cart-count').textContent = '0';
+            }
+        });
+
+        // Checkout functionality
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            const cartCount = document.getElementById('cart-count').textContent;
+            if (cartCount === '0') {
+                alert('Your cart is empty!');
+                return;
+            }
+            alert('Redirecting to checkout...');
+        });
+    </script>
 </body>
 </html>
