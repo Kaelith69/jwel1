@@ -232,9 +232,9 @@ class UIManager {
         const style = document.createElement('style');
         style.textContent = `
             .enhanced-focus:focus-visible {
-                outline: 3px solid var(--accent-color, #d4af37);
+                outline: 3px solid var(--accent-color, #3B82F6);
                 outline-offset: 2px;
-                box-shadow: 0 0 0 6px rgba(212, 175, 55, 0.2);
+                box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
             }
         `;
         document.head.appendChild(style);
