@@ -337,11 +337,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearCart = () => {
         if (cart.length === 0) return;
         
-        if (confirm('Are you sure you want to clear your entire cart?')) {
+        confirmAction('Are you sure you want to clear your entire cart?').then(ok => {
+            if (!ok) return;
             cart = [];
             saveCart();
             renderCart();
-        }
+            notify('Cart cleared', 'success');
+        });
     };
 
     // --- PRODUCT DETAIL MODAL FUNCTIONS ---
@@ -717,7 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cart.length > 0) {
                 window.location.href = 'checkout.html';
             } else {
-                alert('Your bag is empty.');
+                notify('Your bag is empty.', 'error');
             }
         });
     }

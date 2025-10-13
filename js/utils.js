@@ -189,3 +189,56 @@ class FormValidator {
 
 // Export for use in main.js
 window.FormValidator = FormValidator;
+
+// Lightweight non-blocking toast notification
+function notify(message, type = 'info', duration = 3000) {
+    try {
+        let container = document.getElementById('vv-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'vv-toast-container';
+            container.style.position = 'fixed';
+            container.style.right = '16px';
+            container.style.bottom = '16px';
+            container.style.zIndex = 99999;
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'vv-toast vv-toast-' + type;
+        toast.textContent = message;
+        toast.style.marginTop = '8px';
+        toast.style.padding = '10px 14px';
+        toast.style.borderRadius = '8px';
+        toast.style.color = '#fff';
+        toast.style.background = type === 'error' ? '#e53935' : (type === 'success' ? '#2e7d32' : '#333');
+        toast.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+        toast.style.fontSize = '14px';
+        toast.style.maxWidth = '320px';
+        toast.style.wordBreak = 'break-word';
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            try { toast.remove(); } catch (e) {}
+        }, duration);
+    } catch (e) {}
+}
+
+// Promise-based confirm wrapper (non-blocking fallback)
+function confirmAction(message) {
+    return new Promise(resolve => {
+        try {
+            // If native confirm available, use it for simplicity
+            if (typeof window.confirm === 'function') {
+                resolve(window.confirm(message));
+                return;
+            }
+        } catch (e) {}
+        // Fallback: resolve false
+        resolve(false);
+    });
+}
+
+window.notify = notify;
+window.confirmAction = confirmAction;

@@ -27,6 +27,7 @@ class CartManager {
             return true;
         } catch (error) {
             console.error('Error adding item to cart:', error);
+            notify('Failed to add item to cart', 'error');
             return false;
         }
     }
@@ -55,14 +56,19 @@ class CartManager {
     // Clear entire cart
     clear() {
         if (this.cart.length === 0) return false;
-        
-        if (confirm('Are you sure you want to clear your entire cart?')) {
-            this.cart = [];
-            this.saveCart();
-            this.render();
-            return true;
-        }
-        return false;
+
+        // Use confirmAction wrapper (returns a Promise)
+        // Keep method synchronous by returning a Promise
+        return new Promise(resolve => {
+            confirmAction('Are you sure you want to clear your entire cart?').then(ok => {
+                if (!ok) return resolve(false);
+                this.cart = [];
+                this.saveCart();
+                this.render();
+                notify('Cart cleared', 'success');
+                resolve(true);
+            });
+        });
     }
 
     // Get cart totals

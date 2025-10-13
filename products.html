@@ -955,7 +955,7 @@
                 <div class="footer-newsletter">
                     <h3>Newsletter</h3>
                     <p>Be the first to know about new designs.</p>
-                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Thanks for subscribing!');">
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); notify('Thanks for subscribing!', 'success');">
                         <input type="email" placeholder="Your email">
                         <button type="submit" class="newsletter-btn">Subscribe</button>
                     </form>
@@ -1152,10 +1152,10 @@
             const product = sampleProducts.find(p => p.id === productId);
             if (!product) return;
             
-            // Simple alert for demo - in real app would open modal
-            if (confirm(`${product.name}\n${formatPrice(product.price)}\n\nAdd to cart?`)) {
-                addToCart(null, productId);
-            }
+            // Use non-blocking confirm wrapper
+            confirmAction(`${product.name}\n${formatPrice(product.price)}\n\nAdd to cart?`).then(ok => {
+                if (ok) addToCart(null, productId);
+            });
         }
 
         // Filtering
@@ -1251,10 +1251,12 @@
         // Clear cart
         if (clearCartBtn) {
             clearCartBtn.addEventListener('click', function() {
-                if (confirm('Clear all items from cart?')) {
+                confirmAction('Clear all items from cart?').then(ok => {
+                    if (!ok) return;
                     cart = [];
                     updateCartUI();
-                }
+                    notify('Cart cleared', 'success');
+                });
             });
         }
 
@@ -1262,7 +1264,7 @@
         if (checkoutBtn) {
             checkoutBtn.addEventListener('click', function() {
                 if (cart.length === 0) {
-                    alert('Your cart is empty!');
+                    notify('Your cart is empty!', 'error');
                     return;
                 }
                 window.location.href = 'checkout.html';
@@ -1274,7 +1276,7 @@
         if (orderNowBtn) {
             orderNowBtn.addEventListener('click', function() {
                 if (cart.length === 0) {
-                    alert('Your cart is empty!');
+                    notify('Your cart is empty!', 'error');
                     return;
                 }
                 window.location.href = 'checkout.html';
@@ -1303,7 +1305,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js')
-                    .catch(err => console.log('ServiceWorker registration failed'));
+                    .catch(() => { /* ServiceWorker registration failed (suppressed) */ });
             });
         }
         
