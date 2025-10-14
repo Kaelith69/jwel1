@@ -572,6 +572,15 @@ document.addEventListener('DOMContentLoaded', () => {
             orders.push(order);
             localStorage.setItem('proJetOrders', JSON.stringify(orders));
 
+                        // Best-effort push to Firestore (non-blocking)
+                        try{
+                                import('./js/firebase-adapter.js')
+                                    .then(mod=>mod.default.init().then(()=>{
+                                        if(mod.default.addOrder){ mod.default.addOrder(order).catch(()=>{}); }
+                                    }))
+                                    .catch(()=>{});
+                        }catch(e){ /* ignore if not configured */ }
+
             // Show confirmation message
             if (checkoutError) {
                 checkoutError.textContent = 'Order placed! Please complete your order in WhatsApp.';

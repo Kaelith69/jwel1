@@ -966,7 +966,8 @@
             </div>
         </footer>
     </div>
-
+    
+    <script src="js/utils.js"></script>
     <script>
         // Sample jewelry data
         const sampleProducts = [
@@ -1009,11 +1010,11 @@
             try { return priceFormatter.format(value); } catch { return `₹${Number(value || 0).toLocaleString()}`; }
         }
         function saveCart() {
-            try { localStorage.setItem('vv_cart', JSON.stringify(cart)); } catch {}
+            try { localStorage.setItem('cart', JSON.stringify(cart)); } catch {}
         }
         function loadCart() {
             try {
-                const raw = localStorage.getItem('vv_cart');
+                const raw = localStorage.getItem('cart');
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed)) {
@@ -1044,7 +1045,7 @@
             productGrid.innerHTML = products.map(product => `
                 <div class="product-card" onclick="openProductDetail(${product.id})">
                     <div class="product-image-container">
-                        <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                        <img src="${product.image || product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy">
                     </div>
                     <div class="product-info">
                         <div class="product-price">${formatPrice(product.price)}</div>
@@ -1094,7 +1095,7 @@
                 } else {
                     cartItems.innerHTML = cart.map(item => `
                         <div class="cart-item">
-                            <img src="${item.image}" alt="${item.name}" class="cart-item-img">
+                            <img src="${item.image || item.imageUrl}" alt="${item.name}" class="cart-item-img">
                             <div class="cart-item-details">
                                 <div class="cart-item-name">${item.name}</div>
                                 <div class="cart-item-qty">Qty: ${item.quantity}</div>

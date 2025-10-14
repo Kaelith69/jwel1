@@ -47,6 +47,7 @@
                     </select>
                     <button id="order-filters-reset" class="admin-button secondary" type="button">Reset</button>
                     <button id="export-orders" class="admin-button secondary" type="button">Export CSV</button>
+                    <button id="sync-orders-firestore" class="admin-button secondary" type="button" title="Fetch latest orders from Firestore and cache locally">Sync from Firestore</button>
                     <button id="clear-orders-btn" class="admin-button danger ml-auto" type="button">Clear All</button>
                 </div>
             </header>
@@ -82,6 +83,7 @@
         </section>
         <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </main>
-    <script src="admin.js"></script>
+    <script src="../js/utils.js" defer></script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>

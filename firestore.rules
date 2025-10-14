@@ -1,0 +1,70 @@
+rules_version = '2';
+service cloud.firestore {
+  // Strategy: Only authenticated users with custom claim admin == true OR listed in /admins collection can write.
+  // Public reads allowed for products; orders readable only to admins.
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isAdminClaim() { return isSignedIn() && request.auth.token.admin == true; }
+    function isAdminListed() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function isAdmin() { return isAdminClaim() || isAdminListed(); }
+
+    // Products collection
+    match /products/{productId} {
+      allow read: if true; // public product catalog
+      allow create: if isAdmin() && validateNewProduct();
+      allow update: if isAdmin() && validateUpdatedProduct();
+      allow delete: if isAdmin();
+
+      function validateNewProduct() { return validateCommonProductFields() && !('createdAt' in resource.data) && 'name' in request.resource.data; }
+      function validateUpdatedProduct() { return validateCommonProductFields(); }
+      function validateCommonProductFields() {
+        return request.resource.data.keys().hasAll(['name','price','description','category','imageUrl'])
+          && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 120
+          && request.resource.data.description is string && request.resource.data.description.size() >= 5 && request.resource.data.description.size() <= 5000
+          && request.resource.data.category is string && request.resource.data.category.size() > 0 && request.resource.data.category.size() <= 60
+          && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 2000
+          && request.resource.data.price is number && request.resource.data.price >= 0 && request.resource.data.price <= 100000000;
+      }
+    }
+
+    // Orders collection
+    match /orders/{orderId} {
+      // Customers placing orders (unauthenticated) are NOT directly writing to Firestore in current app (orders stored locally then migrated by admin).
+      // So restrict all writes to admins.
+      allow read: if isAdmin();
+      allow create: if isAdmin() && validateOrder();
+      allow update: if isAdmin() && validateOrder();
+      allow delete: if isAdmin();
+
+      function validateOrder() {
+        return request.resource.data.keys().hasAll(['orderId','customer','items','total','date'])
+          && request.resource.data.orderId is string && request.resource.data.orderId.size() <= 80
+          && request.resource.data.customer is map
+          && request.resource.data.customer.keys().hasAll(['name','mobile'])
+          && request.resource.data.customer.name is string && request.resource.data.customer.name.size() >= 2 && request.resource.data.customer.name.size() <= 140
+          && request.resource.data.customer.mobile is string && request.resource.data.customer.mobile.size() >= 8 && request.resource.data.customer.mobile.size() <= 20
+          && ('email' in request.resource.data.customer ? (request.resource.data.customer.email is string && request.resource.data.customer.email.size() <= 320) : true)
+          && ('pincode' in request.resource.data.customer ? (request.resource.data.customer.pincode is string && request.resource.data.customer.pincode.size() <= 20) : true)
+          && request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() <= 500
+          && request.resource.data.items[0] is map // coarse check — Firestore rules lack full loop constructs
+          && request.resource.data.total is number && request.resource.data.total >= 0 && request.resource.data.total <= 100000000
+          && request.resource.data.date is string && request.resource.data.date.size() >= 10 && request.resource.data.date.size() <= 40;
+      }
+    }
+
+    // Admins collection (allows listing of admin UIDs by a super-admin only)
+    match /admins/{adminUid} {
+      allow read: if isAdmin();
+      allow create, update, delete: if isAdminClaim(); // only users with admin custom claim can modify admin list
+    }
+
+    // Fallback: deny everything else explicitly
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

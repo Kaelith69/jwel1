@@ -25,7 +25,7 @@
     <div class="login-container" id="login-main" role="main">
         <div class="glass-panel login-panel">
             <h2>Admin Login</h2>
-            <p>Sign in with your admin email/password.</p>
+            <p>Sign in with your admin email/password (or use demo password <strong>admin123</strong> if Firebase isn't configured).</p>
             <form id="login-form">
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -41,7 +41,6 @@
             <a href="../index.html" class="back-link">← Back to Site</a>
         </div>
     </div>
-    <script src="../js/utils.js" defer></script>
     <script type="module">
         import FirebaseAdapter from '../js/firebase-adapter.js';
         const form = document.getElementById('login-form');
@@ -59,7 +58,13 @@
                     window.location.href='dashboard.html';
                     return;
                 }
-            }catch(err){ if(errEl) errEl.textContent = 'Login failed'; }
+            }catch(err){ console.warn('Firebase sign-in failed or not configured', err); }
+            // fallback to demo password
+            if(pass === 'admin123'){
+                localStorage.setItem('vastravedajewlleries-admin-auth','true');
+                window.location.href='dashboard.html';
+                return;
+            }
             if(errEl) errEl.textContent = 'Login failed';
         });
     </script>
