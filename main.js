@@ -1,38 +1,52 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Initialize UI manager for accessibility, skip links, and cart sidebar behavior
     if (window.UIManager) {
         try { new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
     }
-    // --- DATA ---
-    // Initialize products from localStorage or use default data
-    const initializeProducts = () => {
-        const productsInStorage = localStorage.getItem('products');
-        const dataVersion = localStorage.getItem('productsDataVersion');
-        const currentVersion = '2.0'; // Updated version to force refresh
-        
-        // If no products or old version, use new default data
-        if (!productsInStorage || dataVersion !== currentVersion) {
-            const defaultProducts = [
-                { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Necklace' },
-                { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Ring' },
-                { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
-                { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Bracelet' },
-                { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Bangles' },
-                { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
-                { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Set' },
-                { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Ring' },
-                { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Pendant' },
-                { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Set' },
-                { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Studs' },
-                { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg', category: 'Earrings' },
-                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg', category: 'Brooch' }
-            ];
-            localStorage.setItem('products', JSON.stringify(defaultProducts));
-            localStorage.setItem('productsDataVersion', currentVersion);
-            return defaultProducts;
+    
+    // --- FIREBASE INTEGRATION ---
+    // Show loading indicator
+    const showLoading = () => {
+        if (document.getElementById('product-grid')) {
+            document.getElementById('product-grid').innerHTML = '<div style="text-align:center;padding:40px;color:#666;"><p style="font-size:18px;">🔄 Loading products from Firebase...</p></div>';
         }
-        return JSON.parse(productsInStorage);
     };
+    
+    const showError = (message) => {
+        if (document.getElementById('product-grid')) {
+            document.getElementById('product-grid').innerHTML = `<div style="text-align:center;padding:40px;color:#dc3545;"><p style="font-size:18px;">❌ ${message}</p><p style="margin-top:10px;"><a href="migrate-to-firebase.html" style="color:#3B82F6;">Go to Migration Tool</a></p></div>`;
+        }
+    };
+    
+    // Load Firebase Adapter
+    let FirebaseAdapter;
+    try {
+        const FirebaseAdapterModule = await import('./js/firebase-adapter.js');
+        FirebaseAdapter = FirebaseAdapterModule.default || FirebaseAdapterModule;
+    } catch (err) {
+        console.error('Failed to load Firebase adapter:', err);
+        showError('Failed to load Firebase adapter. Please check your setup.');
+        return;
+    }
+    
+    // --- DATA ---
+    // Load products from Firebase (NO localStorage fallback)
+    let products = [];
+    showLoading();
+    
+    try {
+        products = await FirebaseAdapter.getProducts();
+        console.log('✅ Loaded', products.length, 'products from Firebase');
+        
+        if (products.length === 0) {
+            showError('No products found in Firebase. Please use the migration tool to upload products.');
+            return;
+        }
+    } catch (err) {
+        console.error('Failed to load products from Firebase:', err);
+        showError('Failed to load products from Firebase: ' + err.message);
+        return;
+    }
 
     // Category normalization mapping (canonical categories)
     const CATEGORY_MAP = {
@@ -55,8 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return CATEGORY_MAP[key] || cat; // keep original if not mapped so we don't lose intent
     };
 
-    const products = initializeProducts().map(p => ({ ...p, category: normalizeCategory(p.category) }));
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    // Normalize categories from Firebase data
+    products = products.map(p => {
+        const fallbackId = `fallback-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const normalizedId = p.id != null
+            ? String(p.id)
+            : (p._docId != null ? String(p._docId) : fallbackId);
+        return {
+            ...p,
+            category: normalizeCategory(p.category),
+            id: normalizedId
+        };
+    });
+    
+    // Cart is always localStorage only
+    let cart = (JSON.parse(localStorage.getItem('cart')) || []).map(item => {
+        const normalizedId = item.id != null ? String(item.id) : null;
+        return normalizedId ? { ...item, id: normalizedId } : null;
+    }).filter(Boolean);
 
     // --- DOM Elements ---
     const productGrid = document.getElementById('product-grid');
@@ -117,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         productGrid.innerHTML = list.map(product => `
-            <div class="product-card" data-product-id="${product.id}">
+            <div class="product-card" data-product-id="${String(product.id)}">
                 <!-- Clean Image Section -->
                 <div class="product-image-section">
                     <div class="product-image-container">
@@ -135,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     
                     <!-- Full-width Cart Button -->
-                    <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart" aria-label="Add ${product.name} to cart">
+                    <button class="add-to-cart-btn" data-id="${String(product.id)}" title="Add to Cart" aria-label="Add ${product.name} to cart">
                         <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                         <span class="btn-text">Add to Cart</span>
                     </button>
@@ -179,12 +209,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                         <div class="cart-item-quantity">
-                            <button class="quantity-btn" data-id="${item.id}" data-action="decrease" aria-label="Decrease quantity">-</button>
+                            <button class="quantity-btn" data-id="${String(item.id)}" data-action="decrease" aria-label="Decrease quantity">-</button>
                             <span class="quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn" data-id="${item.id}" data-action="increase" aria-label="Increase quantity">+</button>
+                            <button class="quantity-btn" data-id="${String(item.id)}" data-action="increase" aria-label="Increase quantity">+</button>
                         </div>
                     </div>
-                    <button class="remove-item-btn" data-id="${item.id}" aria-label="Remove item">&times;</button>
+                    <button class="remove-item-btn" data-id="${String(item.id)}" aria-label="Remove item">&times;</button>
                 `;
                 fragment.appendChild(cartItemEl);
             });
@@ -270,25 +300,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add product to cart
     const addToCart = (productId) => {
         try {
-            const productToAdd = products.find(p => p.id === productId);
+            const lookupId = String(productId);
+            // Only use local product data for cart
+            const productToAdd = products.find(p => String(p.id) === lookupId);
             if (!productToAdd) {
                 console.error('Product not found:', productId);
                 return;
             }
-            
-            const existingItem = cart.find(item => item.id === productId);
-
+            const existingItem = cart.find(item => String(item.id) === lookupId);
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                cart.push({ ...productToAdd, quantity: 1 });
+                cart.push({ ...productToAdd, id: lookupId, quantity: 1 });
             }
-            
             saveCart();
             renderCart();
-            
             // Show brief success feedback
-            const addButton = document.querySelector(`[data-id="${productId}"]`);
+            const addButton = document.querySelector(`[data-id="${lookupId}"]`);
             if (addButton) {
                 const originalText = addButton.innerHTML;
                 addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
@@ -305,7 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update item quantity in cart
     const updateQuantity = (productId, action) => {
-        const item = cart.find(item => item.id === productId);
+        const lookupId = String(productId);
+        const item = cart.find(item => String(item.id) === lookupId);
         if (!item) return;
 
         if (action === 'increase') {
@@ -313,7 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'decrease') {
             item.quantity--;
             if (item.quantity <= 0) {
-                removeFromCart(productId);
+                removeFromCart(lookupId);
                 return;
             }
         }
@@ -323,7 +352,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Remove item from cart
     const removeFromCart = (productId) => {
-        cart = cart.filter(item => item.id !== productId);
+        const lookupId = String(productId);
+        cart = cart.filter(item => String(item.id) !== lookupId);
         saveCart();
         renderCart();
     };
@@ -336,21 +366,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear entire cart
     const clearCart = () => {
         if (cart.length === 0) return;
-        
-        confirmAction('Are you sure you want to clear your entire cart?').then(ok => {
-            if (!ok) return;
-            cart = [];
-            saveCart();
-            renderCart();
-            notify('Cart cleared', 'success');
-        });
+        cart = [];
+        saveCart();
+        renderCart();
+        notify('Cart cleared', 'success');
     };
 
     // --- PRODUCT DETAIL MODAL FUNCTIONS ---
     
     // Open product detail modal
     const openProductModal = (productId) => {
-        const product = products.find(p => p.id === productId);
+        const lookupId = String(productId);
+        const product = products.find(p => String(p.id) === lookupId);
         if (!product || !productDetailModal) return;
 
         // Populate modal with product data
@@ -368,7 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Set up the modal add to cart button
         if (modalAddToCartBtn) {
             modalAddToCartBtn.onclick = () => {
-                addToCart(productId);
+                addToCart(lookupId);
                 closeProductModal();
             };
         }
@@ -383,20 +410,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = 'hidden';
     };
 
-    // Close product detail modal
-    const closeProductModal = () => {
-        if (!productDetailModal) return;
-        
-        productDetailModal.classList.remove('active');
-        setTimeout(() => {
-            productDetailModal.style.display = 'none';
-            document.body.style.overflow = '';
-        }, 300);
-    };
-
-    // WhatsApp order logic (dynamic from admin settings)
-    function getWhatsAppNumber(){
-        try { const cfg=JSON.parse(localStorage.getItem('adminSettings')||'{}'); if(cfg.whatsappNumber && /^[0-9]{10,15}$/.test(cfg.whatsappNumber)) return cfg.whatsappNumber; } catch {}
+    // WhatsApp order logic (dynamic from Firebase settings)
+    async function getWhatsAppNumber(){
+        try {
+            const settings = await FirebaseAdapter.getSettings();
+            if(settings.whatsappNumber && /^[0-9]{10,15}$/.test(settings.whatsappNumber)) {
+                return settings.whatsappNumber;
+            }
+        } catch (err) {
+            console.warn('Failed to load WhatsApp number from Firebase:', err);
+        }
         return '919876543210'; // fallback default
     }
 
@@ -418,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return /^[0-9]{6}$/.test(pincode.trim());
     }
 
-    function handleWhatsAppOrder(e) {
+    async function handleWhatsAppOrder(e) {
         if (e) e.preventDefault();
         
         // Clear any previous errors
@@ -560,26 +583,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const message =
 `Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
 
-            // Save order to localStorage
+            // Save order to Firebase (required)
             const order = {
                 orderId: 'ORD-' + Date.now(),
                 customer: { name, mobile, email, address, pincode },
-                items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+                items: cart.map(item => ({ id: item.id || item._docId, name: item.name, price: item.price, quantity: item.quantity })),
                 total: grandTotal,
                 date: new Date().toISOString()
             };
-            let orders = JSON.parse(localStorage.getItem('proJetOrders') || '[]');
-            orders.push(order);
-            localStorage.setItem('proJetOrders', JSON.stringify(orders));
-
-                        // Best-effort push to Firestore (non-blocking)
-                        try{
-                                import('./js/firebase-adapter.js')
-                                    .then(mod=>mod.default.init().then(()=>{
-                                        if(mod.default.addOrder){ mod.default.addOrder(order).catch(()=>{}); }
-                                    }))
-                                    .catch(()=>{});
-                        }catch(e){ /* ignore if not configured */ }
+            
+            try {
+                const orderId = await FirebaseAdapter.addOrder(order);
+                console.log('✅ Order saved to Firebase:', orderId);
+            } catch (err) {
+                console.error('Failed to save order to Firebase:', err);
+                if (checkoutError) {
+                    checkoutError.textContent = 'Failed to save order: ' + err.message;
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#dc3545';
+                }
+                return; // Don't proceed if order can't be saved
+            }
 
             // Show confirmation message
             if (checkoutError) {
@@ -589,9 +613,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // WhatsApp redirect with small delay for better UX
-            setTimeout(() => {
+            setTimeout(async () => {
+                const whatsappNumber = await getWhatsAppNumber();
                 const encodedMsg = encodeURIComponent(message);
-                window.location.href = `https://wa.me/${getWhatsAppNumber()}?text=${encodedMsg}`;
+                window.location.href = `https://wa.me/${whatsappNumber}?text=${encodedMsg}`;
                 // Clear cart after redirect
                 cart = [];
                 saveCart();
@@ -693,8 +718,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Product card click to open modal (but not for add-to-cart button)
         const productCard = e.target.closest('.product-card');
         if (productCard && !e.target.closest('.add-to-cart-btn')) {
-            const productId = parseInt(productCard.dataset.productId, 10);
-            if (!isNaN(productId)) {
+            const productId = productCard.dataset.productId;
+            if (productId) {
                 openProductModal(productId);
                 return;
             }
@@ -703,23 +728,23 @@ document.addEventListener('DOMContentLoaded', () => {
         // Use closest() so clicks on child elements (like icons) still work
         const addBtn = e.target.closest('.add-to-cart-btn');
         if (addBtn) {
-            const id = parseInt(addBtn.dataset.id, 10);
-            if (!isNaN(id)) addToCart(id);
+            const id = addBtn.dataset.id;
+            if (id) addToCart(id);
             return; // Prevent falling through to other handlers
         }
 
         const qtyBtn = e.target.closest('.quantity-btn');
         if (qtyBtn) {
-            const id = parseInt(qtyBtn.dataset.id, 10);
+            const id = qtyBtn.dataset.id;
             const action = qtyBtn.dataset.action;
-            if (!isNaN(id) && action) updateQuantity(id, action);
+            if (id && action) updateQuantity(id, action);
             return;
         }
 
         const removeBtn = e.target.closest('.remove-item-btn');
         if (removeBtn) {
-            const id = parseInt(removeBtn.dataset.id, 10);
-            if (!isNaN(id)) removeFromCart(id);
+            const id = removeBtn.dataset.id;
+            if (id) removeFromCart(id);
         }
     });
 

@@ -15,12 +15,21 @@ service cloud.firestore {
     // Products collection
     match /products/{productId} {
       allow read: if true; // public product catalog
-      allow create: if isAdmin() && validateNewProduct();
+  allow create: if isAdmin() && validateNewProduct();
       allow update: if isAdmin() && validateUpdatedProduct();
       allow delete: if isAdmin();
 
-      function validateNewProduct() { return validateCommonProductFields() && !('createdAt' in resource.data) && 'name' in request.resource.data; }
-      function validateUpdatedProduct() { return validateCommonProductFields(); }
+      function validateNewProduct() {
+        return validateCommonProductFields()
+          && validateTimestamps(true)
+          && 'name' in request.resource.data;
+      }
+
+      function validateUpdatedProduct() {
+        return validateCommonProductFields()
+          && validateTimestamps(false);
+      }
+
       function validateCommonProductFields() {
         return request.resource.data.keys().hasAll(['name','price','description','category','imageUrl'])
           && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 120
@@ -29,14 +38,20 @@ service cloud.firestore {
           && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 2000
           && request.resource.data.price is number && request.resource.data.price >= 0 && request.resource.data.price <= 100000000;
       }
+
+      function validateTimestamps(isCreate) {
+        return (!('createdAt' in request.resource.data) || request.resource.data.createdAt is string)
+          && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is string)
+          && (isCreate ? true : ('updatedAt' in request.resource.data));
+      }
     }
 
     // Orders collection
     match /orders/{orderId} {
-      // Customers placing orders (unauthenticated) are NOT directly writing to Firestore in current app (orders stored locally then migrated by admin).
-      // So restrict all writes to admins.
+      // UPDATED: Allow unauthenticated users to CREATE orders (checkout flow)
+      // Admins can read/update/delete all orders
       allow read: if isAdmin();
-      allow create: if isAdmin() && validateOrder();
+      allow create: if validateOrder();  // ✅ Anyone can create orders
       allow update: if isAdmin() && validateOrder();
       allow delete: if isAdmin();
 
@@ -60,6 +75,19 @@ service cloud.firestore {
     match /admins/{adminUid} {
       allow read: if isAdmin();
       allow create, update, delete: if isAdminClaim(); // only users with admin custom claim can modify admin list
+    }
+
+    // Settings collection
+    match /settings/{settingId} {
+      allow read: if true; // Public read for WhatsApp number (used in checkout)
+      allow write: if isAdmin(); // Only admins can update settings
+    }
+
+    // Health checks: allow signed-in users to write for health checks
+    match /health_checks/{checkId} {
+      allow create: if request.auth != null;
+      // Deny reads so non-admins can't see others' checks
+      allow read: if false;
     }
 
     // Fallback: deny everything else explicitly

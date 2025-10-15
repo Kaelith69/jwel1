@@ -51,7 +51,9 @@
       const el = (id) => document.getElementById(id);
       const li = (cls, text) => {
         const item = document.createElement('li');
-        if (cls) item.className = cls; item.textContent = text; return item;
+        if (cls) item.className = cls;
+        item.textContent = text;
+        return item;
       };
 
       const sdkEl = el('sdk');
@@ -60,100 +62,121 @@
       const adEl = el('ad');
       const sumEl = el('summary');
 
-      function setSummary(parts){ sumEl.textContent = parts.filter(Boolean).join(' | '); }
+      const setSummary = (parts) => {
+        sumEl.textContent = parts.filter(Boolean).join(' | ');
+      };
 
-      let allOk = true;
-      const summaryBits = [];
+      (async () => {
+        const summaryBits = [];
+        let allOk = true;
 
-      try {
-        const cfg = await import('./js/firebase-config.js');
-        // Ensure SDKs load
-        const res = await cfg.initFirebaseIfNeeded();
-        const app = cfg.app;
-        const db = cfg.db;
-        const auth = cfg.auth;
-        const storage = cfg.storage;
-
-        if (app) { sdkEl.appendChild(li('ok', 'App initialized')); summaryBits.push('SDK: OK'); } else { sdkEl.appendChild(li('err', 'App not initialized')); allOk = false; summaryBits.push('SDK: FAIL'); }
-        sdkEl.appendChild(li('', `Project: ${(res && res.app && res.app.options && res.app.options.projectId) || 'unknown'}`));
-        sdkEl.appendChild(li('', `Storage: ${storage ? 'available' : 'not available'}`));
-
-        // Auth checks
-        if (auth) {
-          authEl.appendChild(li('ok', 'Auth instance available'));
-          try {
-            const authMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
-            authMod.onAuthStateChanged(auth, (user) => {
-              const s = user ? `Signed in as ${user.email || user.uid}` : 'Not signed in';
-              authEl.appendChild(li(user ? 'ok' : 'warn', s));
-              summaryBits.push(user ? 'Auth: signed-in' : 'Auth: no-user');
-              setSummary(summaryBits);
-            });
-          } catch (e) {
-            authEl.appendChild(li('warn', 'Failed to import auth helpers'));
-            summaryBits.push('Auth: helpers missing');
-          }
-        } else {
-          authEl.appendChild(li('warn', 'Auth not configured (expected unless you added providers)'));
-          summaryBits.push('Auth: not-configured');
-        }
-
-        // Firestore read test (products are public-read in rules)
-        if (db) {
-          try {
-            const fsMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
-            const qsnap = await fsMod.getDocs(fsMod.collection(db, 'products'));
-            let count = 0; qsnap.forEach(() => count++);
-            fsEl.appendChild(li('ok', `Read products: ${count} document(s)`));
-            summaryBits.push('FS Read: OK');
-          } catch (e) {
-            fsEl.appendChild(li('err', `Failed to read products: ${e && e.code ? e.code : e.message || e}`));
-            allOk = false; summaryBits.push('FS Read: FAIL');
-          }
-
-          // Firestore write test: should be PERMISSION_DENIED for non-admins
-          try {
-            const fsMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
-            const docRef = await fsMod.addDoc(fsMod.collection(db, 'health_checks'), { at: new Date().toISOString(), ok: true });
-            fsEl.appendChild(li('warn', `Write allowed (doc ${docRef.id}); you may be signed in as admin`));
-            summaryBits.push('FS Write: allowed');
-          } catch (e) {
-            const code = e && e.code ? e.code : (e && e.message || String(e));
-            const expected = (code && String(code).includes('permission'));
-            fsEl.appendChild(li(expected ? 'ok' : 'err', expected ? 'Write blocked as expected for non-admin' : `Write failed: ${code}`));
-            summaryBits.push(expected ? 'FS Write: blocked (expected)' : 'FS Write: error');
-            if (!expected) allOk = false;
-          }
-        } else {
-          fsEl.appendChild(li('err', 'Firestore not initialized'));
-          allOk = false; summaryBits.push('FS: FAIL');
-        }
-
-        // Adapter check
         try {
-          const adapter = (await import('./js/firebase-adapter.js')).default;
-          const state = await adapter.init();
-          adEl.appendChild(li(state.useFirestore ? 'ok' : 'warn', `Adapter using ${state.useFirestore ? 'Firestore' : 'localStorage'} backend`));
-          const products = await adapter.getProducts();
-          adEl.appendChild(li('ok', `Adapter getProducts(): ${Array.isArray(products) ? products.length : 0} item(s)`));
-        } catch (e) {
-          adEl.appendChild(li('err', `Adapter error: ${e && e.message || e}`));
+          const cfg = await import('./js/firebase-config.js');
+          const res = await cfg.initFirebaseIfNeeded();
+          const app = cfg.app;
+          const db = cfg.db;
+          const auth = cfg.auth;
+          const storage = cfg.storage;
+
+          if (app) {
+            sdkEl.appendChild(li('ok', 'App initialized'));
+            summaryBits.push('SDK: OK');
+          } else {
+            sdkEl.appendChild(li('err', 'App not initialized'));
+            summaryBits.push('SDK: FAIL');
+            allOk = false;
+          }
+          sdkEl.appendChild(li('', `Project: ${(res?.app?.options?.projectId) || 'unknown'}`));
+          sdkEl.appendChild(li('', `Storage: ${storage ? 'available' : 'not available'}`));
+
+          if (auth) {
+            authEl.appendChild(li('ok', 'Auth instance available'));
+            try {
+              const authMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js');
+              let resolved = false;
+              await new Promise((resolve) => {
+                authMod.onAuthStateChanged(auth, (user) => {
+                  resolved = true;
+                  const s = user ? `Signed in as ${user.email || user.uid}` : 'Not signed in';
+                  authEl.appendChild(li(user ? 'ok' : 'warn', s));
+                  summaryBits.push(user ? 'Auth: signed-in' : 'Auth: no-user');
+                  resolve();
+                }, resolve);
+                setTimeout(() => !resolved && resolve(), 4000);
+              });
+            } catch (err) {
+              authEl.appendChild(li('warn', `Auth helper import failed: ${err?.message || err}`));
+              summaryBits.push('Auth: helper error');
+            }
+          } else {
+            authEl.appendChild(li('warn', 'Auth not configured (expected unless you enabled it)'));
+            summaryBits.push('Auth: not-configured');
+          }
+
+          if (db) {
+            try {
+              const fsMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+              const qsnap = await fsMod.getDocs(fsMod.collection(db, 'products'));
+              fsEl.appendChild(li('ok', `Read products: ${qsnap.size} document(s)`));
+              summaryBits.push('FS Read: OK');
+            } catch (err) {
+              fsEl.appendChild(li('err', `Failed to read products: ${err?.code || err?.message || err}`));
+              summaryBits.push('FS Read: FAIL');
+              allOk = false;
+            }
+
+            try {
+              const fsMod = await import('https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js');
+              const docRef = await fsMod.addDoc(fsMod.collection(db, 'health_checks'), { at: new Date().toISOString(), ok: true });
+              fsEl.appendChild(li('warn', `Write allowed (doc ${docRef.id}); you may be signed in with elevated privileges`));
+              summaryBits.push('FS Write: allowed');
+            } catch (err) {
+              const code = err?.code || err?.message || String(err);
+              const permissionBlocked = typeof code === 'string' && code.includes('permission');
+              fsEl.appendChild(li(permissionBlocked ? 'ok' : 'err', permissionBlocked ? 'Write blocked as expected for non-admin' : `Write failed: ${code}`));
+              summaryBits.push(permissionBlocked ? 'FS Write: blocked (expected)' : 'FS Write: error');
+              if (!permissionBlocked) {
+                allOk = false;
+              }
+            }
+          } else {
+            fsEl.appendChild(li('err', 'Firestore not initialized'));
+            summaryBits.push('FS: FAIL');
+            allOk = false;
+          }
+
+          try {
+            const adapterMod = await import('./js/firebase-adapter.js');
+            const adapter = adapterMod.default || adapterMod;
+            const state = await adapter.init();
+            adEl.appendChild(li(state.useFirestore ? 'ok' : 'warn', `Adapter using ${state.useFirestore ? 'Firestore' : 'localStorage'} backend`));
+            try {
+              const products = await adapter.getProducts();
+              adEl.appendChild(li('ok', `Adapter getProducts(): ${Array.isArray(products) ? products.length : 0} item(s)`));
+            } catch (err) {
+              adEl.appendChild(li('err', `Adapter getProducts failed: ${err?.message || err}`));
+              summaryBits.push('Adapter: read fail');
+              allOk = false;
+            }
+          } catch (err) {
+            adEl.appendChild(li('err', `Adapter import failed: ${err?.message || err}`));
+            summaryBits.push('Adapter: crash');
+            allOk = false;
+          }
+        } catch (err) {
+          sdkEl.appendChild(li('err', `Health check crashed: ${err?.message || err}`));
+          summaryBits.push('Health: crash');
           allOk = false;
         }
 
-      } catch (e) {
-        sdkEl.appendChild(li('err', `Health check crashed: ${e && e.message || e}`));
-        allOk = false; summaryBits.push('Health: crash');
-      }
+        const finalSummary = [`Overall: ${allOk ? 'PASS' : 'FAIL'}`].concat(summaryBits).join(' | ');
+        setSummary([finalSummary]);
 
-      const finalSummary = [`Overall: ${allOk ? 'PASS' : 'FAIL'}`].concat(summaryBits).join(' | ');
-      setSummary([finalSummary]);
-
-      // Ping a local URL so the result is visible in the static server logs
-      try {
-        const q = encodeURIComponent(finalSummary);
-        fetch(`/__health_status__?s=${q}`).catch(()=>{});
-      } catch {}
+        try {
+          const q = encodeURIComponent(finalSummary);
+          fetch(`/__health_status__?s=${q}`).catch(() => {});
+        } catch {}
+      })();
     </script>
   </body>
 </html>

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migrate to Firebase - VastraVeda</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .section h2 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .info-box strong {
+            color: #1976d2;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        .button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.danger {
+            background: #dc3545;
+        }
+        .button.success {
+            background: #28a745;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .log-entry {
+            margin-bottom: 8px;
+        }
+        .log-info { color: #4fc3f7; }
+        .log-success { color: #66bb6a; }
+        .log-error { color: #ef5350; }
+        .log-warn { color: #ffa726; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 12px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Firebase Migration Tool</h1>
+        <p class="subtitle">Migrate your localStorage data to Firebase Firestore</p>
+
+        <div class="section">
+            <h2>📊 Current Data Status</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="localProducts">0</div>
+                    <div class="stat-label">Products (Local)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="localOrders">0</div>
+                    <div class="stat-label">Orders (Local)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="localSettings">-</div>
+                    <div class="stat-label">Settings (Local)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="firebaseProducts">-</div>
+                    <div class="stat-label">Products (Firebase)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="firebaseOrders">-</div>
+                    <div class="stat-label">Orders (Firebase)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="firebaseSettings">-</div>
+                    <div class="stat-label">Settings (Firebase)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Migration Actions</h2>
+            
+            <div class="info-box">
+                <strong>⚠️ Important:</strong> This will upload all localStorage products, orders, and settings to Firebase. 
+                Existing Firebase data will not be deleted - new items will be added.
+            </div>
+
+            <button class="button" onclick="checkFirebase()">1️⃣ Check Firebase Connection</button>
+            <button class="button" onclick="migrateProducts()" id="migrateProductsBtn" disabled>2️⃣ Migrate Products</button>
+            <button class="button" onclick="migrateOrders()" id="migrateOrdersBtn" disabled>3️⃣ Migrate Orders</button>
+            <button class="button" onclick="migrateSettings()" id="migrateSettingsBtn" disabled>4️⃣ Migrate Settings</button>
+            <button class="button success" onclick="migrateAll()" id="migrateAllBtn" disabled>✨ Migrate Everything</button>
+            
+            <br><br>
+            
+            <button class="button secondary" onclick="viewFirebaseData()">👁️ View Firebase Data</button>
+            <button class="button danger" onclick="clearLocalStorage()">🗑️ Clear localStorage</button>
+        </div>
+
+        <div class="section">
+            <h2>📝 Migration Log</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="log" id="log">
+                <div class="log-entry log-info">Ready to migrate. Click "Check Firebase Connection" to begin.</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import FirebaseAdapter from './js/firebase-adapter.js';
+        window.FirebaseAdapter = FirebaseAdapter;
+
+        // Read localStorage data
+        function getLocalData() {
+            const products = JSON.parse(localStorage.getItem('products') || '[]');
+            const orders = JSON.parse(localStorage.getItem('proJetOrders') || '[]');
+            const settings = JSON.parse(localStorage.getItem('adminSettings') || 'null');
+            return { products, orders, settings };
+        }
+
+        function updateStats() {
+            const local = getLocalData();
+            document.getElementById('localProducts').textContent = local.products.length;
+            document.getElementById('localOrders').textContent = local.orders.length;
+            document.getElementById('localSettings').textContent = local.settings ? '✓' : '✗';
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function setProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        window.checkFirebase = async function() {
+            log('Checking Firebase connection...', 'info');
+            setProgress(10);
+            
+            try {
+                const state = await FirebaseAdapter.init();
+                setProgress(30);
+                
+                if (!state.useFirestore) {
+                    log('❌ Firebase is NOT initialized! Check firebase-config.js', 'error');
+                    setProgress(0);
+                    return;
+                }
+
+                log('✅ Firebase initialized successfully!', 'success');
+                setProgress(50);
+
+                // Get current Firebase counts
+                try {
+                    const fbProducts = await FirebaseAdapter.getProducts();
+                    const fbOrders = await FirebaseAdapter.getOrders();
+                    const fbSettings = await FirebaseAdapter.getSettings();
+                    
+                    document.getElementById('firebaseProducts').textContent = fbProducts.length;
+                    document.getElementById('firebaseOrders').textContent = fbOrders.length;
+                    document.getElementById('firebaseSettings').textContent = fbSettings ? '✓' : '✗';
+                    
+                    log(`📦 Firebase has ${fbProducts.length} products, ${fbOrders.length} orders, settings: ${fbSettings ? 'Yes' : 'No'}`, 'info');
+                    setProgress(100);
+
+                    // Enable migration buttons
+                    document.getElementById('migrateProductsBtn').disabled = false;
+                    document.getElementById('migrateOrdersBtn').disabled = false;
+                    document.getElementById('migrateSettingsBtn').disabled = false;
+                    document.getElementById('migrateAllBtn').disabled = false;
+                    
+                    log('🎉 Ready to migrate!', 'success');
+                } catch (err) {
+                    log('⚠️ Could not read from Firebase (may be empty): ' + err.message, 'warn');
+                    document.getElementById('firebaseProducts').textContent = '0';
+                    document.getElementById('firebaseOrders').textContent = '0';
+                    document.getElementById('firebaseSettings').textContent = '✗';
+                    
+                    // Still enable buttons
+                    document.getElementById('migrateProductsBtn').disabled = false;
+                    document.getElementById('migrateOrdersBtn').disabled = false;
+                    document.getElementById('migrateSettingsBtn').disabled = false;
+                    document.getElementById('migrateAllBtn').disabled = false;
+                    setProgress(100);
+                }
+
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+                setProgress(0);
+            }
+        };
+
+        window.migrateProducts = async function() {
+            const local = getLocalData();
+            if (local.products.length === 0) {
+                log('⚠️ No products in localStorage to migrate', 'warn');
+                return;
+            }
+
+            log(`🚀 Starting product migration (${local.products.length} items)...`, 'info');
+            let success = 0;
+            let failed = 0;
+
+            for (let i = 0; i < local.products.length; i++) {
+                const product = local.products[i];
+                const progress = ((i + 1) / local.products.length) * 100;
+                setProgress(progress);
+
+                try {
+                    // Remove local-only fields
+                    const cleanProduct = { ...product };
+                    delete cleanProduct.id; // Firestore will generate its own ID
+                    delete cleanProduct._docId;
+
+                    const docId = await FirebaseAdapter.addProduct(cleanProduct);
+                    log(`✅ Migrated: ${product.name} (ID: ${docId})`, 'success');
+                    success++;
+                } catch (error) {
+                    log(`❌ Failed to migrate: ${product.name} - ${error.message}`, 'error');
+                    failed++;
+                }
+            }
+
+            log(`🎉 Product migration complete! ${success} succeeded, ${failed} failed`, success === local.products.length ? 'success' : 'warn');
+            
+            // Refresh Firebase counts
+            const fbProducts = await FirebaseAdapter.getProducts();
+            document.getElementById('firebaseProducts').textContent = fbProducts.length;
+        };
+
+        window.migrateOrders = async function() {
+            const local = getLocalData();
+            if (local.orders.length === 0) {
+                log('⚠️ No orders in localStorage to migrate', 'warn');
+                return;
+            }
+
+            log(`🚀 Starting order migration (${local.orders.length} items)...`, 'info');
+            let success = 0;
+            let failed = 0;
+
+            for (let i = 0; i < local.orders.length; i++) {
+                const order = local.orders[i];
+                const progress = ((i + 1) / local.orders.length) * 100;
+                setProgress(progress);
+
+                try {
+                    const docId = await FirebaseAdapter.addOrder(order);
+                    log(`✅ Migrated order: ${order.orderId} (Firebase ID: ${docId})`, 'success');
+                    success++;
+                } catch (error) {
+                    log(`❌ Failed to migrate order: ${order.orderId} - ${error.message}`, 'error');
+                    failed++;
+                }
+            }
+
+            log(`🎉 Order migration complete! ${success} succeeded, ${failed} failed`, success === local.orders.length ? 'success' : 'warn');
+            
+            // Refresh Firebase counts
+            const fbOrders = await FirebaseAdapter.getOrders();
+            document.getElementById('firebaseOrders').textContent = fbOrders.length;
+        };
+
+        window.migrateSettings = async function() {
+            const local = getLocalData();
+            if (!local.settings) {
+                log('⚠️ No settings in localStorage to migrate', 'warn');
+                return;
+            }
+
+            log('🚀 Starting settings migration...', 'info');
+            setProgress(50);
+
+            try {
+                await FirebaseAdapter.saveSettings(local.settings);
+                log(`✅ Settings migrated: WhatsApp ${local.settings.whatsappNumber}`, 'success');
+                document.getElementById('firebaseSettings').textContent = '✓';
+                setProgress(100);
+                log('🎉 Settings migration complete!', 'success');
+            } catch (error) {
+                log(`❌ Failed to migrate settings: ${error.message}`, 'error');
+                setProgress(0);
+            }
+        };
+
+        window.migrateAll = async function() {
+            log('🚀 Starting full migration...', 'info');
+            await migrateProducts();
+            await migrateOrders();
+            await migrateSettings();
+            log('✨ Full migration complete!', 'success');
+        };
+
+        window.viewFirebaseData = async function() {
+            try {
+                const products = await FirebaseAdapter.getProducts();
+                const orders = await FirebaseAdapter.getOrders();
+                const settings = await FirebaseAdapter.getSettings();
+                
+                log('📦 Firebase Products:', 'info');
+                products.forEach(p => log(`  - ${p.name} (₹${p.price}) [${p._docId}]`, 'info'));
+                
+                log('📋 Firebase Orders:', 'info');
+                orders.forEach(o => log(`  - ${o.orderId} - ${o.customer.name} (₹${o.total}) [${o._docId}]`, 'info'));
+                
+                log('⚙️ Firebase Settings:', 'info');
+                log(`  - WhatsApp: ${settings.whatsappNumber}`, 'info');
+                
+            } catch (error) {
+                log('❌ Error viewing data: ' + error.message, 'error');
+            }
+        };
+
+        window.clearLocalStorage = function() {
+            if (!confirm('⚠️ Are you sure? This will delete ALL localStorage data (products, orders, cart, settings). This cannot be undone!')) {
+                return;
+            }
+            
+            localStorage.clear();
+            log('🗑️ localStorage cleared!', 'warn');
+            updateStats();
+            document.getElementById('firebaseProducts').textContent = '-';
+            document.getElementById('firebaseOrders').textContent = '-';
+            document.getElementById('firebaseSettings').textContent = '-';
+        };
+
+        // Initialize stats on load
+        updateStats();
+    </script>
+</body>
+</html>

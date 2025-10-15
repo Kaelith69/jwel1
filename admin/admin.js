@@ -22,7 +22,8 @@ let __useFirestore = false;
         }
     }catch(err){ console.warn('Firebase init skipped', err); }
 })();
-    const path=window.location.pathname;
+
+const path=window.location.pathname;
     const isLogin=/\/admin\/(index\.html)?$/.test(path)||path.endsWith('/admin')||path.endsWith('/admin/');
     // If Firebase auth is available, use it to enforce sign-in; otherwise fall back to localStorage demo auth
     (async function enforceAuth(){
@@ -111,40 +112,75 @@ let __useFirestore = false;
     const toggleFormBtn=document.getElementById('toggle-form-btn');
 
     const filterProducts=()=>{const term=(productSearch?.value||'').toLowerCase(); const cat=categoryFilter?.value||''; return products.filter(p=>{const t=!term||p.name.toLowerCase().includes(term)||p.description.toLowerCase().includes(term); const c=!cat||p.category===cat; return t&&c;});};
-    const renderCards=()=>{ if(!productList) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productList.innerHTML='<p style="opacity:.7;margin:0;">No products match your filters.</p>';return;} productList.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}" class="pl-img">`:'<div class="pl-img placeholder">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : '';
-        return `<article class="product-card" data-id="${p.id}" ${docAttr}>${img}<div class="pc-main"><header class="pc-head"><h4>${p.name}</h4><span class="pc-price">₹${p.price.toLocaleString('en-IN')}</span></header><div class="pc-meta"><span>${p.category||''}</span></div><footer class="pc-actions"><a class="admin-button secondary" href="${editHref}">Edit</a><button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></footer></div></article>`;}).join(''); };
-    const renderTable=()=>{ if(!productsTableBody) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productsTableBody.innerHTML='<tr><td colspan="7" style="opacity:.7;">No products match your filters.</td></tr>';return;} productsTableBody.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}">`:'<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#222;border-radius:8px;">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : '';
-        return `<tr data-id="${p.id}" ${docAttr}><td class="nowrap">${p.id}</td><td>${img}</td><td><strong>${p.name}</strong><div class="muted" style="font-size:.7rem;margin-top:2px;">${p.category||''}</div></td><td class="nowrap"><span class="badge">${p.category||''}</span></td><td class="nowrap">${p.price.toLocaleString('en-IN')}</td><td class="clamp">${p.description}</td><td class="actions-cell"><a class="admin-button secondary" href="${editHref}">Edit</a><button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></td></tr>`;}).join(''); };
+    const renderCards=()=>{ if(!productList) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productList.innerHTML='<p style="opacity:.7;margin:0;">No products match your filters.</p>';return;} productList.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}" class="pl-img">`:'<div class="pl-img placeholder">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const statusLabel = (!p._docId && __useFirestore) ? `<span class="muted" style="font-size:.7rem;margin-left:6px;">Unsynced</span>` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : '';
+        return `<article class="product-card" data-id="${p.id}" ${docAttr}>${img}<div class="pc-main"><header class="pc-head"><h4>${p.name}</h4><span class="pc-price">₹${p.price.toLocaleString('en-IN')}</span></header><div class="pc-meta"><span>${p.category||''}</span>${statusLabel}</div><footer class="pc-actions"><a class="admin-button secondary" href="${editHref}">Edit</a>${syncBtn}<button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></footer></div></article>`;}).join(''); };
+    const renderTable=()=>{ if(!productsTableBody) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productsTableBody.innerHTML='<tr><td colspan="7" style="opacity:.7;">No products match your filters.</td></tr>';return;} productsTableBody.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}">`:'<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#222;border-radius:8px;">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : ''; const categoryMeta = (!p._docId && __useFirestore) ? `${p.category||''} · Unsynced` : (p.category||'');
+        return `<tr data-id="${p.id}" ${docAttr}><td class="nowrap">${p.id}</td><td>${img}</td><td><strong>${p.name}</strong><div class="muted" style="font-size:.7rem;margin-top:2px;">${categoryMeta}</div></td><td class="nowrap"><span class="badge">${p.category||''}</span></td><td class="nowrap">${p.price.toLocaleString('en-IN')}</td><td class="clamp">${p.description}</td><td class="actions-cell"><a class="admin-button secondary" href="${editHref}">Edit</a>${syncBtn}<button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></td></tr>`;}).join(''); };
 
     const resetForm=()=>{ if(!productForm) return; productForm.reset(); productForm.dataset.docid=''; const idEl=document.getElementById('product-id'); if(idEl) idEl.value=''; if(formTitle) formTitle.textContent='Add New Product'; if(submitBtn) submitBtn.textContent='Add Product'; if(cancelBtn) cancelBtn.style.display='none'; };
-    const handleFormSubmit=async (e) =>{ e.preventDefault(); const id=document.getElementById('product-id').value; const docId=document.getElementById('product-form')?.dataset?.docid||''; const name=document.getElementById('name').value.trim(); const price=parseInt(document.getElementById('price').value.trim(),10); const description=document.getElementById('description').value.trim(); const category=document.getElementById('category').value; let imageUrl=(document.getElementById('imageUrl')?.value||'').trim(); const asset=document.getElementById('imageAsset')?.value||''; if(!imageUrl && asset) imageUrl=asset; if(!name||name.length<2) { notify('Name must be at least 2 characters.', 'error'); return; } if(isNaN(price)||price<0) { notify('Invalid price', 'error'); return; } if(!description||description.length<5) { notify('Description too short', 'error'); return; } if(!category) { notify('Select category', 'error'); return; }
-        const data={name,price,description,category,imageUrl};
-        // If Firestore available, prefer saving there (best-effort)
-        if(__useFirestore){
-            try{
-                if(docId){
-                    await FirebaseAdapter.updateProduct(docId, data);
-                    // update local copy
-                    const idx = products.findIndex(p=> String(p._docId)===String(docId) || String(p.id)===String(id));
-                    if(idx>-1){ products[idx] = {...products[idx], ...data}; }
-                    if(liveStatus) liveStatus.textContent=`Updated product ${name}`;
-                } else {
-                    // add to Firestore
-                    const newDocId = await FirebaseAdapter.addProduct(data);
-                    // record in local products with returned doc id
-                    const newItem = {...data, id: Date.now(), _docId: newDocId};
-                    products.push(newItem);
-                    if(liveStatus) liveStatus.textContent=`Added product ${name}`;
+    const handleFormSubmit=async (e) =>{
+        e.preventDefault();
+        const id=document.getElementById('product-id').value;
+        const docId=document.getElementById('product-form')?.dataset?.docid||'';
+        const name=document.getElementById('name').value.trim();
+        const price=parseInt(document.getElementById('price').value.trim(),10);
+        const description=document.getElementById('description').value.trim();
+        const category=document.getElementById('category').value;
+        let imageUrl=(document.getElementById('imageUrl')?.value||'').trim();
+        const asset=document.getElementById('imageAsset')?.value||'';
+        if(!imageUrl && asset) imageUrl=asset;
+        if(!name||name.length<2) { notify('Name must be at least 2 characters.', 'error'); return; }
+        if(isNaN(price)||price<0) { notify('Invalid price', 'error'); return; }
+        if(!description||description.length<5) { notify('Description too short', 'error'); return; }
+        if(!category) { notify('Select category', 'error'); return; }
+        const baseData={name,price,description,category,imageUrl};
+        const nowIso=new Date().toISOString();
+        let statusMsg='';
+        if(docId){
+            const idx = products.findIndex(p=> String(p._docId)===String(docId) || String(p.id)===String(id));
+            if(idx===-1){ notify('Product not found. Please refresh.', 'error'); return; }
+            products[idx]={...products[idx],...baseData, updatedAt:nowIso};
+            if(__useFirestore){
+                try{
+                    await FirebaseAdapter.updateProduct(docId, { ...baseData, updatedAt: nowIso });
+                }catch(err){
+                    console.warn('Firestore update failed', err);
+                    notify('Firestore update failed. Local copy updated.', 'warn');
                 }
-                saveProducts(); refreshCategoryOptions(); renderCards(); renderTable();
-                if(window.location.pathname.endsWith('add-product.html')){ setTimeout(()=>location.href='products.html',300); return; }
-                resetForm();
-                if(toggleFormBtn && productFormWrapper && !productFormWrapper.classList.contains('collapsed')){ productFormWrapper.classList.add('collapsed'); toggleFormBtn.textContent='➕ Add Product'; toggleFormBtn.setAttribute('aria-expanded','false'); toggleFormBtn.focus(); }
-                return;
-            }catch(err){ console.warn('Firestore save failed, falling back to local:', err); }
+            }
+            statusMsg=`Updated product ${name}`;
+        } else if(id){
+            const idx=products.findIndex(p=>String(p.id)===String(id));
+            if(idx===-1){ notify('Product not found. Please refresh.', 'error'); return; }
+            products[idx]={...products[idx],...baseData, updatedAt:nowIso};
+            statusMsg=`Updated product ${name}`;
+        } else {
+            const localId=`local_${Date.now()}`;
+            const newItem={...baseData, id:localId, createdAt:nowIso, updatedAt:nowIso};
+            products.push(newItem);
+            statusMsg=`${name} saved locally. Sync to Firestore when ready.`;
+            if(__useFirestore){ notify('Product saved locally. Use Sync to Firestore when ready.', 'info'); }
         }
-        // fallback to local-only behavior
-        if(id){const idx=products.findIndex(p=>p.id==id); if(idx!==-1) products[idx]={...products[idx],...data}; if(liveStatus) liveStatus.textContent=`Updated product ${name}`;} else {data.id=Date.now(); products.push(data); if(liveStatus) liveStatus.textContent=`Added product ${name}`;} saveProducts(); refreshCategoryOptions(); renderCards(); renderTable(); if(window.location.pathname.endsWith('add-product.html')){ setTimeout(()=>location.href='products.html',300); return; } resetForm(); if(toggleFormBtn && productFormWrapper && !productFormWrapper.classList.contains('collapsed')){ productFormWrapper.classList.add('collapsed'); toggleFormBtn.textContent='➕ Add Product'; toggleFormBtn.setAttribute('aria-expanded','false'); toggleFormBtn.focus(); }};
+
+        saveProducts();
+        refreshCategoryOptions();
+        renderCards();
+        renderTable();
+        if(liveStatus) liveStatus.textContent=statusMsg;
+
+        if(window.location.pathname.endsWith('add-product.html')){
+            setTimeout(()=>location.href='products.html',300);
+            return;
+        }
+
+        resetForm();
+        if(toggleFormBtn && productFormWrapper && !productFormWrapper.classList.contains('collapsed')){
+            productFormWrapper.classList.add('collapsed');
+            toggleFormBtn.textContent='➕ Add Product';
+            toggleFormBtn.setAttribute('aria-expanded','false');
+            toggleFormBtn.focus();
+        }
+    };
     const handleDelete=async idOrDoc=>{ confirmAction('Delete this product?').then(async ok=>{ if(!ok) return; try{
             // try to find matching product
             const idx = products.findIndex(p=> String(p.id)===String(idOrDoc) || String(p._docId)===String(idOrDoc));
@@ -155,14 +191,63 @@ let __useFirestore = false;
             saveProducts(); renderCards(); renderTable(); notify('Product deleted', 'info');
         }catch(err){ console.warn('Delete failed, removing locally', err); products = products.filter(p=> !(String(p.id)===String(idOrDoc) || String(p._docId)===String(idOrDoc)) ); saveProducts(); renderCards(); renderTable(); notify('Product deleted (local)', 'info'); } }); };
 
+    const syncProductToFirestore=async idOrDoc=>{
+        if(!__useFirestore){ notify('Firestore not configured.', 'warn'); return; }
+        try{ await FirebaseAdapter.init(); }catch(err){ notify('Firestore not available.', 'error'); return; }
+        const idx = products.findIndex(p=> String(p.id)===String(idOrDoc) || String(p._docId)===String(idOrDoc));
+        if(idx===-1){ notify('Product not found. Please refresh.', 'error'); return; }
+        const product = products[idx];
+        if(product._docId){ notify('Product is already synced.', 'info'); return; }
+        let imageUrl = product.imageUrl || '';
+        if(typeof imageUrl === 'string' && imageUrl.startsWith('data:')){
+            try{
+                imageUrl = await FirebaseAdapter.uploadImage(imageUrl);
+                if(!imageUrl || imageUrl.startsWith('data:')){
+                    throw new Error('No download URL returned');
+                }
+            }catch(err){
+                console.warn('Image upload failed', err);
+                notify('Image upload failed; cannot sync until the image is stored in Firebase Storage.', 'error');
+                return;
+            }
+        }
+        const nowIso=new Date().toISOString();
+        const payload={
+            name: product.name,
+            price: product.price,
+            description: product.description,
+            category: product.category,
+            imageUrl,
+            createdAt: product.createdAt || nowIso,
+            updatedAt: nowIso
+        };
+        try{
+            const docId = await FirebaseAdapter.addProduct(payload);
+            product._docId = docId;
+            product.id = docId;
+            product.createdAt = payload.createdAt;
+            product.updatedAt = payload.updatedAt;
+            product.syncedAt = nowIso;
+            saveProducts();
+            refreshCategoryOptions();
+            renderCards();
+            renderTable();
+            notify('Product synced to Firestore.', 'success');
+            if(liveStatus) liveStatus.textContent=`Synced ${product.name} to Firestore`;
+        }catch(err){
+            console.warn('Sync failed', err);
+            notify('Failed to sync product: '+(err && err.message ? err.message : err), 'error');
+        }
+    };
+
     if(productForm) productForm.addEventListener('submit',handleFormSubmit);
     if(cancelBtn) cancelBtn.addEventListener('click',resetForm);
     if(toggleFormBtn && productFormWrapper) toggleFormBtn.addEventListener('click',()=>{const c=productFormWrapper.classList.toggle('collapsed'); toggleFormBtn.textContent=c?'➕ Add Product':'✖ Close Form'; toggleFormBtn.setAttribute('aria-expanded',c?'false':'true'); if(!c) document.getElementById('name')?.focus();});
     if(clearFiltersBtn) clearFiltersBtn.addEventListener('click',()=>{ if(productSearch) productSearch.value=''; if(categoryFilter) categoryFilter.value=''; renderCards(); renderTable(); if(liveStatus) liveStatus.textContent='Filters cleared'; });
     if(productSearch) productSearch.addEventListener('input',()=>{renderCards();renderTable();});
     if(categoryFilter) categoryFilter.addEventListener('change',()=>{renderCards();renderTable();});
-    if(productList) productList.addEventListener('click',e=>{const del=e.target.closest('.delete-btn'); if(del){ const docid = del.dataset.docid; const id = docid || del.dataset.id; handleDelete(id); } });
-    if(productsTableBody) productsTableBody.addEventListener('click',e=>{const del=e.target.closest('.delete-btn'); if(del){ const docid = del.dataset.docid; const id = docid || del.dataset.id; handleDelete(id); } });
+    if(productList) productList.addEventListener('click',e=>{const sync=e.target.closest('.sync-btn'); if(sync){ const id = sync.dataset.docid || sync.dataset.id; syncProductToFirestore(id); return; } const del=e.target.closest('.delete-btn'); if(del){ const docid = del.dataset.docid; const id = docid || del.dataset.id; handleDelete(id); } });
+    if(productsTableBody) productsTableBody.addEventListener('click',e=>{const sync=e.target.closest('.sync-btn'); if(sync){ const id = sync.dataset.docid || sync.dataset.id; syncProductToFirestore(id); return; } const del=e.target.closest('.delete-btn'); if(del){ const docid = del.dataset.docid; const id = docid || del.dataset.id; handleDelete(id); } });
 
     // Orders (simple table / list)
     const ordersContainer=document.getElementById('orders-list');
@@ -421,9 +506,24 @@ let __useFirestore = false;
     // Real-time sync when Firestore is available
     try{
         FirebaseAdapter.onProductsSnapshot?.((arr)=>{
-            // Update local cache and UI
-            const mapped = (arr||[]).map(p=>({ id: p.id || p._docId || (Date.now()+Math.floor(Math.random()*1000)), ...p }));
-            products = mapped;
+            const localList = Array.isArray(products)?products:[];
+            const remote = (arr||[]).map(p=>{
+                const fallbackId = p.id || p._docId || `prod_${Date.now()}_${Math.floor(Math.random()*1000)}`;
+                const docKey = p._docId || fallbackId;
+                const existing = localList.find(lp=> lp._docId && String(lp._docId)===String(docKey));
+                const merged = existing ? { ...existing, ...p, id: fallbackId, _docId: p._docId || fallbackId } : { ...p, id: fallbackId, _docId: p._docId || fallbackId };
+                return merged;
+            });
+            const remoteDocIds = new Set(remote.filter(p=>p._docId).map(p=>String(p._docId)));
+            const leftoverLocals = localList
+                .filter(p=>!p._docId || !remoteDocIds.has(String(p._docId)))
+                .map(p=>{
+                    if(!p._docId) return p;
+                    const copy = { ...p };
+                    delete copy._docId;
+                    return copy;
+                });
+            products = [...leftoverLocals, ...remote];
             saveProducts();
             refreshCategoryOptions();
             renderCards();
@@ -437,10 +537,10 @@ let __useFirestore = false;
             }
         });
     }catch(e){ /* ignore if not configured */ }
-    // Migration: push local products to Firestore and record returned _docId
+    // Sync helper: push local-only products to Firestore and record returned _docId
     async function migrateToFirestore(){
-        if(!confirm('Migrate local products to Firestore? This will create documents for each product.')) return;
-        // Show modal
+        if(!__useFirestore){ notify('Firestore not configured.', 'warn'); return; }
+        if(!confirm('Sync unsynced products to Firestore now?')) return;
         const modal = document.getElementById('migration-modal');
         const summary = document.getElementById('migration-summary');
         const prog = document.getElementById('migration-progress');
@@ -448,29 +548,58 @@ let __useFirestore = false;
         modal.setAttribute('aria-hidden','false'); modal.style.display='flex';
         try{
             await FirebaseAdapter.init();
-            const localProds = JSON.parse(localStorage.getItem('products')||'[]');
-            const total = localProds.length;
+            const localAll = JSON.parse(localStorage.getItem('products')||'[]');
+            const unsynced = localAll.filter(p=>!p._docId);
+            if(!unsynced.length){
+                summary.textContent = 'All products are already synced.';
+                setTimeout(()=>{ modal.setAttribute('aria-hidden','true'); modal.style.display='none'; }, 1800);
+                return;
+            }
+            const total = unsynced.length;
             let completed = 0;
             const safeLog = (s)=>{ log.innerText = s + '\n' + log.innerText; };
-            summary.textContent = `Migrating ${total} products...`;
-            for(const p of localProds){
-                if(p._docId){ completed++; prog.style.width = Math.round((completed/total)*100)+'%'; continue; }
+            summary.textContent = `Syncing ${total} product${total===1?'':'s'}...`;
+            for(const p of unsynced){
                 let finalImage = p.imageUrl || '';
-                // Only upload data URLs; skip assets/ or http(s) remote URLs
                 if(typeof finalImage === 'string' && finalImage.startsWith('data:')){
-                    try{ finalImage = await FirebaseAdapter.uploadImage(finalImage); safeLog(`Uploaded image for ${p.name}`); }catch(err){ safeLog(`Image upload failed for ${p.name}: ${err.message||err}`); }
+                    try{
+                        finalImage = await FirebaseAdapter.uploadImage(finalImage);
+                        if(!finalImage || finalImage.startsWith('data:')){
+                            throw new Error('No download URL returned');
+                        }
+                        safeLog(`Uploaded image for ${p.name}`);
+                    }catch(err){
+                        safeLog(`Image upload failed for ${p.name}: ${(err && err.message)||err}. Skipping Firestore sync for this product until the image uploads.`);
+                        continue;
+                    }
                 } else {
                     safeLog(`Keeping remote/image asset for ${p.name}`);
                 }
-                const payload = { name: p.name, price: p.price, description: p.description, category: p.category, imageUrl: finalImage };
+                const nowIso = new Date().toISOString();
+                const payload = {
+                    name: p.name,
+                    price: p.price,
+                    description: p.description,
+                    category: p.category,
+                    imageUrl: finalImage,
+                    createdAt: p.createdAt || nowIso,
+                    updatedAt: nowIso
+                };
                 try{
                     const docId = await FirebaseAdapter.addProduct(payload);
                     p._docId = docId;
-                    safeLog(`Created product ${p.name} -> ${docId}`);
-                }catch(err){ safeLog(`Failed to create ${p.name}: ${err.message||err}`); }
+                    p.id = docId;
+                    p.createdAt = payload.createdAt;
+                    p.updatedAt = payload.updatedAt;
+                    p.syncedAt = nowIso;
+                    safeLog(`Synced ${p.name} -> ${docId}`);
+                }catch(err){
+                    safeLog(`Failed to sync ${p.name}: ${err.message||err}`);
+                }
                 completed++; prog.style.width = Math.round((completed/total)*100)+'%';
             }
-            localStorage.setItem('products', JSON.stringify(localProds)); products = localProds; saveProducts(); refreshCategoryOptions(); renderCards(); renderTable();
+            products = localAll;
+            saveProducts(); refreshCategoryOptions(); renderCards(); renderTable();
             // Now migrate orders optionally
             const localOrders = JSON.parse(localStorage.getItem('proJetOrders')||'[]');
             if(Array.isArray(localOrders) && localOrders.length){
@@ -485,7 +614,7 @@ let __useFirestore = false;
                     localStorage.setItem('proJetOrders', JSON.stringify(localOrders));
                 }
             }
-            summary.textContent = 'Migration finished'; safeLog('Migration finished.');
+            summary.textContent = 'Sync finished'; safeLog('Sync finished.');
         }catch(err){ console.error('Migration failed', err); summary.textContent = 'Migration failed: '+(err && err.message || err); }
         const cancel = document.getElementById('migration-cancel'); cancel.addEventListener('click',()=>{ modal.setAttribute('aria-hidden','true'); modal.style.display='none'; });
     }
@@ -536,11 +665,63 @@ let __useFirestore = false;
         const recentEmpty=document.getElementById('recent-orders-empty');
         if(recentBody){ const recent=orders.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8); if(!recent.length){ if(recentEmpty) recentEmpty.style.display='block'; } else { if(recentEmpty) recentEmpty.style.display='none'; recentBody.innerHTML=recent.map(o=>`<tr><td>${o.orderId}</td><td>${new Date(o.date).toLocaleDateString()}<br><span style='opacity:.6;font-size:.55rem;'>${new Date(o.date).toLocaleTimeString()}</span></td><td><span class='status-badge status-${o.status.toLowerCase()}'>${o.status}</span></td><td>₹${o.total.toLocaleString('en-IN')}</td></tr>`).join(''); }}
     })();
-    // Settings page logic (WhatsApp number)
-    const SETTINGS_KEY='adminSettings';
-    const defaultSettings={ whatsappNumber:'919876543210' };
-    const loadSettings=()=>{ try { return { ...defaultSettings, ...(JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')) }; } catch { return { ...defaultSettings }; } };
-    const saveSettings=(s)=>localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
-    const settingsForm=document.getElementById('settings-form');
-    if(settingsForm){ const waInput=document.getElementById('wa-number'); const statusEl=document.getElementById('settings-status'); const current=loadSettings(); if(waInput) waInput.value=current.whatsappNumber||''; settingsForm.addEventListener('submit',e=>{ e.preventDefault(); const val=waInput.value.trim(); if(!/^[0-9]{10,15}$/.test(val)){ notify('Enter 10-15 digit number without + or spaces.', 'error'); return; } const s=loadSettings(); s.whatsappNumber=val; saveSettings(s); if(statusEl){ statusEl.textContent='Saved'; setTimeout(()=>statusEl.textContent='',2500);} }); const resetBtn=document.getElementById('reset-settings-btn'); if(resetBtn) resetBtn.addEventListener('click',()=>{ const s=loadSettings(); waInput.value=s.whatsappNumber||''; }); }
+    // Settings page logic (WhatsApp number) - FIREBASE VERSION
+    (async function(){
+        const settingsForm=document.getElementById('settings-form');
+        if(!settingsForm) return;
+        
+        const waInput=document.getElementById('wa-number');
+        const statusEl=document.getElementById('settings-status');
+        const defaultSettings={ whatsappNumber:'919876543210' };
+        
+        // Load settings from Firebase
+        let currentSettings = defaultSettings;
+        try {
+            currentSettings = await FirebaseAdapter.getSettings();
+            if(waInput) waInput.value = currentSettings.whatsappNumber || '';
+            console.log('✅ Settings loaded from Firebase');
+        } catch (err) {
+            console.error('Failed to load settings:', err);
+            if(waInput) waInput.value = defaultSettings.whatsappNumber;
+            notify('Failed to load settings from Firebase. Using defaults.', 'warn');
+        }
+        
+        // Save settings to Firebase
+        settingsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const val = waInput.value.trim();
+            
+            if(!/^[0-9]{10,15}$/.test(val)){
+                notify('Enter 10-15 digit number without + or spaces.', 'error');
+                return;
+            }
+            
+            try {
+                await FirebaseAdapter.saveSettings({ whatsappNumber: val });
+                currentSettings.whatsappNumber = val;
+                notify('Settings saved successfully!', 'success');
+                if(statusEl){
+                    statusEl.textContent='Saved to Firebase ✓';
+                    statusEl.style.color='#28a745';
+                    setTimeout(()=>statusEl.textContent='', 2500);
+                }
+            } catch (err) {
+                console.error('Failed to save settings:', err);
+                notify('Failed to save settings: ' + err.message, 'error');
+                if(statusEl){
+                    statusEl.textContent='Save failed ✗';
+                    statusEl.style.color='#dc3545';
+                }
+            }
+        });
+        
+        // Reset button
+        const resetBtn=document.getElementById('reset-settings-btn');
+        if(resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                waInput.value = currentSettings.whatsappNumber || '';
+                if(statusEl) statusEl.textContent = '';
+            });
+        }
+    })();
 // module end

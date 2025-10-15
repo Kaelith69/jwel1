@@ -3,7 +3,10 @@
 
 class CartManager {
     constructor() {
-        this.cart = JSON.parse(localStorage.getItem('cart')) || [];
+        this.cart = (JSON.parse(localStorage.getItem('cart')) || []).map(item => {
+            const normalizedId = item.id != null ? String(item.id) : (item._docId != null ? String(item._docId) : null);
+            return normalizedId ? { ...item, id: normalizedId } : null;
+        }).filter(Boolean);
         this.cartCountEl = document.getElementById('cart-count');
         this.cartTotalPriceEl = document.getElementById('cart-total-price');
         this.cartItemsContainer = document.getElementById('cart-items');
@@ -12,12 +15,13 @@ class CartManager {
     // Add item to cart
     addItem(product) {
         try {
-            const existingItem = this.cart.find(item => item.id === product.id);
+            const lookupId = String(product.id);
+            const existingItem = this.cart.find(item => String(item.id) === lookupId);
             
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                this.cart.push({ ...product, quantity: 1 });
+                this.cart.push({ ...product, id: lookupId, quantity: 1 });
             }
             
             this.saveCart();
@@ -34,18 +38,20 @@ class CartManager {
 
     // Remove item from cart
     removeItem(productId) {
-        this.cart = this.cart.filter(item => item.id !== productId);
+        const lookupId = String(productId);
+        this.cart = this.cart.filter(item => String(item.id) !== lookupId);
         this.saveCart();
         this.render();
     }
 
     // Update item quantity
     updateQuantity(productId, newQuantity) {
-        const item = this.cart.find(item => item.id === productId);
+        const lookupId = String(productId);
+        const item = this.cart.find(item => String(item.id) === lookupId);
         if (!item) return;
 
         if (newQuantity <= 0) {
-            this.removeItem(productId);
+            this.removeItem(lookupId);
         } else {
             item.quantity = newQuantity;
             this.saveCart();
@@ -130,14 +136,14 @@ class CartManager {
                     <p class="cart-item-name">${item.name}</p>
                     <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                     <div class="cart-item-quantity">
-                        <button class="quantity-btn" data-id="${item.id}" data-action="decrease" 
+            <button class="quantity-btn" data-id="${String(item.id)}" data-action="decrease" 
                                 aria-label="Decrease quantity">-</button>
                         <span class="quantity-display">${item.quantity}</span>
-                        <button class="quantity-btn" data-id="${item.id}" data-action="increase" 
+            <button class="quantity-btn" data-id="${String(item.id)}" data-action="increase" 
                                 aria-label="Increase quantity">+</button>
                     </div>
                 </div>
-                <button class="remove-item-btn" data-id="${item.id}" 
+        <button class="remove-item-btn" data-id="${String(item.id)}" 
                         aria-label="Remove ${item.name} from cart">&times;</button>
             </div>
         `).join('');
@@ -145,7 +151,8 @@ class CartManager {
 
     // Show feedback when item is added
     showAddFeedback(productId) {
-        const addButton = document.querySelector(`[data-id="${productId}"]`);
+        const lookupId = String(productId);
+        const addButton = document.querySelector(`[data-id="${lookupId}"]`);
         if (addButton) {
             const originalHTML = addButton.innerHTML;
             addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
