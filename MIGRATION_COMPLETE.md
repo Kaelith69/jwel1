@@ -96,13 +96,13 @@ Visit: http://localhost:8000/migrate-to-firebase.html
 ### **Get Settings**
 ```javascript
 const settings = await FirebaseAdapter.getSettings();
-// Returns: { whatsappNumber: "919876543210" }
+// Returns: { whatsappNumber: "919961165503" }
 ```
 
 ### **Save Settings**
 ```javascript
 await FirebaseAdapter.saveSettings({ 
-  whatsappNumber: "919876543210" 
+   whatsappNumber: "919961165503" 
 });
 ```
 

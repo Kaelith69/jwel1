@@ -3,6 +3,48 @@ import FirebaseAdapter from '../js/firebase-adapter.js';
 
 const ADMIN_AUTH_KEY='vastravedajewlleries-admin-auth';
 let __useFirestore = false;
+const __createLocalId=(()=>{let seq=0;return ()=>`local_${Date.now()}_${seq++}`;})();
+const __parseLocalProducts=()=>{
+    try{
+        const raw=JSON.parse(localStorage.getItem('products')||'[]');
+        return Array.isArray(raw)?raw:[];
+    }catch(err){
+        console.warn('Failed to parse local products', err);
+        return [];
+    }
+};
+const __dedupeProducts=list=>{
+    if(!Array.isArray(list)) return [];
+    const order=[];
+    const map=new Map();
+    list.forEach(item=>{
+        if(!item||typeof item!=='object') return;
+        const next={...item};
+        if(next._docId&&!next.id) next.id=next._docId;
+        let key='';
+        if(next._docId) key=String(next._docId);
+        else if(next.id) key=String(next.id);
+        if(!key){
+            key=__createLocalId();
+            next.id=key;
+        }
+        if(map.has(key)){
+            const existing=map.get(key);
+            const merged={...existing,...next};
+            if(existing._docId&&!merged._docId) merged._docId=existing._docId;
+            if(next._docId) merged._docId=next._docId;
+            if(merged._docId&&!merged.id) merged.id=merged._docId;
+            if(!merged.id) merged.id=key;
+            map.set(key,merged);
+        } else {
+            if(!next.id) next.id=key;
+            map.set(key,next);
+            order.push(key);
+        }
+    });
+    return order.map(k=>map.get(k));
+};
+const __persistProducts=list=>localStorage.setItem('products',JSON.stringify(list));
 // initialize Firebase adapter (best-effort) and seed localStorage if empty
 (async function initFirebase(){
     try{
@@ -73,9 +115,12 @@ const path=window.location.pathname;
     try{ FirebaseAdapter.onAuthStateChanged?.((user)=>{ if(user){ userEmailDisplay.textContent = user.email || 'Admin'; } else { userEmailDisplay.textContent=''; } }); }catch(e){ /* ignore */ }
 
     // Data
-    let products=JSON.parse(localStorage.getItem('products')||'[]');
-    if(!products.length){products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];localStorage.setItem('products',JSON.stringify(products));}
-    const saveProducts=()=>localStorage.setItem('products',JSON.stringify(products));
+    let products=__dedupeProducts(__parseLocalProducts());
+    if(products.length){
+        __persistProducts(products);
+    }
+    if(!products.length){products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];__persistProducts(products);}
+    const saveProducts=()=>{products=__dedupeProducts(products);__persistProducts(products);};
     const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Studs'];
     const refreshCategoryOptions=()=>{
         const unique=new Set(BASE_CATEGORIES);
@@ -136,6 +181,7 @@ const path=window.location.pathname;
         const baseData={name,price,description,category,imageUrl};
         const nowIso=new Date().toISOString();
         let statusMsg='';
+        let createdLocalId='';
         if(docId){
             const idx = products.findIndex(p=> String(p._docId)===String(docId) || String(p.id)===String(id));
             if(idx===-1){ notify('Product not found. Please refresh.', 'error'); return; }
@@ -155,11 +201,11 @@ const path=window.location.pathname;
             products[idx]={...products[idx],...baseData, updatedAt:nowIso};
             statusMsg=`Updated product ${name}`;
         } else {
-            const localId=`local_${Date.now()}`;
+            const localId=`local_${Date.now()}_${Math.floor(Math.random()*1000)}`;
             const newItem={...baseData, id:localId, createdAt:nowIso, updatedAt:nowIso};
             products.push(newItem);
-            statusMsg=`${name} saved locally. Sync to Firestore when ready.`;
-            if(__useFirestore){ notify('Product saved locally. Use Sync to Firestore when ready.', 'info'); }
+            statusMsg=__useFirestore?`Syncing ${name} to Firestore...`:`${name} saved locally. Sync to Firestore when ready.`;
+            createdLocalId=localId;
         }
 
         saveProducts();
@@ -167,6 +213,13 @@ const path=window.location.pathname;
         renderCards();
         renderTable();
         if(liveStatus) liveStatus.textContent=statusMsg;
+
+        if(!docId && !id && __useFirestore && createdLocalId){
+            // attempt automatic sync so storefront receives the product
+            try{
+                await syncProductToFirestore(createdLocalId);
+            }catch(err){ /* sync function already notifies on failure */ }
+        }
 
         if(window.location.pathname.endsWith('add-product.html')){
             setTimeout(()=>location.href='products.html',300);
@@ -237,6 +290,7 @@ const path=window.location.pathname;
         }catch(err){
             console.warn('Sync failed', err);
             notify('Failed to sync product: '+(err && err.message ? err.message : err), 'error');
+            if(liveStatus) liveStatus.textContent='Sync failed; product saved locally.';
         }
     };
 
@@ -340,7 +394,7 @@ const path=window.location.pathname;
     const zoomRange=document.getElementById('zoom-range');
     const zoomValue=document.getElementById('zoom-value');
     // track transform state for panning
-    const state={ imgNaturalW:0, imgNaturalH:0, scale:1, x:0, y:0, dragging:false, startX:0, startY:0, origX:0, origY:0 };
+    const state={ imgNaturalW:0, imgNaturalH:0, scale:1, x:0, y:0, dragging:false, startX:0, startY:0, origX:0, origY:0, baseScale:1, baseX:0, baseY:0, dirty:false };
     const updatePreview=()=>{ if(!imagePreview||!imagePreviewPlaceholder) return; let src=imageUrlInput?.value.trim(); if(!src && imageAssetSelect?.value) src=imageAssetSelect.value; if(src){ imagePreview.src=src; imagePreview.style.display='block'; imagePreviewPlaceholder.style.display='none'; // reset transform when new source loads
             // when image loads we'll compute fit
             imagePreview.onload = ()=>{
@@ -350,7 +404,9 @@ const path=window.location.pathname;
                 const vw=previewViewport?.clientWidth||140; const vh=previewViewport?.clientHeight||140;
                 const scale=Math.max(vw/state.imgNaturalW, vh/state.imgNaturalH);
                 state.scale=scale; state.x=(vw - state.imgNaturalW*scale)/2; state.y=(vh - state.imgNaturalH*scale)/2;
+                state.baseScale=state.scale; state.baseX=state.x; state.baseY=state.y; state.dirty=false;
                 applyTransform();
+                updateZoomDisplay();
             };
         } else { imagePreview.src=''; imagePreview.style.display='none'; imagePreviewPlaceholder.style.display='inline'; } };
 
@@ -358,7 +414,7 @@ const path=window.location.pathname;
 
     // Pointer / drag handlers - support mouse & touch via pointer events if available
     const startDrag=(clientX,clientY)=>{ state.dragging=true; state.startX=clientX; state.startY=clientY; state.origX=state.x; state.origY=state.y; imagePreview.classList.add('dragging'); };
-    const moveDrag=(clientX,clientY)=>{ if(!state.dragging) return; const dx=clientX-state.startX; const dy=clientY-state.startY; state.x=state.origX+dx; state.y=state.origY+dy; constrainPosition(); applyTransform(); };
+    const moveDrag=(clientX,clientY)=>{ if(!state.dragging) return; const dx=clientX-state.startX; const dy=clientY-state.startY; state.x=state.origX+dx; state.y=state.origY+dy; constrainPosition(); state.dirty=true; applyTransform(); };
     const endDrag=()=>{ state.dragging=false; imagePreview.classList.remove('dragging'); };
     const constrainPosition=()=>{ // keep image at least covering viewport
         if(!previewViewport) return; const vw=previewViewport.clientWidth; const vh=previewViewport.clientHeight; const iw=state.imgNaturalW*state.scale; const ih=state.imgNaturalH*state.scale; // min and max x/y
@@ -387,7 +443,7 @@ const path=window.location.pathname;
         // touch pinch-to-zoom is out of scope; keep simple double-click to reset
     }
 
-    if(resetImagePosBtn){ resetImagePosBtn.addEventListener('click', ()=>{ if(!previewViewport) return; const vw=previewViewport.clientWidth; const vh=previewViewport.clientHeight; const scale=Math.max(vw/state.imgNaturalW, vh/state.imgNaturalH); state.scale=scale; state.x=(vw - state.imgNaturalW*scale)/2; state.y=(vh - state.imgNaturalH*scale)/2; applyTransform(); }); }
+    if(resetImagePosBtn){ resetImagePosBtn.addEventListener('click', ()=>{ if(!previewViewport) return; const vw=previewViewport.clientWidth; const vh=previewViewport.clientHeight; const scale=Math.max(vw/state.imgNaturalW, vh/state.imgNaturalH); state.scale=scale; state.x=(vw - state.imgNaturalW*scale)/2; state.y=(vh - state.imgNaturalH*scale)/2; state.baseScale=state.scale; state.baseX=state.x; state.baseY=state.y; state.dirty=false; applyTransform(); updateZoomDisplay(); }); }
 
     // Zoom handling
     const setScale = (newScale, centerX=null, centerY=null)=>{
@@ -409,10 +465,10 @@ const path=window.location.pathname;
             const iw = state.imgNaturalW*state.scale; const ih = state.imgNaturalH*state.scale;
             state.x = (vw - iw)/2; state.y = (vh - ih)/2;
         }
-        constrainPosition(); applyTransform(); updateZoomDisplay();
+        constrainPosition(); state.dirty=true; applyTransform(); updateZoomDisplay();
     };
 
-    const updateZoomDisplay = ()=>{ if(!zoomValue) return; zoomValue.textContent = Math.round(state.scale*100)+'%'; if(zoomRange) zoomRange.value = state.scale; };
+    const updateZoomDisplay = ()=>{ if(!zoomValue) return; zoomValue.textContent = Math.round(state.scale*100)+'%'; if(zoomRange){ const min=parseFloat(zoomRange.min||'0.5'); const max=parseFloat(zoomRange.max||'2.5'); const clamped=Math.min(max, Math.max(min, state.scale)); zoomRange.value = clamped; } };
 
     if(zoomRange){ zoomRange.addEventListener('input', (e)=>{ const v=parseFloat(e.target.value); // center around viewport center
             const rect=previewViewport.getBoundingClientRect(); setScale(v, rect.left+rect.width/2, rect.top+rect.height/2); }); }
@@ -443,15 +499,22 @@ const path=window.location.pathname;
         const sy = Math.max(0, -state.y) / state.scale;
         const sw = Math.min(state.imgNaturalW - sx, vw / state.scale);
         const sh = Math.min(state.imgNaturalH - sy, vh / state.scale);
-        const canvas=document.createElement('canvas'); canvas.width = vw; canvas.height = vh; const ctx=canvas.getContext('2d');
-        // draw portion of the original image scaled to fill viewport
+        if(!sw || !sh) return Promise.resolve(null);
+        const canvas=document.createElement('canvas');
+        const targetW = Math.max(1, Math.round(sw));
+        const targetH = Math.max(1, Math.round(sh));
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx=canvas.getContext('2d');
+        if(ctx && ctx.imageSmoothingQuality){ ctx.imageSmoothingQuality = 'high'; }
+        // draw portion of the original image scaled to fill viewport at higher resolution
         const img=new Image(); img.crossOrigin='anonymous'; img.src=imagePreview.src;
         return new Promise((res,rej)=>{
             img.onload=()=>{
                 try{
                     ctx.fillStyle='#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
                     ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
-                    const out=canvas.toDataURL('image/jpeg',0.92);
+                    const out=canvas.toDataURL('image/jpeg',0.96);
                     res(out);
                 }catch(err){ rej(err); }
             };
@@ -464,7 +527,9 @@ const path=window.location.pathname;
     const wrapSubmit = async (e)=>{
         e.preventDefault(); // prevent double submit
         // if there is an image shown in preview, and its src is either dataURL or asset but user moved it, crop it
-        if(imagePreview && imagePreview.src){
+        const currentVal = imageUrlInput?.value?.trim() || '';
+        const shouldCrop = !!(imagePreview && imagePreview.src && (state.dirty || currentVal.startsWith('data:')));
+        if(shouldCrop){
             try{
                 const cropped = await cropPreviewToDataURL();
                 if(cropped){ if(imageUrlInput) imageUrlInput.value = cropped; }
@@ -506,6 +571,15 @@ const path=window.location.pathname;
     // Real-time sync when Firestore is available
     try{
         FirebaseAdapter.onProductsSnapshot?.((arr)=>{
+            const looksRemote=Array.isArray(arr)&&arr.some(p=>p&&p._docId);
+            if(!looksRemote){
+                products=__dedupeProducts(Array.isArray(arr)?arr:[]);
+                __persistProducts(products);
+                refreshCategoryOptions();
+                renderCards();
+                renderTable();
+                return;
+            }
             const localList = Array.isArray(products)?products:[];
             const remote = (arr||[]).map(p=>{
                 const fallbackId = p.id || p._docId || `prod_${Date.now()}_${Math.floor(Math.random()*1000)}`;
@@ -672,7 +746,7 @@ const path=window.location.pathname;
         
         const waInput=document.getElementById('wa-number');
         const statusEl=document.getElementById('settings-status');
-        const defaultSettings={ whatsappNumber:'919876543210' };
+    const defaultSettings={ whatsappNumber:'919961165503' };
         
         // Load settings from Firebase
         let currentSettings = defaultSettings;

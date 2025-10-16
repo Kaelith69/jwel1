@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             console.warn('Failed to load WhatsApp number from Firebase:', err);
         }
-        return '919876543210'; // fallback default
+    return '919961165503'; // fallback default
     }
 
     function validateEmail(email) {

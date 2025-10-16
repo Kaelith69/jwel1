@@ -242,7 +242,7 @@ async function getSettings() {
       const snapshot = await _state.getDocs(_state.collection(_state.db, 'settings'));
       if (snapshot.empty) {
         console.log('[Firebase] No settings found, returning defaults');
-        return { whatsappNumber: '919876543210' };
+  return { whatsappNumber: '919961165503' };
       }
       // Get the first (and should be only) settings document
       const settingsDoc = snapshot.docs.find(docSnap => docSnap.id === 'app') || snapshot.docs[0];
@@ -253,11 +253,11 @@ async function getSettings() {
       console.warn('Failed to read settings from Firestore:', err);
       // Return defaults instead of throwing
       console.log('[Firebase] Returning default settings');
-      return { whatsappNumber: '919876543210' };
+  return { whatsappNumber: '919961165503' };
     }
   } else {
     console.warn('Firebase is not initialized. Returning default settings.');
-    return { whatsappNumber: '919876543210' };
+  return { whatsappNumber: '919961165503' };
   }
 }
 

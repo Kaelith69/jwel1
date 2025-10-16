@@ -35,6 +35,9 @@
 .main-header .logo img {
     height: 32px;
     width: auto;
+    border-radius: 0;
+    object-fit: contain;
+    display: block;
 }
 
 /* Cart button redesign - circular floating style */
@@ -268,6 +271,8 @@
     
     .main-header .logo img {
         height: 28px;
+        width: auto;
+        object-fit: contain;
     }
 }
 
@@ -285,6 +290,8 @@
     
     .main-header .logo img {
         height: 26px;
+        width: auto;
+        object-fit: contain;
     }
     
     .cart-badge {

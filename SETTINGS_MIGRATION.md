@@ -22,7 +22,7 @@ async function saveSettings(settings)
 **Features:**
 - Reads from Firestore `settings/app` document
 - Creates document if it doesn't exist
-- Returns default `{ whatsappNumber: '919876543210' }` if empty
+- Returns default `{ whatsappNumber: '919961165503' }` if empty
 - Throws error if Firebase not initialized
 
 ---
@@ -59,7 +59,7 @@ await FirebaseAdapter.saveSettings({ whatsappNumber: val });
 ```javascript
 function getWhatsAppNumber(){
     const cfg=JSON.parse(localStorage.getItem('adminSettings')||'{}');
-    return cfg.whatsappNumber || '919876543210';
+  return cfg.whatsappNumber || '919961165503';
 }
 ```
 
@@ -67,7 +67,7 @@ function getWhatsAppNumber(){
 ```javascript
 async function getWhatsAppNumber(){
     const settings = await FirebaseAdapter.getSettings();
-    return settings.whatsappNumber || '919876543210';
+  return settings.whatsappNumber || '919961165503';
 }
 ```
 
@@ -137,7 +137,7 @@ match /settings/{settingId} {
 
 ```javascript
 {
-  whatsappNumber: "919876543210"
+  whatsappNumber: "919961165503"
 }
 ```
 
@@ -145,7 +145,7 @@ match /settings/{settingId} {
 ```
 /settings/
   /app
-    - whatsappNumber: "919876543210"
+  - whatsappNumber: "919961165503"
 ```
 
 ---

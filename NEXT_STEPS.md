@@ -14,7 +14,7 @@ Visit: http://localhost:8000/init-settings.html
 
 This will:
 - Create default settings in Firebase
-- Set WhatsApp number to `919876543210`
+- Set WhatsApp number to `919961165503`
 - Confirm setup was successful
 
 ### **Option 2: Create Settings via Admin Panel**

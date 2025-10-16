@@ -351,7 +351,13 @@ input[type=number] {
 }
 
 .logo { padding-left: 0; justify-self: start; }
-.logo img { height: 42px; width: auto; }
+.logo img {
+    height: 42px;
+    width: auto;
+    border-radius: 0;
+    object-fit: contain;
+    display: block;
+}
 
 /* Mobile header optimizations */
 @media (max-width: 768px) {
@@ -1990,7 +1996,11 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
         gap: 0.3rem;
     }
     
-    .main-header .logo img { height: 34px; }
+    .main-header .logo img {
+        height: 34px;
+        width: auto;
+        object-fit: contain;
+    }
     .hero-section .glass-panel .logo img { height: clamp(65px, 50vw, 140px); }
     
     .main-nav ul {

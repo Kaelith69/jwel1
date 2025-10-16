@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Collection - VastraVeda Jewelleries</title>
-    <meta name="description" content="Browse our exquisite collection of luxury jewelry at VastraVeda Jewelleries.">
+    <title>Our Collection - Luxury Jewelleries</title>
+    <meta name="description" content="Browse our exquisite collection of luxury jewelry.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
@@ -55,9 +55,10 @@
         }
 
         .logo img {
-            width: 48px;
             height: 48px;
-            border-radius: 50%;
+            width: auto;
+            border-radius: 0;
+            object-fit: contain;
         }
 
         .main-nav {
@@ -832,14 +833,13 @@
     <div id="app-container">
         <header class="main-header">
             <div class="logo">
-                <a href="index.html"><img src="logo/logo.png" alt="VastraVeda Jewelleries Home" width="48" height="48"></a>
+                <a href="index.html"><img src="logo/logo.png" alt="Store logo" width="48" height="48"></a>
             </div>
             <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
                     <li><a href="index.html">Home</a></li>
                     <li><a href="products.html">Collections</a></li>
-                    <li><a href="contact.html">About</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="contact.html">About &amp; Contact</a></li>
                 </ul>
             </nav>
             <div class="header-actions">
@@ -927,7 +927,6 @@
         <footer class="site-footer">
             <div class="footer-inner">
                 <div class="footer-brand">
-                    <img src="/logo/logo.png" alt="VastraVeda" class="logo">
                     <p class="footer-tagline">Luxury you can feel. Elegance that endures.</p>
                 </div>
                 <div class="footer-links">
@@ -935,16 +934,15 @@
                     <ul>
                         <li><a href="products.html">Shop</a></li>
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="contact.html">About</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="contact.html">About &amp; Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-care">
                     <h3>Customer Care</h3>
                     <ul>
-                        <li><a href="mailto:support@vastravedajewels.com">support@vastravedajewels.com</a></li>
-                        <li><a href="tel:+919876543210">+91 98765 43210</a></li>
-                        <li><a href="https://wa.me/919876543210">WhatsApp</a></li>
+                            <li><a href="mailto:vastraveda2@gmail.com">vastraveda2@gmail.com</a></li>
+                            <li><a href="tel:+919961165503">+91 99611 65503</a></li>
+                        <li><a href="https://wa.me/919961165503">WhatsApp</a></li>
                     </ul>
                     <div class="footer-social">
                         <a href="#" aria-label="Instagram" title="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i><span class="visually-hidden">Instagram</span></a>
@@ -952,17 +950,9 @@
                         <a href="#" aria-label="Pinterest" title="Pinterest"><i class="fa-brands fa-pinterest" aria-hidden="true"></i><span class="visually-hidden">Pinterest</span></a>
                     </div>
                 </div>
-                <div class="footer-newsletter">
-                    <h3>Newsletter</h3>
-                    <p>Be the first to know about new designs.</p>
-                    <form class="newsletter-form" onsubmit="event.preventDefault(); notify('Thanks for subscribing!', 'success');">
-                        <input type="email" placeholder="Your email">
-                        <button type="submit" class="newsletter-btn">Subscribe</button>
-                    </form>
-                </div>
             </div>
             <div class="footer-bottom">
-                <p>© <span id="year"></span> VastraVeda Jewelleries. All rights reserved.</p>
+                <p>© <span id="year"></span> Luxury Jewelleries. All rights reserved.</p>
             </div>
         </footer>
     </div>

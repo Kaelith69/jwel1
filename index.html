@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VastraVeda Jewelleries - Luxury Redefined</title>
-    <meta name="description" content="VastraVeda Jewelleries - Luxury jewelry collection. Shop necklaces, rings, earrings, and bracelets online.">
+    <title>Luxury Jewelleries - Luxury Redefined</title>
+    <meta name="description" content="Luxury jewelry collection. Shop necklaces, rings, earrings, and bracelets online.">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="icon" href="logo/logo.png" sizes="any">
-    <meta property="og:title" content="VastraVeda Jewelleries - Luxury Redefined">
+    <meta property="og:title" content="Luxury Jewelleries - Luxury Redefined">
     <meta property="og:description" content="Shop necklaces, rings, earrings, and bracelets online.">
     <meta property="og:image" content="logo/logo.png">
     <meta property="og:type" content="website">
@@ -86,9 +86,10 @@
         }
 
         .logo img {
-            width: 36px;
             height: 36px;
-            border-radius: 50%;
+            width: auto;
+            border-radius: 0;
+            object-fit: contain;
         }
 
         .brand-text {
@@ -215,11 +216,26 @@
         }
 
         .glass-panel .logo img {
-            width: 120px;
-            height: 120px;
+            width: 210px;
+            height: auto;
             margin: 0 auto 16px;
             display: block;
-            border-radius: 50%;
+            border-radius: 0;
+            padding: 0;
+            background: transparent;
+            object-fit: contain;
+        }
+
+        @media (max-width: 600px) {
+            .glass-panel .logo img {
+                width: min(260px, 85vw);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .glass-panel .logo img {
+                width: min(280px, 92vw);
+            }
         }
 
         .visually-hidden {
@@ -236,13 +252,8 @@
 
         /* Brand name visible */
         .glass-panel::after {
-            content: 'VastraVeda';
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-            font-family: 'Playfair Display', serif;
+            content: '';
+            margin-bottom: 0;
         }
 
         .glass-panel p {
@@ -407,8 +418,7 @@
             }
             
             .glass-panel .logo img {
-                width: 100px;
-                height: 100px;
+                width: 150px;
             }
             
             .glass-panel::after {
@@ -469,9 +479,8 @@
         <header class="main-header">
             <div class="logo">
                 <a href="index.html">
-                    <img src="logo/logo.png" alt="VastraVeda Jewelleries Logo" width="36" height="36" loading="eager" decoding="async">
+                    <img src="logo/logo.png" alt="Store logo" width="36" height="36" loading="eager" decoding="async">
                 </a>
-                <a href="index.html" class="brand-text">VastraVeda</a>
             </div>
             <div class="header-actions">
                 <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
@@ -486,7 +495,7 @@
                 <ul>
                     <li><a href="index.html">Home</a></li>
                     <li><a href="products.html">Products</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="contact.html">About &amp; Contact</a></li>
                 </ul>
             </nav>
         </header>
@@ -494,9 +503,9 @@
         <main class="hero-section" id="main-content" role="main">
             <div class="glass-panel">
                 <div class="logo">
-                    <img src="/logo/logo.png" alt="VastraVeda" class="logo">
+                    <img src="/logo/logo.png" alt="Store logo" class="logo">
                 </div>
-                <h1 class="visually-hidden">VastraVeda Jewelleries</h1>
+                <h1 class="visually-hidden">Luxury Jewelleries</h1>
                 <p>Experience the art of elegance. Crafted for the discerning.</p>
                 <a href="products.html" class="cta-button">Explore Collection</a>
             </div>

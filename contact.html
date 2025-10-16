@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - VastraVeda Jewelleries</title>
-    <meta name="description" content="Get in touch with VastraVeda Jewelleries via Instagram, WhatsApp, phone, or email.">
+    <title>About &amp; Contact - Luxury Jewelleries</title>
+    <meta name="description" content="Learn about our craft and reach us via Instagram, WhatsApp, phone, or email.">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="icon" href="logo/logo.png" sizes="any">
-    <meta property="og:title" content="Contact - VastraVeda Jewelleries">
-    <meta property="og:description" content="Reach us on Instagram, WhatsApp, phone, or email.">
+    <meta property="og:title" content="About &amp; Contact - Luxury Jewelleries">
+    <meta property="og:description" content="Discover our story and reach us on Instagram, WhatsApp, phone, or email.">
     <meta property="og:image" content="logo/logo.png">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="styles.css">
@@ -20,24 +20,72 @@
             padding: 0;
         }
         .contact-container {
-            max-width: 420px;
-            margin: 60px auto 0 auto;
+            max-width: 1024px;
+            margin: 84px auto 56px auto;
+            padding: 0 20px;
         }
-        .contact-card {
-            /* Use glass-card style from consistent CSS */
+        .page-title {
+            text-align: center;
+            font-family: 'Rozha One', serif;
+            font-size: 2.4rem;
+            color: #1E40AF;
+            margin-bottom: 1.6em;
+            letter-spacing: 0.5px;
+        }
+        .info-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .info-card {
             background: rgba(255,255,255,0.85);
             box-shadow: 0 4px 24px rgba(59,130,246,0.12);
             border-radius: 16px;
-            padding: 32px 24px 28px 24px;
+            padding: 32px 28px 28px 28px;
             border: 1px solid #e0e0e0;
         }
-        .contact-title {
-            text-align: center;
+        .section-title {
             font-family: 'Rozha One', serif;
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             color: #1E40AF;
-            margin-bottom: 1.2em;
-            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .about-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .about-card p {
+            color: #4b5563;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .about-highlights {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .about-highlights li {
+            position: relative;
+            padding-left: 28px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .about-highlights li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #3B82F6;
+            font-size: 1rem;
+        }
+        .visit-note {
+            font-size: 0.95rem;
+            color: #1E40AF;
+            font-weight: 500;
         }
         .contact-list {
             list-style: none;
@@ -76,17 +124,19 @@
         }
         @media (max-width: 600px) {
             .contact-container {
-                margin: 24px 2vw 0 2vw;
+                margin: 32px 2vw 40px 2vw;
+                padding: 0;
             }
-            .contact-card {
-                padding: 12px 2vw 10px 2vw;
+            .page-title {
+                font-size: 1.6rem;
+                margin-bottom: 1.2em;
             }
-            .contact-title {
-                font-size: 1.1rem;
+            .info-card {
+                padding: 20px 18px 18px 18px;
             }
             .contact-list li {
                 font-size: 0.97rem;
-                padding: 8px 4px;
+                padding: 8px 10px;
             }
             .cta-button {
                 min-width: 90px !important;
@@ -102,7 +152,7 @@
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <header class="main-header">
         <div class="logo">
-            <a href="index.html"><img src="/logo/logo.png" alt="VastraVeda" class="logo"></a>
+            <a href="index.html"><img src="/logo/logo.png" alt="Store logo" class="logo"></a>
         </div>
         <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
             <i class="fas fa-bars" aria-hidden="true"></i>
@@ -111,7 +161,7 @@
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="products.html">Products</a></li>
-                <li><a href="contact.html" aria-current="page">Contact</a></li>
+                <li><a href="contact.html" aria-current="page">About &amp; Contact</a></li>
             </ul>
         </nav>
         <div class="header-actions">
@@ -123,20 +173,33 @@
     </header>
     <div id="app-container">
     <div class="contact-container" id="main-content" role="main">
-        <div class="contact-card glass-card">
-            <div class="contact-title">Contact Us</div>
-            <ul class="contact-list">
-                <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener">@yourprofile</a></li>
-                <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/1234567890" target="_blank" rel="noopener">+1 234 567 890</a></li>
-                <li><i class="fas fa-phone"></i> <a href="tel:+1234567890">+1 234 567 890</a></li>
-                <li><i class="fas fa-envelope"></i> <a href="mailto:info@example.com">info@example.com</a></li>
-            </ul>
-            <div class="back-to-products-container">
-                <a href="products.html" class="cta-button back-to-products-button">
-                    <i class="fas fa-arrow-left back-to-products-icon"></i>
-                    <span class="back-to-products-text">Back to Products</span>
-                </a>
-            </div>
+        <h1 class="page-title">About &amp; Contact</h1>
+        <div class="info-grid">
+            <section class="info-card about-card glass-card" aria-labelledby="about-title">
+                <h2 id="about-title" class="section-title">Our Story</h2>
+                <p>Luxury Jewelleries curates limited-edition pieces crafted by artisans across Jaipur and Surat. Each design is hand-finished, hallmarked, and created with stones we source responsibly.</p>
+                <ul class="about-highlights">
+                    <li>Handcrafted 18K gold, platinum, and sterling silver collections.</li>
+                    <li>Conflict-free diamonds and ethically sourced gemstones.</li>
+                    <li>Personal styling consultations for bespoke commissions.</li>
+                </ul>
+                <p class="visit-note">Studio visits are by appointment Monday to Saturday, 11:00 AM - 7:00 PM IST.</p>
+            </section>
+            <section class="info-card contact-card glass-card" aria-labelledby="contact-title">
+                <h2 id="contact-title" class="section-title">Connect With Us</h2>
+                <ul class="contact-list">
+                    <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/vastravedabyharinee" target="_blank" rel="noopener">@vastravedabyharinee</a></li>
+                    <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919961165503" target="_blank" rel="noopener">+91 99611 65503</a></li>
+                    <li><i class="fas fa-phone"></i> <a href="tel:+919961165503">+91 99611 65503</a></li>
+                    <li><i class="fas fa-envelope"></i> <a href="mailto:vastraveda2@gmail.com">vastraveda2@gmail.com</a></li>
+                </ul>
+                <div class="back-to-products-container">
+                    <a href="products.html" class="cta-button back-to-products-button">
+                        <i class="fas fa-arrow-left back-to-products-icon"></i>
+                        <span class="back-to-products-text">Back to Products</span>
+                    </a>
+                </div>
+            </section>
         </div>
     </div>
     <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
