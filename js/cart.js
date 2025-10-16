@@ -169,8 +169,8 @@ class CartManager {
 
     // Get cart data for checkout
     getCartForCheckout() {
-        const { itemCount, totalPrice } = this.getTotals();
-        const shipping = totalPrice > 0 ? 500 : 0;
+    const { itemCount, totalPrice } = this.getTotals();
+    const shipping = 0;
         
         return {
             items: [...this.cart],

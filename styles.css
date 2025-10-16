@@ -16,6 +16,38 @@
     background: #7fffd4;
     color: #232323;
 }
+.whatsapp-qr-wrapper {
+    display: none;
+    margin-top: 1.25rem;
+    padding: 1.25rem;
+    text-align: center;
+    border: 1.5px dashed rgba(59,130,246,0.35);
+    border-radius: 1rem;
+    background: rgba(255,255,255,0.88);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.whatsapp-qr-wrapper.visible {
+    display: block;
+}
+.whatsapp-qr-wrapper .qr-instructions {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    font-size: 0.95rem;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+}
+.whatsapp-qr-wrapper .whatsapp-qr-image {
+    width: 240px;
+    height: 240px;
+    margin: 0 auto;
+    border-radius: 0.5rem;
+    background: #fff;
+    padding: 0.75rem;
+}
+.whatsapp-qr-wrapper .qr-fallback-link {
+    display: inline-block;
+    margin-top: 0.85rem;
+    font-weight: 600;
+}
 /* Floating Order Now Button */
 .floating-order-btn {
     position: fixed;

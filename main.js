@@ -100,8 +100,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checkoutBtn = document.getElementById('checkout-btn');
     const checkoutSummaryContainer = document.getElementById('bill-items');
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
+    const whatsappQrWrapper = document.getElementById('whatsapp-qr-wrapper');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
+    const floatingOrderBtn = document.getElementById('order-now-btn');
     // Product filter UI (only present on products page)
     const filterCategorySelect = document.getElementById('filter-category');
     const filterClearBtn = document.getElementById('filter-clear');
@@ -117,6 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
     let currentFilters = { category: '', search: '' };
+    const SHIPPING_CHARGE = 0;
 
     // --- RENDER FUNCTIONS ---
 
@@ -241,6 +244,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
+        if (floatingOrderBtn) {
+            const isDisabled = totalItems === 0;
+            floatingOrderBtn.disabled = isDisabled;
+            floatingOrderBtn.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+        }
         saveCart();
     };
 
@@ -256,8 +264,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
 
         const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const shipping = subtotal > 0 ? 500 : 0; // Rs 500 shipping if subtotal > 0
-        const grandTotal = subtotal + shipping;
+    const shipping = SHIPPING_CHARGE;
+    const grandTotal = subtotal + shipping;
         
         const billSubtotal = document.getElementById('bill-subtotal');
         const billShipping = document.getElementById('bill-shipping');
@@ -414,13 +422,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function getWhatsAppNumber(){
         try {
             const settings = await FirebaseAdapter.getSettings();
-            if(settings.whatsappNumber && /^[0-9]{10,15}$/.test(settings.whatsappNumber)) {
-                return settings.whatsappNumber;
+            if (settings?.whatsappNumber) {
+                const sanitized = String(settings.whatsappNumber).replace(/[^0-9]/g, '');
+                if (sanitized.length >= 10 && sanitized.length <= 15) {
+                    return sanitized;
+                }
+                console.warn('WhatsApp number from settings is invalid after sanitizing:', settings.whatsappNumber);
             }
         } catch (err) {
             console.warn('Failed to load WhatsApp number from Firebase:', err);
         }
-    return '919961165503'; // fallback default
+        return '919961165503'; // fallback default
+    }
+
+    const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase());
+
+    function setWhatsAppButtonText(text, ariaLabel) {
+        if (!whatsappOrderBtn) return;
+        whatsappOrderBtn.textContent = text;
+        whatsappOrderBtn.setAttribute('aria-label', ariaLabel || text);
+    }
+
+    if (whatsappOrderBtn) {
+        if (isMobileDevice()) {
+            setWhatsAppButtonText('Place Order on WhatsApp');
+        } else {
+            setWhatsAppButtonText('Generate WhatsApp QR', 'Generate WhatsApp QR for WhatsApp order');
+        }
+    }
+
+    function buildWhatsAppUrl(phone, encodedMessage, { target = 'auto' } = {}) {
+        const baseParams = `phone=${phone}&text=${encodedMessage}`;
+        const resolvedTarget = target === 'auto'
+            ? (isMobileDevice() ? 'mobile' : 'web')
+            : target;
+        if (resolvedTarget === 'mobile') {
+            return `https://wa.me/${phone}?text=${encodedMessage}`;
+        }
+        return `https://web.whatsapp.com/send?${baseParams}`;
+    }
+
+    function renderWhatsAppQr(mobileUrl, desktopUrl) {
+        if (!whatsappQrWrapper) return;
+        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(mobileUrl)}`;
+        whatsappQrWrapper.innerHTML = `
+            <p class="qr-instructions">Scan this QR code with WhatsApp on your phone to continue your order.</p>
+            <img src="${qrSrc}" alt="WhatsApp order QR code" class="whatsapp-qr-image" loading="lazy" decoding="async">
+            <a href="${desktopUrl}" target="_blank" rel="noopener" class="qr-fallback-link">Open on WhatsApp Web instead</a>
+        `;
+        whatsappQrWrapper.hidden = false;
+        whatsappQrWrapper.classList.add('visible');
     }
 
     function validateEmail(email) {
@@ -447,7 +498,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Clear any previous errors
         if (checkoutError) {
             checkoutError.style.display = 'none';
+            checkoutError.style.color = '';
             checkoutError.textContent = '';
+        }
+        if (whatsappQrWrapper) {
+            whatsappQrWrapper.hidden = true;
+            whatsappQrWrapper.classList.remove('visible');
+            whatsappQrWrapper.innerHTML = '';
         }
         
         if (!cart || cart.length === 0) {
@@ -536,49 +593,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return;
         }
-        
-        if (name.length < 2) {
-            if (checkoutError) {
-                checkoutError.textContent = 'Please enter a valid name (at least 2 characters).';
-                checkoutError.style.display = 'block';
-            }
-            const f = document.getElementById('customer-name');
-            if (f) {
-                f.setAttribute('aria-invalid', 'true');
-                f.style.borderColor = '#e53935';
-                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
-            }
-            return;
-        }
-        
-        if (address.length < 10) {
-            if (checkoutError) {
-                checkoutError.textContent = 'Please enter a complete address (at least 10 characters).';
-                checkoutError.style.display = 'block';
-            }
-            const f = document.getElementById('customer-address');
-            if (f) {
-                f.setAttribute('aria-invalid', 'true');
-                f.style.borderColor = '#e53935';
-                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
-            }
-            return;
-        }
-        if (checkoutError) checkoutError.style.display = 'none';
-
-        // Show loading state
-        const submitButton = document.getElementById('whatsapp-order-btn');
+        const submitButton = whatsappOrderBtn;
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = 'Processing Order...';
+            if (isMobileDevice()) {
+                setWhatsAppButtonText('Processing...');
+            } else {
+                setWhatsAppButtonText('Generating WhatsApp QR...', 'Generating WhatsApp QR for WhatsApp order');
+            }
         }
-
+        
         try {
+            const whatsappNumber = await getWhatsAppNumber();
+            if (!whatsappNumber) {
+                if (checkoutError) {
+                    checkoutError.textContent = 'WhatsApp number is not configured. Please update it in settings.';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#dc3545';
+                }
+                return;
+            }
+
             // Prepare order summary
             const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const shipping = subtotal > 0 ? 500 : 0;
+            const shipping = SHIPPING_CHARGE;
             const grandTotal = subtotal + shipping;
-            let orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
+            const orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
 
             const message =
 `Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
@@ -591,10 +631,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 total: grandTotal,
                 date: new Date().toISOString()
             };
-            
+
             try {
                 const orderId = await FirebaseAdapter.addOrder(order);
-                console.log('✅ Order saved to Firebase:', orderId);
+                console.log('\u2705 Order saved to Firebase:', orderId);
             } catch (err) {
                 console.error('Failed to save order to Firebase:', err);
                 if (checkoutError) {
@@ -605,25 +645,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return; // Don't proceed if order can't be saved
             }
 
-            // Show confirmation message
-            if (checkoutError) {
-                checkoutError.textContent = 'Order placed! Please complete your order in WhatsApp.';
-                checkoutError.style.display = 'block';
-                checkoutError.style.color = '#080';
+            // Show confirmation message briefly before redirecting
+            const encodedMsg = encodeURIComponent(message);
+            const whatsappMobileUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'mobile' });
+            const whatsappWebUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'web' });
+
+            if (isMobileDevice()) {
+                if (checkoutError) {
+                    checkoutError.textContent = 'Order placed! Redirecting you to WhatsApp...';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#080';
+                }
+                const newWindow = window.open(whatsappMobileUrl, '_blank', 'noopener');
+                if (!newWindow) {
+                    window.location.href = whatsappMobileUrl;
+                }
+            } else {
+                if (checkoutError) {
+                    checkoutError.textContent = 'Order placed! Scan the QR code below with your phone to continue on WhatsApp.';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#080';
+                }
+                renderWhatsAppQr(whatsappMobileUrl, whatsappWebUrl);
+                setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');
             }
 
-            // WhatsApp redirect with small delay for better UX
-            setTimeout(async () => {
-                const whatsappNumber = await getWhatsAppNumber();
-                const encodedMsg = encodeURIComponent(message);
-                window.location.href = `https://wa.me/${whatsappNumber}?text=${encodedMsg}`;
-                // Clear cart after redirect
-                cart = [];
-                saveCart();
-                updateCartSummary();
-                renderCheckoutSummary();
-            }, 1000);
-            
+            cart = [];
+            saveCart();
+            updateCartSummary();
+            renderCheckoutSummary();
         } catch (error) {
             console.error('Error processing order:', error);
             if (checkoutError) {
@@ -631,11 +681,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 checkoutError.style.display = 'block';
             }
         } finally {
-            // Reset button state
             if (submitButton) {
                 setTimeout(() => {
                     submitButton.disabled = false;
-                    submitButton.textContent = 'Place Order on WhatsApp';
+                    if (isMobileDevice()) {
+                        setWhatsAppButtonText('Place Order on WhatsApp');
+                    } else if (whatsappQrWrapper && whatsappQrWrapper.classList.contains('visible')) {
+                        setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');
+                    } else {
+                        setWhatsAppButtonText('Generate WhatsApp QR', 'Generate WhatsApp QR for WhatsApp order');
+                    }
                 }, 2000);
             }
         }
@@ -684,6 +739,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
+    if (floatingOrderBtn) {
+        floatingOrderBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (cart.length === 0) {
+                if (typeof window.notify === 'function') {
+                    window.notify('Your bag is empty.', 'error');
+                } else {
+                    alert('Your bag is empty.');
+                }
+                return;
+            }
+
+            if (window.location.pathname.endsWith('checkout.html')) {
+                if (cartSidebar && !cartSidebar.classList.contains('open')) {
+                    toggleCart();
+                } else if (!cartSidebar) {
+                    document.getElementById('checkout-summary')?.scrollIntoView({ behavior: 'smooth' });
+                }
+                return;
+            }
+
+            if (cartSidebar) {
+                if (!cartSidebar.classList.contains('open')) {
+                    toggleCart();
+                } else {
+                    cartCloseBtn?.focus();
+                }
+                return;
+            }
+
+            window.location.href = 'checkout.html';
+        });
+    }
     
     // Product detail modal event listeners
     if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeProductModal);
