@@ -26,6 +26,29 @@ let _state = {
   onAuthStateChanged: null
 };
 
+function cacheOrderLocally(orderRecord) {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const raw = localStorage.getItem('proJetOrders');
+    const parsed = raw ? JSON.parse(raw) : [];
+    const existing = Array.isArray(parsed) ? parsed : [];
+    const filtered = existing.filter((entry) => {
+      const sameOrderId = orderRecord.orderId && entry.orderId && String(entry.orderId) === String(orderRecord.orderId);
+      const sameDocId = orderRecord._docId && entry._docId && String(entry._docId) === String(orderRecord._docId);
+      return !(sameOrderId || sameDocId);
+    });
+    filtered.push(orderRecord);
+    filtered.sort((a, b) => {
+      const aDate = new Date(a.date || a.createdAt || a.updatedAt || 0).getTime();
+      const bDate = new Date(b.date || b.createdAt || b.updatedAt || 0).getTime();
+      return bDate - aDate;
+    });
+    localStorage.setItem('proJetOrders', JSON.stringify(filtered));
+  } catch (err) {
+    console.warn('Order cache update skipped:', err);
+  }
+}
+
 async function init() {
   if (_state.initialized) return _state;
   _state.initialized = true;
@@ -144,12 +167,37 @@ async function getOrders(){
 
 async function addOrder(order){
   await init();
+  const payload = { ...order };
+  if (!payload.orderId) {
+    payload.orderId = `ORD-${Date.now()}`;
+  }
+  if (!payload.date) {
+    const nowIso = new Date().toISOString();
+    payload.date = nowIso;
+    if (!payload.createdAt) payload.createdAt = nowIso;
+    if (!payload.updatedAt) payload.updatedAt = nowIso;
+  }
+  if (!payload.createdAt) payload.createdAt = payload.date;
+  if (!payload.updatedAt) payload.updatedAt = payload.createdAt;
+  if (!payload.status) payload.status = 'Pending';
+
   if(_state.useFirestore){
-    try{ 
-      const ref = await _state.addDoc(_state.collection(_state.db,'orders'), order);
-      console.log('[Firebase] Order added with ID:', ref.id);
-      return ref.id;
-    }catch(err){ 
+    try{
+      const collectionRef = _state.collection(_state.db,'orders');
+      let docId = null;
+      if (_state.setDoc && _state.doc && payload.orderId) {
+        const docRef = _state.doc(_state.db, 'orders', String(payload.orderId));
+        await _state.setDoc(docRef, payload, { merge: true });
+        docId = docRef.id;
+      } else {
+        const ref = await _state.addDoc(collectionRef, payload);
+        docId = ref.id;
+      }
+      console.log('[Firebase] Order added with ID:', docId);
+      const savedOrder = { ...payload, _docId: docId, id: docId };
+      cacheOrderLocally(savedOrder);
+      return docId;
+    }catch(err){
       console.error('Failed to add order to Firestore', err);
       throw new Error('Firebase is required. Order could not be saved.');
     }

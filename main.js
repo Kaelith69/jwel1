@@ -618,23 +618,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
             const shipping = SHIPPING_CHARGE;
             const grandTotal = subtotal + shipping;
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const placedAt = new Date();
+            const orderReference = `ORD-${placedAt.getTime()}`;
+            const orderTimestampIso = placedAt.toISOString();
             const orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
 
             const message =
-`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
+`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Order ID:* ${orderReference}\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
 
             // Save order to Firebase (required)
             const order = {
-                orderId: 'ORD-' + Date.now(),
-                customer: { name, mobile, email, address, pincode },
-                items: cart.map(item => ({ id: item.id || item._docId, name: item.name, price: item.price, quantity: item.quantity })),
+                orderId: orderReference,
+                status: 'Pending',
+                source: 'storefront-checkout',
+                channel: 'whatsapp',
+                currency: 'INR',
+                subtotal,
+                shipping,
                 total: grandTotal,
-                date: new Date().toISOString()
+                itemCount,
+                date: orderTimestampIso,
+                createdAt: orderTimestampIso,
+                updatedAt: orderTimestampIso,
+                customer: {
+                    name,
+                    mobile,
+                    email: email || null,
+                    address,
+                    pincode
+                },
+                items: cart.map(item => ({
+                    id: item.id || item._docId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    lineTotal: item.price * item.quantity
+                })),
+                statusHistory: [
+                    { status: 'Pending', changedAt: orderTimestampIso, changedBy: 'customer' }
+                ],
+                whatsappMessage: message,
+                notes: 'Order initiated via checkout form and shared over WhatsApp.'
             };
 
             try {
-                const orderId = await FirebaseAdapter.addOrder(order);
-                console.log('\u2705 Order saved to Firebase:', orderId);
+                const firestoreDocId = await FirebaseAdapter.addOrder(order);
+                console.log('\u2705 Order saved to Firebase:', firestoreDocId);
             } catch (err) {
                 console.error('Failed to save order to Firebase:', err);
                 if (checkoutError) {
