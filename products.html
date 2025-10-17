@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="liquid-button.css">
     <style>
         * {
             margin: 0;
@@ -446,6 +447,50 @@
     .cart-item-price { color: var(--primary-gold); font-weight: 600; }
         .remove-btn { background: none; border: none; color: #dc3545; font-size: 16px; cursor: pointer; padding: 8px; }
 
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .cart-item-quantity .quantity-btn {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            min-height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #2563eb;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .cart-item-quantity .quantity-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .cart-item-quantity .quantity-display {
+            min-width: 44px;
+            height: 44px;
+            padding: 0 10px;
+            border-radius: 14px;
+            border: 1px solid rgba(37, 99, 235, 0.45);
+            background: rgba(255, 255, 255, 0.9);
+            color: #1f2937;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .cart-footer {
             padding: 20px;
             border-top: 1px solid #e9ecef;
@@ -657,26 +702,68 @@
         }
 
         /* Loading State */
-        .loading {
-            text-align: center;
-            padding: 40px;
+        .loading-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 60px 20px;
             color: var(--text-light);
+            text-align: center;
+            font-size: 1rem;
         }
 
-        .loading::after {
-            content: '';
+        .loading-state .loading-gem {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transform: translateZ(0);
+            perspective: 500px;
+        }
+
+        .loading-state .loading-gem span {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary-gold);
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
+            width: clamp(24px, 3vw, 32px);
+            height: clamp(24px, 3vw, 32px);
+            background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%);
+            border-radius: 18% 18% 42% 42%;
+            transform: rotate(45deg) scale(0.88);
+            box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28);
+            animation: gemPulse 1.2s ease-in-out infinite;
+            opacity: 0.95;
+            position: relative;
+            overflow: hidden;
+            will-change: transform, box-shadow, filter;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .loading-state .loading-gem span::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), transparent 55%);
+            opacity: 0.75;
+        }
+
+        .loading-state .loading-gem span:nth-child(2) { animation-delay: 0.18s; }
+        .loading-state .loading-gem span:nth-child(3) { animation-delay: 0.36s; }
+
+        @keyframes gemPulse {
+            0%, 100% {
+                transform: rotate(45deg) scale(0.82) translateY(0);
+                box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18);
+                filter: brightness(0.92);
+            }
+            45% {
+                transform: rotate(45deg) scale(1.08) translateY(-8px);
+                box-shadow: 0 18px 30px rgba(250, 204, 21, 0.4);
+                filter: brightness(1.12);
+            }
+            55% {
+                transform: rotate(45deg) scale(1.05) translateY(-5px);
+                box-shadow: 0 12px 26px rgba(96, 165, 250, 0.35);
+                filter: brightness(1.05);
+            }
         }
 
     /* Mobile Navigation */
@@ -696,6 +783,25 @@
             
             .cart-sidebar {
                 max-width: 100%;
+            }
+
+            .cart-item-quantity {
+                gap: 10px;
+            }
+
+            .cart-item-quantity .quantity-btn {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 1rem;
+            }
+
+            .cart-item-quantity .quantity-display {
+                min-width: 40px;
+                height: 40px;
+                font-size: 0.95rem;
+                border-radius: 12px;
             }
 
             /* Mobile navigation */
@@ -785,6 +891,25 @@
             .products-main {
                 padding: 16px 12px 100px;
             }
+
+            .cart-item-quantity {
+                gap: 8px;
+            }
+
+            .cart-item-quantity .quantity-btn {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                font-size: 0.95rem;
+            }
+
+            .cart-item-quantity .quantity-display {
+                min-width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+                border-radius: 10px;
+            }
         }
 
         /* Accessibility */
@@ -837,9 +962,9 @@
             </div>
             <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="products.html">Collections</a></li>
-                    <li><a href="contact.html">About &amp; Contact</a></li>
+                    <li><a href="index.html" class="liquid-button">Home</a></li>
+                    <li><a href="products.html" class="liquid-button">Collections</a></li>
+                    <li><a href="contact.html" class="liquid-button">About &amp; Contact</a></li>
                 </ul>
             </nav>
             <div class="header-actions">
@@ -856,7 +981,7 @@
         <section class="hero-banner">
             <div class="hero-banner__content">
                 <h1 class="hero-banner__title">Timeless Elegance. Crafted with Love.</h1>
-                <button class="cta-button" onclick="const mainContent = document.getElementById('main-content'); if (mainContent) window.scrollTo({ top: mainContent.offsetTop - 60, behavior: 'smooth' });">Shop Collection</button>
+                <button class="cta-button liquidize" onclick="const mainContent = document.getElementById('main-content'); if (mainContent) window.scrollTo({ top: mainContent.offsetTop - 60, behavior: 'smooth' });">Shop Collection</button>
             </div>
         </section>
 
@@ -888,20 +1013,26 @@
                         </div>
                     </div>
                     <div class="filter-actions">
-                        <button id="filter-clear" class="filter-clear-btn">Clear Filters</button>
+                        <button id="filter-clear" class="filter-clear-btn liquidize">Clear Filters</button>
                     </div>
                 </div>
             </div>
 
             <div id="product-grid" class="product-grid">
-                <div class="loading">Loading products...</div>
+                <div class="loading-state" role="status" aria-live="polite" aria-label="Loading products">
+                    <span class="loading-gem" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </div>
             </div>
         </main>
         
         <aside id="cart-sidebar" class="cart-sidebar">
             <div class="cart-header">
                 <h2>Your Bag</h2>
-                <button id="cart-close-btn" class="close-btn">&times;</button>
+                <button id="cart-close-btn" class="close-btn liquidize">&times;</button>
             </div>
             <div id="cart-items" class="cart-items">
                 <p class="cart-empty-msg">Your cart is empty</p>
@@ -912,15 +1043,15 @@
                     <span id="cart-total-price">₹0</span>
                 </div>
                 <div class="cart-footer-actions">
-                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn">Clear</button>
-                    <button id="checkout-btn" class="checkout-button">Checkout</button>
+                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn liquidize">Clear</button>
+                    <button id="checkout-btn" class="checkout-button liquidize">Checkout</button>
                 </div>
             </div>
         </aside>
         
         <div id="sidebar-overlay" class="sidebar-overlay"></div>
         
-        <button id="order-now-btn" class="floating-order-btn" aria-label="Go to checkout">
+        <button id="order-now-btn" class="floating-order-btn liquidize" aria-label="Go to checkout">
             <i class="fa-solid fa-cart-shopping"></i>
         </button>
 
@@ -945,14 +1076,15 @@
                         <li><a href="https://wa.me/919961165503">WhatsApp</a></li>
                     </ul>
                     <div class="footer-social">
-                        <a href="#" aria-label="Instagram" title="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i><span class="visually-hidden">Instagram</span></a>
-                        <a href="#" aria-label="Facebook" title="Facebook"><i class="fa-brands fa-facebook" aria-hidden="true"></i><span class="visually-hidden">Facebook</span></a>
-                        <a href="#" aria-label="Pinterest" title="Pinterest"><i class="fa-brands fa-pinterest" aria-hidden="true"></i><span class="visually-hidden">Pinterest</span></a>
+                        <a href="https://instagram.com/vastravedabyharinee" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                            <span class="visually-hidden">Instagram</span>
+                        </a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© <span id="year"></span> Luxury Jewelleries. All rights reserved.</p>
+                <p>© <span id="year"></span> VastraVeda Jewelleries. All rights reserved.</p>
             </div>
         </footer>
     </div>
@@ -960,5 +1092,6 @@
     <script src="js/utils.js"></script>
     <script src="js/cart.js" defer></script>
     <script src="main.js" defer></script>
+    <script src="js/liquid-button.js" defer></script>
 </body>
 </html>

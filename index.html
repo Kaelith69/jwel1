@@ -15,6 +15,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="liquid-button.css">
     <style>
         * {
             margin: 0;
@@ -493,9 +494,9 @@
             </div>
             <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="contact.html">About &amp; Contact</a></li>
+                    <li><a href="index.html" class="liquid-button">Home</a></li>
+                    <li><a href="products.html" class="liquid-button">Products</a></li>
+                    <li><a href="contact.html" class="liquid-button">About &amp; Contact</a></li>
                 </ul>
             </nav>
         </header>
@@ -507,14 +508,14 @@
                 </div>
                 <h1 class="visually-hidden">Luxury Jewelleries</h1>
                 <p>Experience the art of elegance. Crafted for the discerning.</p>
-                <a href="products.html" class="cta-button">Explore Collection</a>
+                <a href="products.html" class="cta-button liquidize">Explore Collection</a>
             </div>
         </main>
         
         <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
             <div class="cart-header">
                 <h2>Your Bag</h2>
-                <button id="cart-close-btn" class="close-btn" aria-label="Close cart">&times;</button>
+                <button id="cart-close-btn" class="close-btn liquidize" aria-label="Close cart">&times;</button>
             </div>
             <div id="cart-items" class="cart-items">
                 <p class="cart-empty">Your cart is empty</p>
@@ -525,8 +526,8 @@
                     <span id="cart-total-price">₹0</span>
                 </div>
                 <div class="cart-footer-actions">
-                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn" type="button">Clear</button>
-                    <button id="checkout-btn" class="checkout-button">Proceed to Checkout</button>
+                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn liquidize" type="button">Clear</button>
+                    <button id="checkout-btn" class="checkout-button liquidize">Proceed to Checkout</button>
                 </div>
             </div>
         </aside>
@@ -535,6 +536,7 @@
 
     <!-- Utilities for notifications and confirmAction -->
     <script src="js/utils.js"></script>
+    <script src="js/liquid-button.js" defer></script>
     <script>
         // Mobile navigation toggle
         const navToggle = document.getElementById('nav-toggle');

@@ -3,13 +3,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (window.UIManager) {
         try { new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
     }
+
+    const yearEl = document.getElementById('year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+    }
     
     // --- FIREBASE INTEGRATION ---
     // Show loading indicator
+    const ensureLoadingStyles = () => {
+        if (document.getElementById('loading-gem-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'loading-gem-styles';
+        style.textContent = `
+            .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: #666; text-align: center; font-size: 1rem; }
+            .loading-state .loading-gem { display: inline-flex; align-items: center; justify-content: center; gap: 12px; transform: translateZ(0); perspective: 500px; }
+            .loading-state .loading-gem span { display: inline-block; width: clamp(24px, 3vw, 32px); height: clamp(24px, 3vw, 32px); background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%); border-radius: 18% 18% 42% 42%; transform: rotate(45deg) scale(0.88); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28); animation: gemPulse 1.2s ease-in-out infinite; opacity: 0.95; position: relative; overflow: hidden; will-change: transform, box-shadow, filter; }
+            .loading-state .loading-gem span::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), transparent 55%); opacity: 0.75; }
+            .loading-state .loading-gem span:nth-child(2) { animation-delay: 0.18s; }
+            .loading-state .loading-gem span:nth-child(3) { animation-delay: 0.36s; }
+            @keyframes gemPulse { 0%, 100% { transform: rotate(45deg) scale(0.82) translateY(0); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18); filter: brightness(0.92); } 45% { transform: rotate(45deg) scale(1.08) translateY(-8px); box-shadow: 0 18px 30px rgba(250, 204, 21, 0.4); filter: brightness(1.12); } 55% { transform: rotate(45deg) scale(1.05) translateY(-5px); box-shadow: 0 12px 26px rgba(96, 165, 250, 0.35); filter: brightness(1.05); } }
+        `;
+        document.head.appendChild(style);
+    };
+
     const showLoading = () => {
-        if (document.getElementById('product-grid')) {
-            document.getElementById('product-grid').innerHTML = '<div style="text-align:center;padding:40px;color:#666;"><p style="font-size:18px;">🔄 Loading products from Firebase...</p></div>';
-        }
+        const grid = document.getElementById('product-grid');
+        if (!grid) return;
+        ensureLoadingStyles();
+        grid.innerHTML = `
+            <div class="loading-state" role="status" aria-live="polite" aria-label="Loading products">
+                <span class="loading-gem" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </div>
+        `.trim();
     };
     
     const showError = (message) => {
@@ -168,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     
                     <!-- Full-width Cart Button -->
-                    <button class="add-to-cart-btn" data-id="${String(product.id)}" title="Add to Cart" aria-label="Add ${product.name} to cart">
+                    <button class="add-to-cart-btn liquidize" data-id="${String(product.id)}" title="Add to Cart" aria-label="Add ${product.name} to cart">
                         <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
                         <span class="btn-text">Add to Cart</span>
                     </button>
@@ -212,12 +242,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                         <div class="cart-item-quantity">
-                            <button class="quantity-btn" data-id="${String(item.id)}" data-action="decrease" aria-label="Decrease quantity">-</button>
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" aria-label="Decrease quantity">-</button>
                             <span class="quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn" data-id="${String(item.id)}" data-action="increase" aria-label="Increase quantity">+</button>
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" aria-label="Increase quantity">+</button>
                         </div>
                     </div>
-                    <button class="remove-item-btn" data-id="${String(item.id)}" aria-label="Remove item">&times;</button>
+                    <button class="remove-item-btn liquidize" data-id="${String(item.id)}" aria-label="Remove item">&times;</button>
                 `;
                 fragment.appendChild(cartItemEl);
             });

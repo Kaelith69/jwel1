@@ -206,6 +206,147 @@ async function addOrder(order){
   }
 }
 
+async function resolveOrderDocId(orderId) {
+  await init();
+  if (!_state.useFirestore || !orderId) return null;
+  if (!_state.collection || !_state.getDocs) return null;
+  const snapshot = await _state.getDocs(_state.collection(_state.db, 'orders'));
+  let resolved = null;
+  snapshot.forEach(docSnap => {
+    if (resolved) return;
+    const data = docSnap.data();
+    if (String(docSnap.id) === String(orderId)) {
+      resolved = docSnap.id;
+      return;
+    }
+    if (data && data.orderId && String(data.orderId) === String(orderId)) {
+      resolved = docSnap.id;
+    }
+  });
+  return resolved;
+}
+
+async function updateOrder(docIdOrOrderId, updates) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot update order.');
+  }
+  if (!docIdOrOrderId) {
+    throw new Error('Order identifier is required.');
+  }
+  const initialId = String(docIdOrOrderId);
+  let targetId = initialId;
+  let docRef = _state.doc(_state.db, 'orders', targetId);
+  try {
+    await _state.updateDoc(docRef, updates);
+  } catch (err) {
+    if (err && err.code === 'not-found') {
+      const fallbackId = await resolveOrderDocId(targetId);
+      if (fallbackId) {
+        targetId = fallbackId;
+        docRef = _state.doc(_state.db, 'orders', targetId);
+        await _state.updateDoc(docRef, updates);
+      } else if (_state.setDoc) {
+        await _state.setDoc(docRef, updates, { merge: true });
+      } else {
+        throw err;
+      }
+    } else {
+      throw err;
+    }
+  }
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('proJetOrders');
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        const idx = parsed.findIndex(entry =>
+          String(entry.orderId) === initialId ||
+          String(entry.orderId) === targetId ||
+          String(entry._docId) === initialId ||
+          String(entry._docId) === targetId
+        );
+        if (idx > -1) {
+          const merged = { ...parsed[idx], ...updates };
+          if (!merged._docId) merged._docId = targetId;
+          parsed[idx] = merged;
+          localStorage.setItem('proJetOrders', JSON.stringify(parsed));
+        }
+      }
+    } catch (err) {
+      console.warn('Order cache update skipped after patch:', err);
+    }
+  }
+  return targetId;
+}
+
+async function deleteOrder(docIdOrOrderId) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot delete order.');
+  }
+  if (!docIdOrOrderId) {
+    throw new Error('Order identifier is required.');
+  }
+  const initialId = String(docIdOrOrderId);
+  let targetId = initialId;
+  try {
+    await _state.deleteDoc(_state.doc(_state.db, 'orders', targetId));
+  } catch (err) {
+    if (err && err.code === 'not-found') {
+      const fallbackId = await resolveOrderDocId(targetId);
+      if (!fallbackId) {
+        throw err;
+      }
+      targetId = fallbackId;
+      await _state.deleteDoc(_state.doc(_state.db, 'orders', targetId));
+    } else {
+      throw err;
+    }
+  }
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('proJetOrders');
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        const filtered = parsed.filter(entry =>
+          String(entry.orderId) !== initialId &&
+          String(entry.orderId) !== targetId &&
+          String(entry._docId) !== initialId &&
+          String(entry._docId) !== targetId
+        );
+        localStorage.setItem('proJetOrders', JSON.stringify(filtered));
+      }
+    } catch (err) {
+      console.warn('Order cache update skipped after delete:', err);
+    }
+  }
+  return targetId;
+}
+
+async function clearOrders() {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot clear orders.');
+  }
+  const snapshot = await _state.getDocs(_state.collection(_state.db, 'orders'));
+  const deletions = [];
+  snapshot.forEach(docSnap => {
+    deletions.push(_state.deleteDoc(_state.doc(_state.db, 'orders', docSnap.id)));
+  });
+  if (deletions.length) {
+    await Promise.all(deletions);
+  }
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.removeItem('proJetOrders');
+    } catch (err) {
+      console.warn('Order cache clear skipped:', err);
+    }
+  }
+  return deletions.length;
+}
+
 // Auth helpers
 async function signIn(email, password){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signInWithEmailAndPassword(_state.auth, email, password); }
 async function signOut(){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signOut(_state.auth); }
@@ -353,6 +494,9 @@ export default {
   // orders
   getOrders,
   addOrder,
+  updateOrder,
+  deleteOrder,
+  clearOrders,
   // settings
   getSettings,
   saveSettings,

@@ -136,14 +136,14 @@ class CartManager {
                     <p class="cart-item-name">${item.name}</p>
                     <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                     <div class="cart-item-quantity">
-            <button class="quantity-btn" data-id="${String(item.id)}" data-action="decrease" 
+            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" 
                                 aria-label="Decrease quantity">-</button>
                         <span class="quantity-display">${item.quantity}</span>
-            <button class="quantity-btn" data-id="${String(item.id)}" data-action="increase" 
+            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" 
                                 aria-label="Increase quantity">+</button>
                     </div>
                 </div>
-        <button class="remove-item-btn" data-id="${String(item.id)}" 
+    <button class="remove-item-btn liquidize" data-id="${String(item.id)}" 
                         aria-label="Remove ${item.name} from cart">&times;</button>
             </div>
         `).join('');

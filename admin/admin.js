@@ -334,7 +334,7 @@ const path=window.location.pathname;
         return arr;
     };
     const saveOrders=(o)=>localStorage.setItem('proJetOrders',JSON.stringify(o));
-    const renderOrdersList=()=>{ if(!ordersContainer) return; const orders=fetchOrders().sort((a,b)=>new Date(b.date)-new Date(a.date)); if(!orders.length){ordersContainer.innerHTML='<p style="opacity:.7">No orders yet.</p>';return;} ordersContainer.innerHTML=orders.map(o=>`<div class="order-item" data-id="${o.orderId}"><div class="order-meta"><strong>${o.orderId}</strong> <span>${new Date(o.date).toLocaleString()}</span></div><div class="order-items">${o.items.map(i=>`${i.name} x${i.quantity}`).join(', ')}</div><div class="order-total">Total: ₹${o.total.toLocaleString('en-IN')}</div><div><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></div><button class="admin-button danger order-delete-btn" data-id="${o.orderId}">Delete</button></div>`).join(''); };
+    const renderOrdersList=()=>{ if(!ordersContainer) return; const orders=fetchOrders().sort((a,b)=>new Date(b.date)-new Date(a.date)); if(!orders.length){ordersContainer.innerHTML='<p style="opacity:.7">No orders yet.</p>';return;} ordersContainer.innerHTML=orders.map(o=>`<div class="order-item" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}><div class="order-meta"><strong>${o.orderId}</strong> <span>${new Date(o.date).toLocaleString()}</span></div><div class="order-items">${o.items.map(i=>`${i.name} x${i.quantity}`).join(', ')}</div><div class="order-total">Total: ₹${o.total.toLocaleString('en-IN')}</div><div><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></div><button class="admin-button danger order-delete-btn" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}>Delete</button></div>`).join(''); };
     const filterOrders=o=>{ let f=[...o];
         const term=(orderSearch?.value||'').toLowerCase();
         if(term) f=f.filter(or=> (or.orderId||'').toLowerCase().includes(term) || (or.customer?.name||'').toLowerCase().includes(term));
@@ -343,14 +343,36 @@ const path=window.location.pathname;
     const statusCycle=['Pending','Processing','Shipped','Delivered','Cancelled'];
     const nextStatus=cur=>{ const i=statusCycle.indexOf(cur); return statusCycle[(i+1)%statusCycle.length]; };
     const computeKPIs=(orders)=>{ if(!(kpiToday&&kpiWeek&&kpiMonth&&kpiTotal)) return; const now=new Date(); const startOfDay=new Date(now.getFullYear(),now.getMonth(),now.getDate()); const startOfWeek=new Date(now); startOfWeek.setDate(now.getDate()-6); startOfWeek.setHours(0,0,0,0); const startOfMonth=new Date(now.getFullYear(),now.getMonth(),1); let todayT=0,weekT=0,monthT=0,totalT=0,todayC=0,weekC=0,monthC=0,totalC=0,deliveredC=0,cancelledC=0; orders.forEach(o=>{ const d=new Date(o.date); const amt=o.total||0; totalT+=amt; totalC++; if(o.status==='Delivered') deliveredC++; if(o.status==='Cancelled') cancelledC++; if(d>=startOfMonth){monthT+=amt; monthC++;} if(d>=startOfWeek){weekT+=amt; weekC++;} if(d>=startOfDay){todayT+=amt; todayC++;} }); kpiToday.querySelector('.kpi-value').textContent='₹'+todayT.toLocaleString('en-IN'); kpiWeek.querySelector('.kpi-value').textContent='₹'+weekT.toLocaleString('en-IN'); kpiMonth.querySelector('.kpi-value').textContent='₹'+monthT.toLocaleString('en-IN'); kpiTotal.querySelector('.kpi-value').textContent='₹'+totalT.toLocaleString('en-IN'); kpiTodayCount.textContent=`${todayC} ${todayC===1?'order':'orders'}`; kpiWeekCount.textContent=`${weekC} ${weekC===1?'order':'orders'}`; kpiMonthCount.textContent=`${monthC} ${monthC===1?'order':'orders'}`; kpiTotalCount.innerHTML=`${totalC} ${totalC===1?'order':'orders'} <span class="kpi-delivered">(${deliveredC} delivered</span> / <span class="kpi-cancelled">${cancelledC} cancelled)</span>`; };
-    const buildStatusSelect=o=>`<select class="status-select" data-id="${o.orderId}">${statusCycle.map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>`;
-    const buildRow=o=>{ const dateStr=new Date(o.date).toLocaleString(); const status=buildStatusSelect(o)+` <span class=\"status-badge status-${o.status.toLowerCase()}\">${o.status}</span>`; const expanded=expandedOrders.has(o.orderId); const summary=`<strong>${o.customer?.name||''}</strong> • ${o.items.length} item(s)<span class="toggle-indicator">${expanded?'▲':'▼'}</span>`; return `<tr class="data-row" data-id="${o.orderId}" aria-expanded="${expanded?'true':'false'}"><td class="nowrap">${o.orderId}</td><td class="nowrap">${dateStr}</td><td>${status}</td><td>${summary}</td><td class="nowrap">${o.total.toLocaleString('en-IN')}</td><td class="actions-cell"><button class="admin-button danger order-delete-btn" data-id="${o.orderId}">Delete</button></td></tr>`; };
+    const buildStatusSelect=o=>`<select class="status-select" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}>${statusCycle.map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>`;
+    const buildRow=o=>{ const dateStr=new Date(o.date).toLocaleString(); const status=buildStatusSelect(o)+` <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>`; const expanded=expandedOrders.has(o.orderId); const summary=`<strong>${o.customer?.name||''}</strong> • ${o.items.length} item(s)<span class="toggle-indicator">${expanded?'▲':'▼'}</span>`; const docAttr=o._docId?` data-docid="${o._docId}"`:''; return `<tr class="data-row" data-id="${o.orderId}"${docAttr} aria-expanded="${expanded?'true':'false'}"><td class="nowrap">${o.orderId}</td><td class="nowrap">${dateStr}</td><td>${status}</td><td>${summary}</td><td class="nowrap">${o.total.toLocaleString('en-IN')}</td><td class="actions-cell"><button class="admin-button danger order-delete-btn" data-id="${o.orderId}"${docAttr}>Delete</button></td></tr>`; };
     const buildDetailRow=o=>{ const c=o.customer||{}; const itemsHtml=o.items.map(i=>`<li>${i.name} x${i.quantity} <span class="muted">(₹${(i.price*i.quantity).toLocaleString('en-IN')})</span></li>`).join(''); const meta=`<div>Order ID: <strong>${o.orderId}</strong></div><div>Status: ${o.status}</div><div>Date: ${new Date(o.date).toLocaleString()}</div>`; const customer=`${c.name||''}<br>${c.mobile||''}<br>${c.email||''}<br>${(c.address||'').replace(/\n/g,'<br>')}<br>PIN: ${c.pincode||''}`; return `<tr class="order-detail-row" data-detail-for="${o.orderId}"><td colspan="6"><div class="order-detail"><div class="od-section"><h4>Customer</h4><div class="od-customer">${customer}</div></div><div class="od-section"><h4>Items</h4><ul class="od-items">${itemsHtml}</ul></div><div class="od-section"><h4>Meta</h4><div class="od-meta">${meta}</div></div></div></td></tr>`; };
     const renderOrdersTable=()=>{ if(!ordersTableBody) return; const all=fetchOrders(); const filtered=filterOrders(all); computeKPIs(all); if(!filtered.length){ ordersTableBody.innerHTML=''; if(ordersEmpty) ordersEmpty.style.display='block'; return;} if(ordersEmpty) ordersEmpty.style.display='none'; const rows=[]; filtered.forEach(o=>{ rows.push(buildRow(o)); if(expandedOrders.has(o.orderId)) rows.push(buildDetailRow(o)); }); ordersTableBody.innerHTML=rows.join(''); };
-    const deleteOrder=id=>{ const remaining=fetchOrders().filter(o=>o.orderId!==id); saveOrders(remaining); renderOrdersList(); renderOrdersTable(); };
-    if(ordersContainer) ordersContainer.addEventListener('click',e=>{const d=e.target.closest('.order-delete-btn'); if(d) { confirmAction('Delete order '+d.dataset.id+'?').then(ok=>{ if(ok) deleteOrder(d.dataset.id); }); }});
+    const deleteOrder=async (orderId, docId)=>{
+        const current=fetchOrders();
+        const target=current.find(o=>o.orderId===orderId);
+        if(!target) return;
+        const remaining=current.filter(o=>o.orderId!==orderId);
+        const wasExpanded=expandedOrders.has(orderId);
+        expandedOrders.delete(orderId);
+        saveOrders(remaining);
+        renderOrdersList();
+        renderOrdersTable();
+        if(!__useFirestore){ notify('Order removed.', 'info'); return; }
+        try{
+            await FirebaseAdapter.deleteOrder(docId||orderId);
+            notify('Order deleted.', 'info');
+        }catch(err){
+            console.warn('Order delete failed', err);
+            saveOrders(current);
+            if(wasExpanded) expandedOrders.add(orderId);
+            renderOrdersList();
+            renderOrdersTable();
+            notify('Failed to delete order from Firestore.', 'error');
+        }
+    };
+    if(ordersContainer) ordersContainer.addEventListener('click',e=>{const d=e.target.closest('.order-delete-btn'); if(d) { const orderId=d.dataset.id; const docId=d.dataset.docid||orderId; confirmAction('Delete order '+orderId+'?').then(async ok=>{ if(ok) await deleteOrder(orderId, docId); }); }});
     if(ordersTableBody) ordersTableBody.addEventListener('click',e=>{
-        const del=e.target.closest('.order-delete-btn'); if(del){ confirmAction('Delete order '+del.dataset.id+'?').then(ok=>{ if(ok){ deleteOrder(del.dataset.id); } }); return; }
+        const del=e.target.closest('.order-delete-btn'); if(del){ const orderId=del.dataset.id; const docId=del.dataset.docid||orderId; confirmAction('Delete order '+orderId+'?').then(async ok=>{ if(ok){ await deleteOrder(orderId, docId); } }); return; }
         const row=e.target.closest('tr.data-row');
         if(row && !e.target.closest('select.status-select') && !e.target.closest('.actions-cell')){
             const id=row.dataset.id;
@@ -358,10 +380,42 @@ const path=window.location.pathname;
             renderOrdersTable();
         }
     });
-    if(ordersTableBody) ordersTableBody.addEventListener('change',e=>{
-        const sel=e.target.closest('select.status-select'); if(sel){ const id=sel.dataset.id; const orders=fetchOrders(); const idx=orders.findIndex(o=>o.orderId===id); if(idx>-1){ orders[idx].status=sel.value; saveOrders(orders); renderOrdersTable(); }}
+    if(ordersTableBody) ordersTableBody.addEventListener('change',async e=>{
+        const sel=e.target.closest('select.status-select');
+        if(sel){
+            const orderId=sel.dataset.id;
+            const docId=sel.dataset.docid||orderId;
+            const orders=fetchOrders();
+            const idx=orders.findIndex(o=>o.orderId===orderId);
+            if(idx>-1){
+                const previous=JSON.parse(JSON.stringify(orders[idx]));
+                const nextStatus=sel.value;
+                if(previous.status===nextStatus) return;
+                const changedAt=new Date().toISOString();
+                orders[idx].status=nextStatus;
+                orders[idx].updatedAt=changedAt;
+                if(!Array.isArray(orders[idx].statusHistory)) orders[idx].statusHistory=[];
+                orders[idx].statusHistory.push({ status: nextStatus, changedAt, changedBy: 'admin-panel' });
+                saveOrders(orders);
+                renderOrdersList();
+                renderOrdersTable();
+                if(!__useFirestore){ notify('Order status updated.', 'success'); return; }
+                try{
+                    await FirebaseAdapter.updateOrder(docId, { status: nextStatus, updatedAt: changedAt, statusHistory: orders[idx].statusHistory });
+                    notify('Order status updated.', 'success');
+                }catch(err){
+                    console.warn('Order status update failed', err);
+                    orders[idx]=previous;
+                    saveOrders(orders);
+                    renderOrdersList();
+                    renderOrdersTable();
+                    sel.value=previous.status;
+                    notify('Failed to update status in Firestore.', 'error');
+                }
+            }
+        }
     });
-    if(clearOrdersBtn) clearOrdersBtn.addEventListener('click',()=>{ confirmAction('Clear ALL orders?').then(ok=>{ if(ok){ saveOrders([]); renderOrdersList(); renderOrdersTable(); notify('All orders cleared', 'info'); } }); });
+    if(clearOrdersBtn) clearOrdersBtn.addEventListener('click',()=>{ confirmAction('Clear ALL orders?').then(async ok=>{ if(!ok) return; const previous=fetchOrders(); const previouslyExpanded=new Set(expandedOrders); saveOrders([]); expandedOrders.clear(); renderOrdersList(); renderOrdersTable(); if(!__useFirestore){ notify('All orders cleared.', 'info'); return; } try{ const removed=await FirebaseAdapter.clearOrders(); notify(`Cleared ${removed} order${removed===1?'':'s'}.`, 'info'); }catch(err){ console.warn('Order clear failed', err); saveOrders(previous); expandedOrders.clear(); previouslyExpanded.forEach(id=>expandedOrders.add(id)); renderOrdersList(); renderOrdersTable(); notify('Failed to clear orders from Firestore.', 'error'); } }); });
     if(syncOrdersBtn) syncOrdersBtn.addEventListener('click', async ()=>{
         try{
             await FirebaseAdapter.init();
