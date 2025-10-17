@@ -2871,10 +2871,3 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
     cursor: not-allowed;
     box-shadow: none;
 }
-
-/* Hide/disable floating button when cart is open (cart sidebar is full-screen) */
-.cart-sidebar.open ~ #order-now-btn {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.96);
-}

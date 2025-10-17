@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="liquid-button.css">
     <link rel="stylesheet" href="neumorphic.css">
@@ -549,7 +548,49 @@
             color: var(--white);
         }
 
-        /* Floating button styles are in styles.css */
+        /* Floating Checkout Button */
+        .floating-order-btn {
+            position: fixed;
+            right: 16px;
+            bottom: max(16px, env(safe-area-inset-bottom));
+            background: var(--primary-gold);
+            color: var(--white);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(212, 168, 83, 0.3);
+            transition: var(--transition);
+            z-index: 1000; /* keep under cart sidebar (1001) and above page content */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .floating-order-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 6px 24px rgba(212, 168, 83, 0.4);
+        }
+
+        .btn-label { display: none; }
+
+        /* Hide/disable floating button when cart is open to avoid overlay interactions */
+        .cart-sidebar.open ~ #order-now-btn {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.96);
+        }
+
+        /* Better spacing on small screens */
+        @media (max-width: 600px) {
+            .floating-order-btn {
+                width: 54px;
+                height: 54px;
+                right: 14px;
+                bottom: max(14px, env(safe-area-inset-bottom));
+                font-size: 18px;
+            }
+        }
 
         /* Footer */
         .site-footer {
@@ -930,6 +971,21 @@
     </style>
 </head>
 <body>
+        <!-- Page loader overlay -->
+        <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading">
+                <div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <style>
+            .page-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:2000;transition:opacity .18s ease}
+            .page-loader.hidden{opacity:0;pointer-events:none}
+            .loader-gem{display:inline-flex;gap:10px}
+            .loader-gem span{width:14px;height:14px;border-radius:3px 3px 8px 8px;transform:rotate(45deg);background:linear-gradient(135deg,#4f46e5 0%,#60a5fa 50%,#facc15 100%);box-shadow:0 6px 14px rgba(79,70,229,.28)}
+            .loader-gem span:nth-child(1){animation:lg-bounce 900ms ease-in-out infinite}
+            .loader-gem span:nth-child(2){animation:lg-bounce 900ms ease-in-out infinite .12s}
+            .loader-gem span:nth-child(3){animation:lg-bounce 900ms ease-in-out infinite .24s}
+            @keyframes lg-bounce{0%,100%{transform:rotate(45deg) translateY(0) scale(.9);filter:brightness(.95)}50%{transform:rotate(45deg) translateY(-8px) scale(1.1);filter:brightness(1.1)}}
+            @media (prefers-reduced-motion: reduce){.page-loader{-webkit-backdrop-filter:none;backdrop-filter:none}.loader-gem span{animation:none}}
+        </style>
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="app-container">
         <header class="main-header">
@@ -1069,5 +1125,6 @@
     <script src="js/cart.js" defer></script>
     <script src="main.js" defer></script>
     <script src="js/liquid-button.js" defer></script>
+    <script src="js/nav-loading.js" defer></script>
 </body>
 </html>
