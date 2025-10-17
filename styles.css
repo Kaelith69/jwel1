@@ -53,7 +53,7 @@
     position: fixed;
     right: 16px;
     bottom: max(16px, env(safe-area-inset-bottom));
-    z-index: 1002;
+    z-index: 1000; /* keep below dialogs (1001+) */
     background: var(--accent-color, #3B82F6);
     color: #fff;
     border: none;
@@ -494,7 +494,7 @@ input[type=number] {
     justify-content: center;
 }
 /* thinner minimalist hamburger/X */
-.nav-toggle i { font-size: 20px; font-weight: 300; line-height: 1; }
+.nav-toggle i { font-size: 20px; line-height: 1; }
 
 @media (max-width: 768px) {
     .nav-toggle { display: inline-flex; }
@@ -2863,4 +2863,18 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
         margin-bottom: 1.2rem;
         padding: 0 1rem;
     }
+}
+
+/* Disabled state visuals for floating button */
+.floating-order-btn[disabled], .floating-order-btn[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Hide/disable floating button when cart is open (cart sidebar is full-screen) */
+.cart-sidebar.open ~ #order-now-btn {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.96);
 }

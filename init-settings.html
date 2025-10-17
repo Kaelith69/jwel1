@@ -74,14 +74,19 @@
             font-family: monospace;
             font-size: 14px;
         }
+
+        /* Initially hidden areas (toggled by JS) */
+        #details { display: none; }
+        #actions { display: none; }
     </style>
+    <link rel="stylesheet" href="neumorphic.css">
 </head>
 <body>
     <div class="container">
         <h1>🔥 Initialize Firebase Settings</h1>
         <div id="status" class="status loading">Initializing...</div>
-        <div id="details" class="details" style="display:none;"></div>
-        <div id="actions" style="display:none;">
+    <div id="details" class="details"></div>
+    <div id="actions">
             <button class="button" onclick="location.reload()">Refresh</button>
             <button class="button secondary" onclick="location.href='admin/settings.html'">Go to Settings</button>
         </div>

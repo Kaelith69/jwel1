@@ -8,8 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="liquid-button.css">
+    <link rel="stylesheet" href="neumorphic.css">
     <style>
         * {
             margin: 0;
@@ -547,33 +549,7 @@
             color: var(--white);
         }
 
-        /* Floating Checkout Button */
-        .floating-order-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary-gold);
-            color: var(--white);
-            border: none;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(212, 168, 83, 0.3);
-            transition: var(--transition);
-            z-index: 999;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .floating-order-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 6px 24px rgba(212, 168, 83, 0.4);
-        }
-
-        .btn-label {
-            display: none;
-        }
+        /* Floating button styles are in styles.css */
 
         /* Footer */
         .site-footer {
@@ -973,7 +949,7 @@
                     <span id="cart-count" aria-live="polite" aria-atomic="true">0</span>
                 </button>
                 <button id="nav-toggle" class="nav-toggle" aria-label="Open menu">
-                    <i class="fas fa-bars" aria-hidden="true"></i>
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
         </header>
@@ -1051,7 +1027,7 @@
         
         <div id="sidebar-overlay" class="sidebar-overlay"></div>
         
-        <button id="order-now-btn" class="floating-order-btn liquidize" aria-label="Go to checkout">
+        <button id="order-now-btn" class="floating-order-btn liquidize no-neu" aria-label="Go to checkout">
             <i class="fa-solid fa-cart-shopping"></i>
         </button>
 

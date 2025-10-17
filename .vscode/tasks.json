@@ -7,6 +7,13 @@
 			"command": "node server.js",
 			"isBackground": true,
 			"group": "build"
+		},
+		{
+			"label": "Start local static server",
+			"type": "shell",
+			"command": "node server.js",
+			"isBackground": true,
+			"group": "build"
 		}
 	]
 }

@@ -278,6 +278,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isDisabled = totalItems === 0;
             floatingOrderBtn.disabled = isDisabled;
             floatingOrderBtn.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+            // Provide hidden label text reflecting item count for SR users
+            floatingOrderBtn.setAttribute('title', isDisabled ? 'Cart is empty' : `Open cart (${totalItems} item${totalItems===1?'':'s'})`);
         }
         saveCart();
     };
@@ -762,11 +764,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navToggle = document.getElementById('nav-toggle');
     const mainNav = document.getElementById('site-main-nav');
     if (navToggle && mainNav) {
+        const navIcon = navToggle.querySelector('i');
+        const setNavIcon = (open) => {
+            if (!navIcon) return;
+            navIcon.classList.remove('fa-bars', 'fa-xmark');
+            navIcon.classList.add('fa-solid', open ? 'fa-xmark' : 'fa-bars');
+            navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        };
+        // Ensure initial state
+        setNavIcon(false);
+
         navToggle.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             const isOpen = mainNav.classList.toggle('open');
             navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            setNavIcon(isOpen);
             
             // Handle body scroll
             if (isOpen) {
@@ -783,6 +796,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 !navToggle.contains(e.target)) {
                 mainNav.classList.remove('open');
                 navToggle.setAttribute('aria-expanded', 'false');
+                setNavIcon(false);
                 document.body.style.overflow = '';
             }
         });
@@ -792,6 +806,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (e.key === 'Escape' && mainNav.classList.contains('open')) {
                 mainNav.classList.remove('open');
                 navToggle.setAttribute('aria-expanded', 'false');
+                setNavIcon(false);
                 document.body.style.overflow = '';
             }
         });
@@ -800,6 +815,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
     if (floatingOrderBtn) {
+        // Initialize disabled state on load
+        const initialItems = cart.reduce((s,i)=>s+i.quantity,0);
+        floatingOrderBtn.disabled = initialItems === 0;
+        floatingOrderBtn.setAttribute('aria-disabled', initialItems === 0 ? 'true' : 'false');
         floatingOrderBtn.addEventListener('click', (e) => {
             e.preventDefault();
             if (cart.length === 0) {

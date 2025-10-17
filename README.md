@@ -222,6 +222,14 @@ Upload all files to your web server. Ensure:
 - **[RUN_INSTRUCTIONS.md](./RUN_INSTRUCTIONS.md)** - Development setup
 - **[ISSUES_FOUND.md](./ISSUES_FOUND.md)** - Known issues & fixes
 
+### 💠 Neuromorphic Buttons
+
+- A lightweight neuromorphic layer was added in `neumorphic.css` and linked across all pages (public + admin).
+- Applies soft depth to common buttons: `.cta-button`, `.admin-button`, `.checkout-button`, `.cart-button`, `.close-btn`, `.nav-toggle`, quantity/remove buttons and generic `.button`.
+- Accessibility: retains clear focus ring; hover and active states preserve depth cues.
+- Opt out on any element by adding class `no-neu`.
+
+
 ---
 
 ## 🎯 Future Enhancements
