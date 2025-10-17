@@ -15,8 +15,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="liquid-button.css">
     <link rel="stylesheet" href="neumorphic.css">
+    <link rel="stylesheet" href="loader.css">
     <style>
         * {
             margin: 0;
@@ -482,17 +484,7 @@
             <span></span><span></span><span></span>
         </div>
     </div>
-        <style>
-            .page-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.85);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);z-index:2000;transition:opacity .18s ease;}
-      .page-loader.hidden{opacity:0;pointer-events:none;}
-      .loader-gem{display:inline-flex;gap:10px}
-      .loader-gem span{width:14px;height:14px;border-radius:3px 3px 8px 8px;transform:rotate(45deg);background:linear-gradient(135deg,#4f46e5 0%,#60a5fa 50%,#facc15 100%);box-shadow:0 6px 14px rgba(79,70,229,.28)}
-      .loader-gem span:nth-child(1){animation:lg-bounce 900ms ease-in-out infinite}
-      .loader-gem span:nth-child(2){animation:lg-bounce 900ms ease-in-out infinite .12s}
-      .loader-gem span:nth-child(3){animation:lg-bounce 900ms ease-in-out infinite .24s}
-      @keyframes lg-bounce{0%,100%{transform:rotate(45deg) translateY(0) scale(.9);filter:brightness(.95)}50%{transform:rotate(45deg) translateY(-8px) scale(1.1);filter:brightness(1.1)}}
-            @media (prefers-reduced-motion: reduce){.page-loader{-webkit-backdrop-filter:none;backdrop-filter:none}.loader-gem span{animation:none}}
-    </style>
+    
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="app-container">
         <header class="main-header">
@@ -513,7 +505,7 @@
             <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
                 <ul>
                     <li><a href="index.html" class="liquid-button">Home</a></li>
-                    <li><a href="products.html" class="liquid-button">Products</a></li>
+                    <li><a href="products.html" class="liquid-button">Collections</a></li>
                     <li><a href="contact.html" class="liquid-button">About &amp; Contact</a></li>
                 </ul>
             </nav>
@@ -522,7 +514,7 @@
         <main class="hero-section" id="main-content" role="main">
             <div class="glass-panel">
                 <div class="logo">
-                    <img src="/logo/logo.png" alt="Store logo" class="logo">
+                    <img src="logo/logo.png" alt="Store logo" class="logo">
                 </div>
                 <h1 class="visually-hidden">Luxury Jewelleries</h1>
                 <p>Experience the art of elegance. Crafted for the discerning.</p>
@@ -554,6 +546,8 @@
 
     <!-- Utilities for notifications and confirmAction -->
     <script src="js/utils.js"></script>
+    <script src="js/liquid-button.js" defer></script>
+    <script src="js/nav-active.js" defer></script>
     <script src="js/nav-loading.js" defer></script>
     <script src="js/liquid-button.js" defer></script>
     <script>

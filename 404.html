@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page not found</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="loader.css">
+  <link rel="stylesheet" href="neumorphic.css">
+  <style>
+    .not-found{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+    .not-found .card{background:#fff;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:28px 24px;max-width:560px;margin:auto}
+    .not-found h1{font-size:2rem;margin-bottom:.5rem;color:#1E40AF}
+    .not-found p{color:#374151;margin:.25rem 0}
+    .not-found a{display:inline-block;margin-top:1rem;color:#3B82F6;font-weight:600;text-decoration:none}
+  </style>
+</head>
+<body>
+  <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading"><div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div></div>
+  <div class="not-found">
+    <div class="card">
+      <h1>Page not found</h1>
+      <p>The page you’re looking for doesn’t exist or may have moved.</p>
+      <p><a href="index.html">Go back home</a></p>
+    </div>
+  </div>
+  <script src="js/nav-loading.js" defer></script>
+</body>
+</html>

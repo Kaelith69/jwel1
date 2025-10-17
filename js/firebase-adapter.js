@@ -21,6 +21,7 @@ let _state = {
   onSnapshot: null,
   query: null,
   orderBy: null,
+  serverTimestamp: null,
   signInWithEmailAndPassword: null,
   signOut: null,
   onAuthStateChanged: null
@@ -80,7 +81,8 @@ async function init() {
       _state.setDoc = cfg.setDoc;
       _state.onSnapshot = cfg.onSnapshot;
       _state.query = cfg.query;
-      _state.orderBy = cfg.orderBy;
+  _state.orderBy = cfg.orderBy;
+  _state.serverTimestamp = cfg.serverTimestamp || null;
       _state.ref = cfg.ref;
       _state.uploadBytes = cfg.uploadBytes;
       _state.getDownloadURL = cfg.getDownloadURL;
@@ -125,6 +127,9 @@ async function addProduct(product) {
       const payload = { ...product };
       if (!payload.id) {
         payload.id = `prod_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      }
+      if (_state.serverTimestamp) {
+        payload.createdAt = _state.serverTimestamp();
       }
       if (_state.setDoc && _state.doc) {
         const targetRef = _state.doc(_state.db, 'products', String(payload.id));
@@ -185,12 +190,17 @@ async function addOrder(order){
     try{
       const collectionRef = _state.collection(_state.db,'orders');
       let docId = null;
+      const payloadTs = { ...payload };
+      if (_state.serverTimestamp) {
+        payloadTs.createdAt = _state.serverTimestamp();
+        payloadTs.updatedAt = _state.serverTimestamp();
+      }
       if (_state.setDoc && _state.doc && payload.orderId) {
         const docRef = _state.doc(_state.db, 'orders', String(payload.orderId));
-        await _state.setDoc(docRef, payload, { merge: true });
+        await _state.setDoc(docRef, payloadTs, { merge: true });
         docId = docRef.id;
       } else {
-        const ref = await _state.addDoc(collectionRef, payload);
+        const ref = await _state.addDoc(collectionRef, payloadTs);
         docId = ref.id;
       }
       console.log('[Firebase] Order added with ID:', docId);
@@ -357,7 +367,11 @@ async function updateProduct(docIdOrLocalId, product) {
   if (_state.useFirestore) {
     try {
       const dref = _state.doc(_state.db, 'products', docIdOrLocalId);
-      await _state.updateDoc(dref, product);
+      const payload = { ...product };
+      if (_state.serverTimestamp) {
+        payload.updatedAt = _state.serverTimestamp();
+      }
+      await _state.updateDoc(dref, payload);
       console.log('[Firebase] Product updated:', docIdOrLocalId);
       return true;
     } catch (err) {

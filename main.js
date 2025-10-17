@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checkoutSummaryContainer = document.getElementById('bill-items');
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
     const whatsappQrWrapper = document.getElementById('whatsapp-qr-wrapper');
+    const whatsappQrProgress = document.getElementById('whatsapp-qr-progress');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
     const floatingOrderBtn = document.getElementById('order-now-btn');
@@ -287,6 +288,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Render checkout page summary
     const renderCheckoutSummary = () => {
         if (!checkoutSummaryContainer) return;
+        const progress = document.getElementById('checkout-progress');
+        if (progress) { progress.style.display = 'block'; progress.setAttribute('aria-hidden','false'); }
 
         checkoutSummaryContainer.innerHTML = cart.map(item => `
             <div class="bill-item">
@@ -305,6 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (billSubtotal) billSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
         if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
         if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+        if (progress) { setTimeout(() => { progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
     };
 
     // --- EVENT HANDLERS ---
@@ -502,6 +506,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             <img src="${qrSrc}" alt="WhatsApp order QR code" class="whatsapp-qr-image" loading="lazy" decoding="async">
             <a href="${desktopUrl}" target="_blank" rel="noopener" class="qr-fallback-link">Open on WhatsApp Web instead</a>
         `;
+        // Hide the QR progress bar once image loads or fails
+        try {
+            const img = whatsappQrWrapper.querySelector('.whatsapp-qr-image');
+            if (img) {
+                const hideProgress = () => { if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); } };
+                img.addEventListener('load', hideProgress, { once: true });
+                img.addEventListener('error', hideProgress, { once: true });
+            }
+        } catch(_) {}
         whatsappQrWrapper.hidden = false;
         whatsappQrWrapper.classList.add('visible');
     }
@@ -538,6 +551,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             whatsappQrWrapper.classList.remove('visible');
             whatsappQrWrapper.innerHTML = '';
         }
+        if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
         
         if (!cart || cart.length === 0) {
             if (checkoutError) {
@@ -634,6 +648,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setWhatsAppButtonText('Generating WhatsApp QR...', 'Generating WhatsApp QR for WhatsApp order');
             }
         }
+        if (!isMobileDevice() && whatsappQrProgress) { whatsappQrProgress.style.display='block'; whatsappQrProgress.setAttribute('aria-hidden','false'); }
         
         try {
             const whatsappNumber = await getWhatsAppNumber();
@@ -643,6 +658,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     checkoutError.style.display = 'block';
                     checkoutError.style.color = '#dc3545';
                 }
+                if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
                 return;
             }
 
@@ -742,6 +758,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 checkoutError.textContent = 'An error occurred while processing your order. Please try again.';
                 checkoutError.style.display = 'block';
             }
+            if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
         } finally {
             if (submitButton) {
                 setTimeout(() => {
@@ -754,6 +771,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         setWhatsAppButtonText('Generate WhatsApp QR', 'Generate WhatsApp QR for WhatsApp order');
                     }
                 }, 2000);
+            }
+            if (!whatsappQrWrapper || !whatsappQrWrapper.classList.contains('visible')) {
+                if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
             }
         }
     }

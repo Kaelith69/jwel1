@@ -48,6 +48,10 @@
     margin-top: 0.85rem;
     font-weight: 600;
 }
+/* Slim progress bar for WhatsApp QR generation */
+.qr-progress { display:none; height:4px; margin-top:10px; position:relative; overflow:hidden; border-radius:999px; background: rgba(0,0,0,0.06); }
+.qr-progress .loader { position:absolute; inset:0; background: linear-gradient(90deg, transparent, var(--accent-color, #3B82F6), transparent); width: 35%; animation: qr-moving 1.1s linear infinite; border-radius:inherit; }
+@keyframes qr-moving { 0% { left: -35%; } 100% { left: 100%; } }
 /* Floating Order Now Button */
 .floating-order-btn {
     position: fixed;
@@ -153,6 +157,22 @@ img {
 .skip-link { position:absolute; left:-9999px; top:auto; width:1px; height:1px; overflow:hidden; }
 .skip-link:focus { left:8px; top:8px; width:auto; height:auto; background:var(--accent-color); color:#000; padding:8px 12px; border-radius:8px; z-index:10000; }
 .visually-hidden { position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px, 1px, 1px, 1px); white-space:nowrap; }
+
+/* Active nav styling */
+.main-nav a[aria-current="page"],
+.nav a[aria-current="page"]{
+    color: var(--accent-color);
+    font-weight: 600;
+    position: relative;
+}
+.main-nav a[aria-current="page"]::after,
+.nav a[aria-current="page"]::after{
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: -2px;
+    height: 2px; border-radius: 2px;
+    background: var(--accent-color);
+}
 
 /* Respect user reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
@@ -2870,4 +2890,32 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
     opacity: 0.6;
     cursor: not-allowed;
     box-shadow: none;
+}
+
+/* Checkout order summary progress loader (Uiverse.io by satyamchaudharydev) */
+.checkout-progress { display:none; padding: 8px 0 12px; }
+.checkout-progress .loader {
+    display: block;
+    --height-of-loader: 4px;
+    --loader-color: #0071e2;
+    width: 130px;
+    height: var(--height-of-loader);
+    border-radius: 30px;
+    background-color: rgba(0,0,0,0.2);
+    position: relative;
+}
+.checkout-progress .loader::before {
+    content: "";
+    position: absolute;
+    background: var(--loader-color);
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    border-radius: 30px;
+    animation: moving 1s ease-in-out infinite;
+}
+@keyframes moving {
+    50% { width: 100%; }
+    100% { width: 0; right: 0; left: unset; }
 }

@@ -51,6 +51,11 @@
                 <a class="admin-button" href="add-product.html">➕ Add Product</a>
                 <button type="button" id="migrate-firestore" class="admin-button" title="Sync unsynced products to Firestore">⬆️ Sync to Firestore</button>
             </div>
+            <!-- Inline loader shown during Firestore refresh -->
+            <div id="products-loading" class="inline-loader" aria-live="polite" hidden>
+                <div class="spinner" role="status" aria-label="Loading products"></div>
+                <span>Loading products…</span>
+            </div>
             <div class="table-wrapper" role="region" aria-label="Products table">
                 <table class="data-table products-table" id="products-table">
                     <thead>

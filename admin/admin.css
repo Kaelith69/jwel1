@@ -352,6 +352,10 @@ option { background:#1d1d1d; color:#fff; }
     select, option { outline: 1px solid #888; }
 }
 .inline-stats { font-size:.85rem; opacity:.75; }
+.inline-loader { display:flex; align-items:center; gap:10px; margin-top:10px; opacity:.9; }
+.inline-loader[hidden] { display:none !important; }
+.inline-loader .spinner { width:18px; height:18px; border-radius:50%; border:3px solid rgba(255,255,255,0.25); border-top-color:#4A90E2; animation: adminSpin .8s linear infinite; }
+@keyframes adminSpin { to { transform: rotate(360deg); } }
 .table-wrapper { overflow-x:auto; margin-top:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; }
 .data-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
 .data-table thead { background:rgba(255,255,255,0.08); }

@@ -27,6 +27,7 @@ let setDocRef = null;
 let onSnapshotRef = null;
 let queryRef = null;
 let orderByRef = null;
+let serverTimestampRef = null;
 
 let storageRef = null;
 let uploadBytesRef = null;
@@ -84,6 +85,7 @@ async function ensureInitialized() {
 			onSnapshotRef = fsMod.onSnapshot || null;
 			queryRef = fsMod.query || null;
 			orderByRef = fsMod.orderBy || null;
+			serverTimestampRef = fsMod.serverTimestamp || null;
 
 			storageRef = storageMod.ref;
 			uploadBytesRef = storageMod.uploadBytes;
@@ -138,6 +140,7 @@ export {
 	onSnapshotRef as onSnapshot,
 	queryRef as query,
 	orderByRef as orderBy,
+	serverTimestampRef as serverTimestamp,
 	storageRef as ref,
 	uploadBytesRef as uploadBytes,
 	getDownloadURLRef as getDownloadURL,
