@@ -23,6 +23,10 @@
       </ul>
     </nav>
     <div class="admin-header-actions">
+      <div id="conn-indicator" class="conn-indicator state-offline" title="Firebase connection">
+        <span class="conn-dot" aria-hidden="true"></span>
+        <span id="conn-label">Offline</span>
+      </div>
       <button id="logout-btn" class="admin-button secondary">Logout</button>
     </div>
   </header>
@@ -39,7 +43,7 @@
             <small class="hint">Digits only. 10–15 digits.</small>
           </div>
           <div class="actions-row">
-            <button type="submit" class="admin-button" id="save-settings-btn">Save</button>
+            <button type="submit" class="admin-button requires-auth" id="save-settings-btn" aria-disabled="true">Save</button>
             <button type="button" class="admin-button secondary" id="reset-settings-btn">Reset</button>
             <span id="settings-status" aria-live="polite" class="status-note"></span>
           </div>

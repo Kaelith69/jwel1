@@ -4,6 +4,39 @@ import FirebaseAdapter from '../js/firebase-adapter.js';
 const ADMIN_AUTH_KEY='vastravedajewlleries-admin-auth';
 let __useFirestore = false;
 const __createLocalId=(()=>{let seq=0;return ()=>`local_${Date.now()}_${seq++}`;})();
+// UI helpers: connection indicator + auth gating
+function setConnState(connected){
+    const el = document.getElementById('conn-indicator');
+    if(!el) return;
+    const isConn = !!connected;
+    el.classList.toggle('state-connected', isConn);
+    el.classList.toggle('state-offline', !isConn);
+    const lbl = document.getElementById('conn-label');
+    if(lbl) lbl.textContent = isConn ? 'Connected' : 'Offline';
+}
+function applyAuthGate(isAuthed){
+    const enabled = !!isAuthed;
+    document.querySelectorAll('.requires-auth').forEach(el=>{
+        if(enabled){
+            el.classList.remove('requires-auth-disabled');
+            el.removeAttribute('aria-disabled');
+            try{ if('disabled' in el) el.disabled = false; }catch(_){}
+        } else {
+            el.classList.add('requires-auth-disabled');
+            el.setAttribute('aria-disabled','true');
+            try{ if('disabled' in el) el.disabled = true; }catch(_){}
+        }
+    });
+}
+// Block clicks/activations on disabled auth-gated controls (capture phase)
+document.addEventListener('click', (e)=>{
+    const t = e.target.closest?.('.requires-auth');
+    if(t && t.getAttribute('aria-disabled') === 'true'){
+        e.preventDefault();
+        e.stopPropagation();
+        try{ if(typeof notify === 'function') notify('Sign in to enable this action','warn'); }catch(_){/* noop */}
+    }
+}, true);
 const __parseLocalProducts=()=>{
     try{
         const raw=JSON.parse(localStorage.getItem('products')||'[]');
@@ -50,6 +83,14 @@ const __persistProducts=list=>localStorage.setItem('products',JSON.stringify(lis
     try{
         const st = await FirebaseAdapter.init();
         __useFirestore = !!st.useFirestore;
+        // Update connection indicator once Firebase init resolves
+        setConnState(__useFirestore);
+        // If already signed in, immediately enable gated actions
+        try{ const user = await FirebaseAdapter.getCurrentUser?.(); applyAuthGate(!!user); }catch(_){ /* ignore */ }
+        // Fallback: if local demo auth flag is present, enable gates as well
+        if(localStorage.getItem(ADMIN_AUTH_KEY)){
+            applyAuthGate(true);
+        }
         if(__useFirestore){
             const local = JSON.parse(localStorage.getItem('products')||'[]');
             if(local.length===0){
@@ -75,15 +116,23 @@ const path=window.location.pathname;
                 FirebaseAdapter.onAuthStateChanged(user=>{
                     if(!user){
                         if(!isLogin && path.includes('/admin/')) window.location.href='index.html';
+                        applyAuthGate(false);
                     } else {
                         // user signed in — allow
+                        applyAuthGate(true);
                     }
                 });
                 return;
             }
         }catch(err){ /* ignore */ }
         // fallback
-        if(!isLogin && path.includes('/admin/')){ if(!localStorage.getItem(ADMIN_AUTH_KEY)) { window.location.href='index.html'; return; } }
+        if(!isLogin && path.includes('/admin/')){
+            if(!localStorage.getItem(ADMIN_AUTH_KEY)) { window.location.href='index.html'; return; }
+            // demo auth present
+            applyAuthGate(true);
+        } else {
+            applyAuthGate(!!localStorage.getItem(ADMIN_AUTH_KEY));
+        }
     })();
     // Auth
     const loginForm=document.getElementById('login-form');
@@ -112,14 +161,27 @@ const path=window.location.pathname;
         window.location.href='index.html';
     });
     // update current user email when auth changes
-    try{ FirebaseAdapter.onAuthStateChanged?.((user)=>{ if(user){ userEmailDisplay.textContent = user.email || 'Admin'; } else { userEmailDisplay.textContent=''; } }); }catch(e){ /* ignore */ }
+    try{ FirebaseAdapter.onAuthStateChanged?.((user)=>{ if(user){ userEmailDisplay.textContent = user.email || 'Admin'; applyAuthGate(true); } else { userEmailDisplay.textContent=''; applyAuthGate(false); } }); }catch(e){ /* ignore */ }
 
     // Data
-    let products=__dedupeProducts(__parseLocalProducts());
-    if(products.length){
-        __persistProducts(products);
+    let products = [];
+    try {
+        const st = await FirebaseAdapter.init();
+        if (st.useFirestore) {
+            const remote = await FirebaseAdapter.getProducts();
+            products = __dedupeProducts(remote || []);
+            __persistProducts(products);
+        } else {
+            products = __dedupeProducts(__parseLocalProducts());
+            if (!products.length) {
+                products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];
+                __persistProducts(products);
+            }
+        }
+    } catch (err) {
+        console.warn('Initial product fetch failed, using local fallback', err);
+        products = __dedupeProducts(__parseLocalProducts());
     }
-    if(!products.length){products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];__persistProducts(products);}
     const saveProducts=()=>{products=__dedupeProducts(products);__persistProducts(products);};
     const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Studs'];
     const refreshCategoryOptions=()=>{
@@ -186,14 +248,10 @@ const path=window.location.pathname;
             const idx = products.findIndex(p=> String(p._docId)===String(docId) || String(p.id)===String(id));
             if(idx===-1){ notify('Product not found. Please refresh.', 'error'); return; }
             products[idx]={...products[idx],...baseData, updatedAt:nowIso};
-            if(__useFirestore){
-                try{
-                    await FirebaseAdapter.updateProduct(docId, { ...baseData, updatedAt: nowIso });
-                }catch(err){
-                    console.warn('Firestore update failed', err);
-                    notify('Firestore update failed. Local copy updated.', 'warn');
-                }
-            }
+            try{
+                const st = await FirebaseAdapter.init();
+                if(st.useFirestore){ await FirebaseAdapter.updateProduct(docId, { ...baseData }); }
+            }catch(err){ console.warn('Firestore update failed', err); notify('Firestore update failed. Local copy updated.', 'warn'); }
             statusMsg=`Updated product ${name}`;
         } else if(id){
             const idx=products.findIndex(p=>String(p.id)===String(id));
@@ -214,10 +272,11 @@ const path=window.location.pathname;
         renderTable();
         if(liveStatus) liveStatus.textContent=statusMsg;
 
-        if(!docId && !id && __useFirestore && createdLocalId){
+        if(!docId && !id && createdLocalId){
             // attempt automatic sync so storefront receives the product
             try{
-                await syncProductToFirestore(createdLocalId);
+                const st = await FirebaseAdapter.init();
+                if(st.useFirestore){ await syncProductToFirestore(createdLocalId); }
             }catch(err){ /* sync function already notifies on failure */ }
         }
 
@@ -580,6 +639,11 @@ const path=window.location.pathname;
     const originalHandleFormSubmit = handleFormSubmit;
     const wrapSubmit = async (e)=>{
         e.preventDefault(); // prevent double submit
+        // Block when auth is required and disabled
+        if(submitBtn && submitBtn.getAttribute('aria-disabled') === 'true'){
+            try{ if(typeof notify==='function') notify('Sign in to add or update products.','warn'); }catch(_){}
+            return;
+        }
         // if there is an image shown in preview, and its src is either dataURL or asset but user moved it, crop it
         const currentVal = imageUrlInput?.value?.trim() || '';
         const shouldCrop = !!(imagePreview && imagePreview.src && (state.dirty || currentVal.startsWith('data:')));
@@ -600,18 +664,27 @@ const path=window.location.pathname;
     const editParam = params.get('edit');
     if((docIdParam || editParam) && productForm){
         const findKey = docIdParam || String(parseInt(editParam,10));
-        const p = products.find(pp=> String(pp._docId)===String(findKey) || String(pp.id)===String(findKey));
-        if(p){
-            document.getElementById('product-id').value=p.id;
-            productForm.dataset.docid = p._docId||'';
-            document.getElementById('name').value=p.name;
-            document.getElementById('price').value=p.price;
-            document.getElementById('description').value=p.description;
-            document.getElementById('category').value=p.category||'';
-            const iu=document.getElementById('imageUrl'); if(iu) iu.value=p.imageUrl||'';
-            const ia=document.getElementById('imageAsset'); if(ia && p.imageUrl?.startsWith('assets/')) ia.value=p.imageUrl;
-            if(formTitle) formTitle.textContent='Edit Product'; if(submitBtn) submitBtn.textContent='Update Product'; updatePreview();
-        }
+        try{
+            const st = await FirebaseAdapter.init();
+            let p = null;
+            if(st.useFirestore){
+                p = await FirebaseAdapter.getProductById(findKey);
+            }
+            if(!p){
+                p = products.find(pp=> String(pp._docId)===String(findKey) || String(pp.id)===String(findKey));
+            }
+            if(p){
+                document.getElementById('product-id').value=p.id;
+                productForm.dataset.docid = p._docId||'';
+                document.getElementById('name').value=p.name;
+                document.getElementById('price').value=p.price;
+                document.getElementById('description').value=p.description;
+                document.getElementById('category').value=p.category||'';
+                const iu=document.getElementById('imageUrl'); if(iu) iu.value=p.imageUrl||'';
+                const ia=document.getElementById('imageAsset'); if(ia && p.imageUrl?.startsWith('assets/')) ia.value=p.imageUrl;
+                if(formTitle) formTitle.textContent='Edit Product'; if(submitBtn) submitBtn.textContent='Update Product'; updatePreview();
+            }
+        }catch(err){ console.warn('Failed to load product for edit', err); }
     }
 
     // Initial renders
@@ -854,8 +927,13 @@ const path=window.location.pathname;
         }
         
         // Save settings to Firebase
+        const saveBtn = document.getElementById('save-settings-btn');
         settingsForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if(saveBtn && saveBtn.getAttribute('aria-disabled') === 'true'){
+                try{ if(typeof notify==='function') notify('Sign in to save settings.','warn'); }catch(_){}
+                return;
+            }
             const val = waInput.value.trim();
             
             if(!/^[0-9]{10,15}$/.test(val)){

@@ -10,6 +10,7 @@ let _state = {
   auth: null,
   collection: null,
   getDocs: null,
+  getDoc: null,
   addDoc: null,
   updateDoc: null,
   deleteDoc: null,
@@ -74,6 +75,7 @@ async function init() {
       // also copy helpers if present
       _state.collection = cfg.collection;
       _state.getDocs = cfg.getDocs;
+  _state.getDoc = cfg.getDoc || null;
       _state.addDoc = cfg.addDoc;
       _state.updateDoc = cfg.updateDoc;
       _state.deleteDoc = cfg.deleteDoc;
@@ -101,7 +103,9 @@ async function getProducts() {
   await init();
   if (_state.useFirestore) {
     try {
-      const qsnap = await _state.getDocs(_state.collection(_state.db, 'products'));
+      const col = _state.collection(_state.db, 'products');
+      const q = _state.query && _state.orderBy ? _state.query(col, _state.orderBy('name')) : col;
+      const qsnap = await _state.getDocs(q);
       const out = [];
       qsnap.forEach(d => {
         const data = d.data();
@@ -117,6 +121,16 @@ async function getProducts() {
   } else {
     throw new Error('Firebase is not initialized. Cannot load products.');
   }
+}
+
+async function getProductById(docIdOrId) {
+  await init();
+  if(!_state.useFirestore || !_state.getDoc || !_state.doc) throw new Error('Firestore not available');
+  const docRef = _state.doc(_state.db, 'products', String(docIdOrId));
+  const snap = await _state.getDoc(docRef);
+  if(!snap.exists()) return null;
+  const data = snap.data();
+  return { ...data, id: data?.id || snap.id, _docId: snap.id };
 }
 
 async function addProduct(product) {
@@ -361,6 +375,7 @@ async function clearOrders() {
 async function signIn(email, password){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signInWithEmailAndPassword(_state.auth, email, password); }
 async function signOut(){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signOut(_state.auth); }
 function onAuthStateChanged(callback){ if(!_state.onAuthStateChanged) return ()=>{}; return _state.onAuthStateChanged(_state.auth, callback); }
+async function getCurrentUser(){ await init(); return _state.auth ? _state.auth.currentUser : null; }
 
 async function updateProduct(docIdOrLocalId, product) {
   await init();
@@ -501,6 +516,7 @@ async function saveSettings(settings) {
 export default {
   init,
   getProducts,
+  getProductById,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -555,5 +571,6 @@ export default {
   // auth
   signIn,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  getCurrentUser
 };

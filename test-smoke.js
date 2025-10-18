@@ -15,7 +15,6 @@ const tests = [
   { name: 'Add product', url: 'http://localhost:8000/admin/add-product.html' },
   { name: 'Settings', url: 'http://localhost:8000/admin/settings.html' },
   { name: 'Logo image', url: 'http://localhost:8000/logo/logo.png' },
-  { name: 'Product image 1', url: 'http://localhost:8000/assets/IMG-20250812-WA0001.jpg' },
   { name: 'Utils.js', url: 'http://localhost:8000/js/utils.js' },
   { name: 'Main.js', url: 'http://localhost:8000/main.js' },
   { name: 'Admin.js', url: 'http://localhost:8000/admin/admin.js' },

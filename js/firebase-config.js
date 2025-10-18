@@ -23,6 +23,7 @@ let addDoc = null;
 let updateDoc = null;
 let deleteDoc = null;
 let docRef = null;
+let getDocRef = null;
 let setDocRef = null;
 let onSnapshotRef = null;
 let queryRef = null;
@@ -81,6 +82,7 @@ async function ensureInitialized() {
 			updateDoc = fsMod.updateDoc;
 			deleteDoc = fsMod.deleteDoc;
 			docRef = fsMod.doc;
+			getDocRef = fsMod.getDoc || null;
 			setDocRef = fsMod.setDoc || null;
 			onSnapshotRef = fsMod.onSnapshot || null;
 			queryRef = fsMod.query || null;
@@ -136,6 +138,7 @@ export {
 	updateDoc,
 	deleteDoc,
 	docRef as doc,
+	getDocRef as getDoc,
 	setDocRef as setDoc,
 	onSnapshotRef as onSnapshot,
 	queryRef as query,

@@ -23,6 +23,10 @@
             </ul>
         </nav>
         <div class="admin-header-actions">
+            <div id="conn-indicator" class="conn-indicator state-offline" title="Firebase connection">
+                <span class="conn-dot" aria-hidden="true"></span>
+                <span id="conn-label">Offline</span>
+            </div>
             <button id="logout-btn" class="admin-button secondary">Logout</button>
         </div>
     </header>
@@ -48,8 +52,8 @@
                     <option value="Studs">Studs</option>
                 </select>
                 <button type="button" id="clear-filters" class="admin-button secondary">Reset</button>
-                <a class="admin-button" href="add-product.html">➕ Add Product</a>
-                <button type="button" id="migrate-firestore" class="admin-button" title="Sync unsynced products to Firestore">⬆️ Sync to Firestore</button>
+                <a class="admin-button requires-auth" href="add-product.html" aria-disabled="true">➕ Add Product</a>
+                <button type="button" id="migrate-firestore" class="admin-button requires-auth" title="Sync unsynced products to Firestore" aria-disabled="true">⬆️ Sync to Firestore</button>
             </div>
             <!-- Inline loader shown during Firestore refresh -->
             <div id="products-loading" class="inline-loader" aria-live="polite" hidden>

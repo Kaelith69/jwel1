@@ -31,6 +31,10 @@
             <form id="product-form" autocomplete="off">
                 <input type="hidden" id="product-id">
                 <div class="form-row">
+                        <div id="conn-indicator" class="conn-indicator state-offline" title="Firebase connection">
+                            <span class="conn-dot" aria-hidden="true"></span>
+                            <span id="conn-label">Offline</span>
+                        </div>
                     <div class="form-group">
                         <label for="name">Product Name</label>
                         <input type="text" id="name" required>
@@ -115,7 +119,7 @@
                     <p class="hint">Uploaded images are stored locally in this browser only (data URL). For production, replace with real file storage.</p>
                 </details>
                 <div class="form-actions">
-                    <button type="submit" id="submit-btn" class="admin-button">Add Product</button>
+                    <button id="submit-btn" class="admin-button requires-auth" type="submit" aria-disabled="true">Add Product</button>
                     <a href="products.html" class="admin-button secondary">Back</a>
                 </div>
             </form>

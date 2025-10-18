@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <!-- Clean Image Section -->
                 <div class="product-image-section">
                     <div class="product-image-container">
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy" decoding="async" width="600" height="600" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy" decoding="async" width="600" height="600" onerror="this.src='/logo/logo.png'">
                     </div>
                 </div>
                 
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
                 cartItemEl.innerHTML = `
-                    <img src="${item.imageUrl || 'assets/IMG-20250812-WA0001.jpg'}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                    <img src="${item.imageUrl || '/logo/logo.png'}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='/logo/logo.png'">
                     <div class="cart-item-info">
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>

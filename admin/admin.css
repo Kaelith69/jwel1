@@ -327,6 +327,12 @@ fieldset.form-fieldset { border:1px solid rgba(255,255,255,.2); padding:16px 18p
 .admin-nav a:hover, .admin-nav a:focus-visible { background:rgba(255,255,255,0.18); }
 .admin-nav a[aria-current="page"] { background:#3B82F6; color:#000; }
 .admin-header-actions { display:flex; gap:10px; align-items:center; }
+.conn-indicator { display:flex; align-items:center; gap:6px; font-size:.85rem; opacity:.9; }
+.conn-indicator .conn-dot { width:10px; height:10px; border-radius:50%; background:#888; box-shadow:0 0 6px rgba(0,0,0,.35); }
+.conn-indicator.state-connected .conn-dot { background:#34d399; }
+.conn-indicator.state-offline .conn-dot { background:#f59e0b; }
+.conn-indicator.state-error .conn-dot { background:#ef4444; }
+.requires-auth-disabled { opacity:.55; pointer-events:none; }
 .page-container { padding:30px; display:flex; flex-direction:column; gap:30px; max-width:1600px; margin:0 auto; }
 .panel-head { display:flex; align-items:center; gap:16px; justify-content:space-between; flex-wrap:wrap; }
 .toolbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; width: 100%; }

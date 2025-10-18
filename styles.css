@@ -468,15 +468,14 @@ input[type=number] {
 }
 
 /* Larger responsive logo specifically in the hero glass panel (homepage) */
+.hero-section .glass-panel .logo { display: grid; place-items: center; justify-items: center; align-items: center; }
 .hero-section .glass-panel .logo img {
-    height: clamp(110px, 22vw, 220px); /* Bigger but bounded */
-    width: auto;
-    max-width: 100%;
+    height: auto;
+    width: clamp(260px, 52vw, 520px);
+    max-width: 92vw;
     display: block;
-    margin: 2.5rem auto 1.2rem auto;
-    padding-top: 0.5rem;
-    object-fit: contain; /* Prevent unintended cropping */
-    image-rendering: -webkit-optimize-contrast;
+    margin: clamp(16px, 4vh, 32px) auto clamp(12px, 2vh, 20px) auto;
+    object-fit: contain;
 }
 
 .main-nav { justify-self: center; }
@@ -573,23 +572,34 @@ input[type=number] {
 
 /* --- Hero Section (Homepage) --- */
 .hero-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
     min-height: 80vh;
     padding: 0 2vw;
     flex-wrap: wrap;
+    text-align: center;
+    margin-top: 84px; /* space for fixed navbar on desktop */
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        margin-top: 72px; /* space for fixed navbar on mobile */
+    }
 }
 
 .hero-section .glass-panel {
     background: var(--glass-bg);
     box-shadow: var(--shadow-dark);
     text-align: center;
-    padding: 5vw 2vw 5vw 2vw;
+    padding: clamp(20px, 5vw, 48px) clamp(16px, 3vw, 32px);
     border: 2px solid var(--accent-color);
     border-radius: var(--border-radius);
-    max-width: 600px;
+    max-width: 800px;
     width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 
@@ -604,11 +614,11 @@ input[type=number] {
 
 
 .hero-section p {
-    font-size: var(--font-size-lg);
-    margin-bottom: 2rem;
+    font-size: clamp(1rem, 2.4vw, 1.25rem);
+    margin: 0 auto clamp(20px, 4vh, 28px);
     color: var(--secondary-color);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    line-height: 1.5;
+    line-height: 1.6;
+    text-shadow: none;
 }
 
 
@@ -642,6 +652,26 @@ input[type=number] {
 .cta-button:active, .admin-button:active {
     filter: brightness(0.96) saturate(1.3);
     box-shadow: 0 2px 8px rgba(191,167,106,0.22);
+}
+
+/* Hero CTA: stronger neumorphic glass look */
+.hero-section .cta-button {
+    border-radius: 999px;
+    padding: 0.9em 2.4em;
+    background: linear-gradient(135deg, rgba(230,240,255,0.70) 0%, rgba(59,130,246,0.22) 100%);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(59,130,246,0.35);
+    color: var(--primary-color);
+    box-shadow: 0 10px 26px rgba(59,130,246,0.18), inset 0 1px 0 rgba(255,255,255,0.50);
+}
+.hero-section .cta-button:hover {
+    background: linear-gradient(135deg, rgba(230,240,255,0.78) 0%, rgba(59,130,246,0.30) 100%);
+    box-shadow: 0 14px 34px rgba(59,130,246,0.22), inset 0 1px 0 rgba(255,255,255,0.60);
+}
+.hero-section .cta-button:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 6px 18px rgba(59,130,246,0.25), 0 6px 18px rgba(59,130,246,0.16);
 }
 
 /* Card fade-in animation */
