@@ -1,7 +1,6 @@
 // Clean reimplementation of admin logic (now an ES module)
 import FirebaseAdapter from '../js/firebase-adapter.js';
 
-const ADMIN_AUTH_KEY='vastravedajewlleries-admin-auth';
 let __useFirestore = false;
 const __createLocalId=(()=>{let seq=0;return ()=>`local_${Date.now()}_${seq++}`;})();
 // UI helpers: connection indicator + auth gating
@@ -37,15 +36,6 @@ document.addEventListener('click', (e)=>{
         try{ if(typeof notify === 'function') notify('Sign in to enable this action','warn'); }catch(_){/* noop */}
     }
 }, true);
-const __parseLocalProducts=()=>{
-    try{
-        const raw=JSON.parse(localStorage.getItem('products')||'[]');
-        return Array.isArray(raw)?raw:[];
-    }catch(err){
-        console.warn('Failed to parse local products', err);
-        return [];
-    }
-};
 const __dedupeProducts=list=>{
     if(!Array.isArray(list)) return [];
     const order=[];
@@ -77,8 +67,7 @@ const __dedupeProducts=list=>{
     });
     return order.map(k=>map.get(k));
 };
-const __persistProducts=list=>localStorage.setItem('products',JSON.stringify(list));
-// initialize Firebase adapter (best-effort) and seed localStorage if empty
+// initialize Firebase adapter (best-effort)
 (async function initFirebase(){
     try{
         const st = await FirebaseAdapter.init();
@@ -87,28 +76,12 @@ const __persistProducts=list=>localStorage.setItem('products',JSON.stringify(lis
         setConnState(__useFirestore);
         // If already signed in, immediately enable gated actions
         try{ const user = await FirebaseAdapter.getCurrentUser?.(); applyAuthGate(!!user); }catch(_){ /* ignore */ }
-        // Fallback: if local demo auth flag is present, enable gates as well
-        if(localStorage.getItem(ADMIN_AUTH_KEY)){
-            applyAuthGate(true);
-        }
-        if(__useFirestore){
-            const local = JSON.parse(localStorage.getItem('products')||'[]');
-            if(local.length===0){
-                try{
-                    const prods = await FirebaseAdapter.getProducts();
-                    if(Array.isArray(prods) && prods.length){
-                        const mapped = prods.map(p=>({ id: p.id||Date.now()+Math.floor(Math.random()*1000), name: p.name||'', price: p.price||0, description: p.description||'', category: p.category||'', imageUrl: p.imageUrl||'', _docId: p._docId }));
-                        localStorage.setItem('products', JSON.stringify(mapped));
-                    }
-                }catch(err){ console.warn('Firebase product fetch failed', err); }
-            }
-        }
     }catch(err){ console.warn('Firebase init skipped', err); }
 })();
 
 const path=window.location.pathname;
     const isLogin=/\/admin\/(index\.html)?$/.test(path)||path.endsWith('/admin')||path.endsWith('/admin/');
-    // If Firebase auth is available, use it to enforce sign-in; otherwise fall back to localStorage demo auth
+    // Use Firebase auth to enforce sign-in
     (async function enforceAuth(){
         try{
             await FirebaseAdapter.init();
@@ -125,13 +98,9 @@ const path=window.location.pathname;
                 return;
             }
         }catch(err){ /* ignore */ }
-        // fallback
+        // If Firebase auth is not available, redirect to login
         if(!isLogin && path.includes('/admin/')){
-            if(!localStorage.getItem(ADMIN_AUTH_KEY)) { window.location.href='index.html'; return; }
-            // demo auth present
-            applyAuthGate(true);
-        } else {
-            applyAuthGate(!!localStorage.getItem(ADMIN_AUTH_KEY));
+            window.location.href='index.html';
         }
     })();
     // Auth
@@ -142,11 +111,11 @@ const path=window.location.pathname;
         const em=document.getElementById('error-message');
         try{
             await FirebaseAdapter.init();
-            if(FirebaseAdapter.signIn){ await FirebaseAdapter.signIn(email, pw); localStorage.setItem(ADMIN_AUTH_KEY,'true'); window.location.href='dashboard.html'; return; }
+            if(FirebaseAdapter.signIn){ await FirebaseAdapter.signIn(email, pw); window.location.href='dashboard.html'; return; }
             if(em) em.textContent='Auth not configured.';
         }catch(err){ if(em) em.textContent='Login failed.'; }
     });}
-    const logoutBtn=document.getElementById('logout-btn'); if(logoutBtn) logoutBtn.addEventListener('click',()=>{localStorage.removeItem(ADMIN_AUTH_KEY); window.location.href='index.html';});
+    const logoutBtn=document.getElementById('logout-btn'); if(logoutBtn) logoutBtn.addEventListener('click',()=>{ window.location.href='index.html';});
 
     // Show signed-in user email and wire sign out when possible
     const userEmailDisplay = document.createElement('div'); userEmailDisplay.id='user-email-display'; userEmailDisplay.style.opacity='.85';
@@ -157,11 +126,21 @@ const path=window.location.pathname;
             await FirebaseAdapter.init();
             if(FirebaseAdapter.signOut){ await FirebaseAdapter.signOut(); }
         }catch(err){ /* ignore */ }
-        localStorage.removeItem(ADMIN_AUTH_KEY);
         window.location.href='index.html';
     });
     // update current user email when auth changes
-    try{ FirebaseAdapter.onAuthStateChanged?.((user)=>{ if(user){ userEmailDisplay.textContent = user.email || 'Admin'; applyAuthGate(true); } else { userEmailDisplay.textContent=''; applyAuthGate(false); } }); }catch(e){ /* ignore */ }
+    try{ FirebaseAdapter.onAuthStateChanged?.((user)=>{
+        if(user){
+            userEmailDisplay.textContent = user.email || 'Admin';
+            applyAuthGate(true);
+        } else {
+            userEmailDisplay.textContent='';
+            applyAuthGate(false);
+        }
+        try{
+            window.dispatchEvent(new CustomEvent('admin-auth-state', { detail:{ user }}));
+        }catch(_){ /* ignore */ }
+    }); }catch(e){ /* ignore */ }
 
     // Data
     let products = [];
@@ -170,19 +149,15 @@ const path=window.location.pathname;
         if (st.useFirestore) {
             const remote = await FirebaseAdapter.getProducts();
             products = __dedupeProducts(remote || []);
-            __persistProducts(products);
         } else {
-            products = __dedupeProducts(__parseLocalProducts());
-            if (!products.length) {
-                products=[{id:1,name:'Ethereal Diamond Necklace',price:120000,description:'Pear-cut diamond with halo setting.',imageUrl:'assets/IMG-20250812-WA0001.jpg',category:'Necklace'},{id:2,name:'Sapphire Dream Ring',price:95000,description:'Blue sapphire in white gold band.',imageUrl:'assets/IMG-20250812-WA0002.jpg',category:'Ring'}];
-                __persistProducts(products);
-            }
+            // No Firestore, use empty array
+            products = [];
         }
     } catch (err) {
-        console.warn('Initial product fetch failed, using local fallback', err);
-        products = __dedupeProducts(__parseLocalProducts());
+        console.warn('Initial product fetch failed', err);
+        products = [];
     }
-    const saveProducts=()=>{products=__dedupeProducts(products);__persistProducts(products);};
+    const saveProducts=()=>{products=__dedupeProducts(products);};
     const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Studs'];
     const refreshCategoryOptions=()=>{
         const unique=new Set(BASE_CATEGORIES);
@@ -377,6 +352,63 @@ const path=window.location.pathname;
     const orderStatusFilter=document.getElementById('order-status-filter');
     // Track expanded rows (persist across re-renders in this session)
     const expandedOrders=new Set();
+    let ordersCache=[];
+    let autoSyncedOrdersAfterLogin=false;
+    let pendingOrdersSync=null;
+    let pendingDashboardSync=null;
+    const asDateObject=(value)=>{
+        if(!value) return null;
+        if(value instanceof Date) return value;
+        if(typeof value.toDate==='function'){
+            try{ return value.toDate(); }catch(_){ return null; }
+        }
+        if(typeof value==='number'){ const fromNumber=new Date(value); return isNaN(fromNumber.getTime())?null:fromNumber; }
+        if(typeof value==='string'){ const fromString=new Date(value); return isNaN(fromString.getTime())?null:fromString; }
+        if(typeof value==='object'){ // Firestore Timestamp in object form
+            const seconds=Number(value.seconds);
+            const nanoseconds=Number(value.nanoseconds||0);
+            if(!isNaN(seconds)){ return new Date(seconds*1000 + Math.floor(nanoseconds/1e6)); }
+        }
+        return null;
+    };
+    const normalizeOrderRecord=(raw, index=0)=>{
+        if(!raw || typeof raw!=='object') return null;
+    const base={ ...raw };
+    const fallbackId = base._docId || base.id || base.orderId || `order_${index}`;
+        base.orderId = String(base.orderId || base.id || base._docId || fallbackId);
+        base._docId = base._docId || base.id || base.orderId || fallbackId;
+        const primaryDate = asDateObject(base.date || base.createdAt || base.updatedAt || Date.now()) || new Date();
+        base.date = primaryDate.toISOString();
+        if(base.createdAt){
+            const createdObj=asDateObject(base.createdAt);
+            base.createdAt = createdObj ? createdObj.toISOString() : base.date;
+        } else {
+            base.createdAt = base.date;
+        }
+        if(base.updatedAt){
+            const updatedObj=asDateObject(base.updatedAt);
+            base.updatedAt = updatedObj ? updatedObj.toISOString() : base.date;
+        } else {
+            base.updatedAt = base.date;
+        }
+        base.status = base.status || 'Pending';
+        base.items = Array.isArray(base.items) ? base.items.map(item=>{
+            const detail = { ...(item||{}) };
+            detail.name = detail.name || 'Item';
+            detail.quantity = Number(detail.quantity)||0;
+            detail.price = Number(detail.price)||0;
+            return detail;
+        }) : [];
+        const totalValue = Number(base.total);
+        base.total = Number.isFinite(totalValue) ? totalValue : 0;
+        base.customer = typeof base.customer==='object' && base.customer ? { ...base.customer } : {};
+        return base;
+    };
+    const setOrdersCache=(list)=>{
+        const normalized = Array.isArray(list) ? list.map((entry, idx)=>normalizeOrderRecord(entry, idx)).filter(Boolean) : [];
+        ordersCache = normalized;
+        return ordersCache;
+    };
     // KPI elements
     const kpiToday=document.getElementById('kpi-today');
     const kpiWeek=document.getElementById('kpi-week');
@@ -386,46 +418,126 @@ const path=window.location.pathname;
     const kpiWeekCount=document.getElementById('kpi-week-count');
     const kpiMonthCount=document.getElementById('kpi-month-count');
     const kpiTotalCount=document.getElementById('kpi-total-count');
-    const fetchOrders=()=>{
-        const arr=JSON.parse(localStorage.getItem('proJetOrders')||'[]');
-        // ensure status field
-        let updated=false; arr.forEach(o=>{ if(!o.status) { o.status='Pending'; updated=true; }}); if(updated) localStorage.setItem('proJetOrders',JSON.stringify(arr));
-        return arr;
+    const fetchOrders=async (force=false)=>{
+        if(!force && Array.isArray(ordersCache) && ordersCache.length){
+            return [...ordersCache];
+        }
+        try{
+            await FirebaseAdapter.init();
+            const arr = await FirebaseAdapter.getOrders();
+            if(Array.isArray(arr)){
+                const normalized = setOrdersCache(arr);
+                return [...normalized];
+            }
+        }catch(err){
+            console.warn('Failed to fetch orders', err);
+            if(force && typeof notify==='function'){
+                notify('Failed to load orders from Firestore. Retrying...', 'warn');
+            }
+        }
+        ordersCache = [];
+        return [];
     };
-    const saveOrders=(o)=>localStorage.setItem('proJetOrders',JSON.stringify(o));
-    const renderOrdersList=()=>{ if(!ordersContainer) return; const orders=fetchOrders().sort((a,b)=>new Date(b.date)-new Date(a.date)); if(!orders.length){ordersContainer.innerHTML='<p style="opacity:.7">No orders yet.</p>';return;} ordersContainer.innerHTML=orders.map(o=>`<div class="order-item" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}><div class="order-meta"><strong>${o.orderId}</strong> <span>${new Date(o.date).toLocaleString()}</span></div><div class="order-items">${o.items.map(i=>`${i.name} x${i.quantity}`).join(', ')}</div><div class="order-total">Total: ₹${o.total.toLocaleString('en-IN')}</div><div><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></div><button class="admin-button danger order-delete-btn" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}>Delete</button></div>`).join(''); };
+    const refreshOrdersUI=async(force=false, dataOverride=null)=>{
+        if(!(ordersTableBody||ordersContainer)) return;
+        let data;
+        if(Array.isArray(dataOverride)){
+            data = [...setOrdersCache(dataOverride)];
+        } else {
+            data = await fetchOrders(force);
+        }
+        renderOrdersList(data);
+        renderOrdersTable(data);
+    };
+    const syncOrdersFromFirestore=async({showSuccessToast=false}={})=>{
+        if(!(ordersTableBody||ordersContainer)) return false;
+        try{
+            await FirebaseAdapter.init();
+            const arr = await FirebaseAdapter.getOrders();
+            if(Array.isArray(arr)){
+                await refreshOrdersUI(false, arr);
+                if(showSuccessToast){
+                    notify('Orders synced from Firestore.', 'info');
+                }
+                return true;
+            }
+            await refreshOrdersUI(false, []);
+            if(showSuccessToast){
+                notify('No orders found in Firestore.', 'info');
+            }
+            return true;
+        }catch(err){
+            console.warn('Orders sync from Firestore failed', err);
+            if(showSuccessToast){
+                notify('Failed to sync orders from Firestore.', 'error');
+            }
+            return false;
+        }
+    };
+    window.addEventListener('admin-auth-state', async (evt)=>{
+        const user = evt?.detail?.user;
+        if(!user) return;
+        if(!(ordersTableBody||ordersContainer)) return;
+        if(autoSyncedOrdersAfterLogin) return;
+        if(pendingOrdersSync) return;
+        try{
+            pendingOrdersSync = syncOrdersFromFirestore();
+            const success = await pendingOrdersSync;
+            if(success){
+                autoSyncedOrdersAfterLogin = true;
+            }
+        }catch(err){
+            console.warn('Automatic orders sync after login failed', err);
+        }finally{
+            pendingOrdersSync = null;
+        }
+    });
+    const renderOrdersList=(data=null)=>{
+        if(!ordersContainer) return;
+        const base = Array.isArray(data) ? data : (Array.isArray(ordersCache) ? ordersCache : []);
+        const orders=[...base].sort((a,b)=>new Date(b.date)-new Date(a.date));
+        if(!orders.length){ordersContainer.innerHTML='<p style="opacity:.7">No orders yet.</p>';return;}
+        ordersContainer.innerHTML=orders.map(o=>{
+            const items=(Array.isArray(o.items)?o.items:[]).map(i=>`${i.name} x${i.quantity}`).join(', ');
+            const orderTotal=isNaN(o.total)?0:o.total;
+            const docAttr = o._docId ? ` data-docid="${o._docId}"` : '';
+            return `<div class="order-item" data-id="${o.orderId}"${docAttr}><div class="order-meta"><strong>${o.orderId}</strong> <span>${new Date(o.date).toLocaleString()}</span></div><div class="order-items">${items}</div><div class="order-total">Total: ₹${orderTotal.toLocaleString('en-IN')}</div><div><span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span></div><button class="admin-button danger order-delete-btn" data-id="${o.orderId}"${docAttr}>Delete</button></div>`;
+        }).join('');
+    };
     const filterOrders=o=>{ let f=[...o];
         const term=(orderSearch?.value||'').toLowerCase();
         if(term) f=f.filter(or=> (or.orderId||'').toLowerCase().includes(term) || (or.customer?.name||'').toLowerCase().includes(term));
         const statusVal=orderStatusFilter?.value||''; if(statusVal) f=f.filter(or=>or.status===statusVal);
         const s=orderDateStart?.value; const e=orderDateEnd?.value; if(s){const sd=new Date(s+'T00:00:00'); f=f.filter(x=>new Date(x.date)>=sd);} if(e){const ed=new Date(e+'T23:59:59'); f=f.filter(x=>new Date(x.date)<=ed);} const dir=orderSort?.value||'newest'; f.sort((a,b)=>dir==='newest'?new Date(b.date)-new Date(a.date):new Date(a.date)-new Date(b.date)); return f; };
     const statusCycle=['Pending','Processing','Shipped','Delivered','Cancelled'];
-    const nextStatus=cur=>{ const i=statusCycle.indexOf(cur); return statusCycle[(i+1)%statusCycle.length]; };
     const computeKPIs=(orders)=>{ if(!(kpiToday&&kpiWeek&&kpiMonth&&kpiTotal)) return; const now=new Date(); const startOfDay=new Date(now.getFullYear(),now.getMonth(),now.getDate()); const startOfWeek=new Date(now); startOfWeek.setDate(now.getDate()-6); startOfWeek.setHours(0,0,0,0); const startOfMonth=new Date(now.getFullYear(),now.getMonth(),1); let todayT=0,weekT=0,monthT=0,totalT=0,todayC=0,weekC=0,monthC=0,totalC=0,deliveredC=0,cancelledC=0; orders.forEach(o=>{ const d=new Date(o.date); const amt=o.total||0; totalT+=amt; totalC++; if(o.status==='Delivered') deliveredC++; if(o.status==='Cancelled') cancelledC++; if(d>=startOfMonth){monthT+=amt; monthC++;} if(d>=startOfWeek){weekT+=amt; weekC++;} if(d>=startOfDay){todayT+=amt; todayC++;} }); kpiToday.querySelector('.kpi-value').textContent='₹'+todayT.toLocaleString('en-IN'); kpiWeek.querySelector('.kpi-value').textContent='₹'+weekT.toLocaleString('en-IN'); kpiMonth.querySelector('.kpi-value').textContent='₹'+monthT.toLocaleString('en-IN'); kpiTotal.querySelector('.kpi-value').textContent='₹'+totalT.toLocaleString('en-IN'); kpiTodayCount.textContent=`${todayC} ${todayC===1?'order':'orders'}`; kpiWeekCount.textContent=`${weekC} ${weekC===1?'order':'orders'}`; kpiMonthCount.textContent=`${monthC} ${monthC===1?'order':'orders'}`; kpiTotalCount.innerHTML=`${totalC} ${totalC===1?'order':'orders'} <span class="kpi-delivered">(${deliveredC} delivered</span> / <span class="kpi-cancelled">${cancelledC} cancelled)</span>`; };
     const buildStatusSelect=o=>`<select class="status-select" data-id="${o.orderId}"${o._docId?` data-docid="${o._docId}"`:''}>${statusCycle.map(s=>`<option value="${s}" ${s===o.status?'selected':''}>${s}</option>`).join('')}</select>`;
     const buildRow=o=>{ const dateStr=new Date(o.date).toLocaleString(); const status=buildStatusSelect(o)+` <span class="status-badge status-${o.status.toLowerCase()}">${o.status}</span>`; const expanded=expandedOrders.has(o.orderId); const summary=`<strong>${o.customer?.name||''}</strong> • ${o.items.length} item(s)<span class="toggle-indicator">${expanded?'▲':'▼'}</span>`; const docAttr=o._docId?` data-docid="${o._docId}"`:''; return `<tr class="data-row" data-id="${o.orderId}"${docAttr} aria-expanded="${expanded?'true':'false'}"><td class="nowrap">${o.orderId}</td><td class="nowrap">${dateStr}</td><td>${status}</td><td>${summary}</td><td class="nowrap">${o.total.toLocaleString('en-IN')}</td><td class="actions-cell"><button class="admin-button danger order-delete-btn" data-id="${o.orderId}"${docAttr}>Delete</button></td></tr>`; };
     const buildDetailRow=o=>{ const c=o.customer||{}; const itemsHtml=o.items.map(i=>`<li>${i.name} x${i.quantity} <span class="muted">(₹${(i.price*i.quantity).toLocaleString('en-IN')})</span></li>`).join(''); const meta=`<div>Order ID: <strong>${o.orderId}</strong></div><div>Status: ${o.status}</div><div>Date: ${new Date(o.date).toLocaleString()}</div>`; const customer=`${c.name||''}<br>${c.mobile||''}<br>${c.email||''}<br>${(c.address||'').replace(/\n/g,'<br>')}<br>PIN: ${c.pincode||''}`; return `<tr class="order-detail-row" data-detail-for="${o.orderId}"><td colspan="6"><div class="order-detail"><div class="od-section"><h4>Customer</h4><div class="od-customer">${customer}</div></div><div class="od-section"><h4>Items</h4><ul class="od-items">${itemsHtml}</ul></div><div class="od-section"><h4>Meta</h4><div class="od-meta">${meta}</div></div></div></td></tr>`; };
-    const renderOrdersTable=()=>{ if(!ordersTableBody) return; const all=fetchOrders(); const filtered=filterOrders(all); computeKPIs(all); if(!filtered.length){ ordersTableBody.innerHTML=''; if(ordersEmpty) ordersEmpty.style.display='block'; return;} if(ordersEmpty) ordersEmpty.style.display='none'; const rows=[]; filtered.forEach(o=>{ rows.push(buildRow(o)); if(expandedOrders.has(o.orderId)) rows.push(buildDetailRow(o)); }); ordersTableBody.innerHTML=rows.join(''); };
+    const renderOrdersTable=(data=null)=>{
+        if(!ordersTableBody) return;
+        const source = Array.isArray(data) ? data : (Array.isArray(ordersCache) ? ordersCache : []);
+        const all=[...source];
+        const filtered=filterOrders(all);
+        computeKPIs(all);
+        if(!filtered.length){ ordersTableBody.innerHTML=''; if(ordersEmpty) ordersEmpty.style.display='block'; return;}
+        if(ordersEmpty) ordersEmpty.style.display='none';
+        const rows=[];
+        filtered.forEach(o=>{ rows.push(buildRow(o)); if(expandedOrders.has(o.orderId)) rows.push(buildDetailRow(o)); });
+        ordersTableBody.innerHTML=rows.join('');
+    };
     const deleteOrder=async (orderId, docId)=>{
-        const current=fetchOrders();
-        const target=current.find(o=>o.orderId===orderId);
-        if(!target) return;
-        const remaining=current.filter(o=>o.orderId!==orderId);
-        const wasExpanded=expandedOrders.has(orderId);
         expandedOrders.delete(orderId);
-        saveOrders(remaining);
-        renderOrdersList();
-        renderOrdersTable();
+        const remaining = Array.isArray(ordersCache) ? ordersCache.filter(o=>o.orderId!==orderId) : [];
+        await refreshOrdersUI(false, remaining);
         if(!__useFirestore){ notify('Order removed.', 'info'); return; }
         try{
             await FirebaseAdapter.deleteOrder(docId||orderId);
             notify('Order deleted.', 'info');
+            await syncOrdersFromFirestore();
         }catch(err){
             console.warn('Order delete failed', err);
-            saveOrders(current);
-            if(wasExpanded) expandedOrders.add(orderId);
-            renderOrdersList();
-            renderOrdersTable();
+            await syncOrdersFromFirestore();
             notify('Failed to delete order from Firestore.', 'error');
         }
     };
@@ -436,7 +548,7 @@ const path=window.location.pathname;
         if(row && !e.target.closest('select.status-select') && !e.target.closest('.actions-cell')){
             const id=row.dataset.id;
             if(expandedOrders.has(id)) expandedOrders.delete(id); else expandedOrders.add(id);
-            renderOrdersTable();
+            renderOrdersTable(ordersCache);
         }
     });
     if(ordersTableBody) ordersTableBody.addEventListener('change',async e=>{
@@ -444,58 +556,53 @@ const path=window.location.pathname;
         if(sel){
             const orderId=sel.dataset.id;
             const docId=sel.dataset.docid||orderId;
-            const orders=fetchOrders();
-            const idx=orders.findIndex(o=>o.orderId===orderId);
+            await fetchOrders();
+            const idx=ordersCache.findIndex(o=>o.orderId===orderId);
             if(idx>-1){
-                const previous=JSON.parse(JSON.stringify(orders[idx]));
+                const previous=ordersCache[idx].status;
                 const nextStatus=sel.value;
-                if(previous.status===nextStatus) return;
+                if(previous===nextStatus) return;
                 const changedAt=new Date().toISOString();
-                orders[idx].status=nextStatus;
-                orders[idx].updatedAt=changedAt;
-                if(!Array.isArray(orders[idx].statusHistory)) orders[idx].statusHistory=[];
-                orders[idx].statusHistory.push({ status: nextStatus, changedAt, changedBy: 'admin-panel' });
-                saveOrders(orders);
-                renderOrdersList();
-                renderOrdersTable();
-                if(!__useFirestore){ notify('Order status updated.', 'success'); return; }
+                const statusHistory = Array.isArray(ordersCache[idx].statusHistory) ? ordersCache[idx].statusHistory : [];
+                statusHistory.push({ status: nextStatus, changedAt, changedBy: 'admin-panel' });
+                
+                if(!__useFirestore){ 
+                    ordersCache[idx].status = nextStatus;
+                    ordersCache[idx].updatedAt = changedAt;
+                    ordersCache[idx].statusHistory = statusHistory;
+                    await refreshOrdersUI(false, ordersCache);
+                    notify('Order status updated.', 'success'); 
+                    return; 
+                }
                 try{
-                    await FirebaseAdapter.updateOrder(docId, { status: nextStatus, updatedAt: changedAt, statusHistory: orders[idx].statusHistory });
+                    await FirebaseAdapter.updateOrder(docId, { status: nextStatus, updatedAt: changedAt, statusHistory });
+                    ordersCache[idx].status = nextStatus;
+                    ordersCache[idx].updatedAt = changedAt;
+                    ordersCache[idx].statusHistory = statusHistory;
+                    // Refresh after successful Firestore update
+                    await refreshOrdersUI(false, ordersCache);
                     notify('Order status updated.', 'success');
                 }catch(err){
                     console.warn('Order status update failed', err);
-                    orders[idx]=previous;
-                    saveOrders(orders);
-                    renderOrdersList();
-                    renderOrdersTable();
-                    sel.value=previous.status;
+                    await syncOrdersFromFirestore();
                     notify('Failed to update status in Firestore.', 'error');
                 }
             }
         }
     });
-    if(clearOrdersBtn) clearOrdersBtn.addEventListener('click',()=>{ confirmAction('Clear ALL orders?').then(async ok=>{ if(!ok) return; const previous=fetchOrders(); const previouslyExpanded=new Set(expandedOrders); saveOrders([]); expandedOrders.clear(); renderOrdersList(); renderOrdersTable(); if(!__useFirestore){ notify('All orders cleared.', 'info'); return; } try{ const removed=await FirebaseAdapter.clearOrders(); notify(`Cleared ${removed} order${removed===1?'':'s'}.`, 'info'); }catch(err){ console.warn('Order clear failed', err); saveOrders(previous); expandedOrders.clear(); previouslyExpanded.forEach(id=>expandedOrders.add(id)); renderOrdersList(); renderOrdersTable(); notify('Failed to clear orders from Firestore.', 'error'); } }); });
-    if(syncOrdersBtn) syncOrdersBtn.addEventListener('click', async ()=>{
-        try{
-            await FirebaseAdapter.init();
-            const arr = await FirebaseAdapter.getOrders();
-            if(Array.isArray(arr)){
-                localStorage.setItem('proJetOrders', JSON.stringify(arr));
-                renderOrdersList();
-                renderOrdersTable();
-                notify('Orders synced from Firestore', 'info');
-            } else {
-                notify('No orders found in Firestore', 'info');
-            }
-        }catch(err){ notify('Failed to sync from Firestore', 'error'); }
+    if(clearOrdersBtn) clearOrdersBtn.addEventListener('click',()=>{ confirmAction('Clear ALL orders?').then(async ok=>{ if(!ok) return; expandedOrders.clear(); await refreshOrdersUI(false, []); if(!__useFirestore){ notify('All orders cleared.', 'info'); return; } try{ const removed=await FirebaseAdapter.clearOrders(); notify(`Cleared ${removed} order${removed===1?'':'s'}.`, 'info'); await syncOrdersFromFirestore(); }catch(err){ console.warn('Order clear failed', err); await syncOrdersFromFirestore(); notify('Failed to clear orders from Firestore.', 'error'); } }); });
+    if(syncOrdersBtn) syncOrdersBtn.addEventListener('click', ()=>{
+        if(pendingOrdersSync) return;
+        pendingOrdersSync = syncOrdersFromFirestore({ showSuccessToast:true });
+        pendingOrdersSync.finally(()=>{ pendingOrdersSync = null; });
     });
-    if(orderFiltersReset) orderFiltersReset.addEventListener('click',()=>{ if(orderDateStart) orderDateStart.value=''; if(orderDateEnd) orderDateEnd.value=''; if(orderSort) orderSort.value='newest'; if(orderSearch) orderSearch.value=''; if(orderStatusFilter) orderStatusFilter.value=''; renderOrdersTable(); if(liveStatus) liveStatus.textContent='Order filters cleared'; });
-    if(orderSearch) orderSearch.addEventListener('input',()=>renderOrdersTable());
-    if(orderStatusFilter) orderStatusFilter.addEventListener('change',()=>renderOrdersTable());
-    if(orderDateStart) orderDateStart.addEventListener('change',renderOrdersTable);
-    if(orderDateEnd) orderDateEnd.addEventListener('change',renderOrdersTable);
-    if(orderSort) orderSort.addEventListener('change',renderOrdersTable);
-    if(exportOrdersBtn) exportOrdersBtn.addEventListener('click',()=>{ const orders=filterOrders(fetchOrders()); if(!orders.length){ notify('No orders to export.', 'info'); return;} const header=['Order ID','Date','Status','Customer Name','Mobile','Email','Address','PIN','Items','Total']; const rows=orders.map(o=>{const c=o.customer||{}; const items=o.items.map(i=>`${i.name} x${i.quantity} (₹${i.price*i.quantity})`).join('; '); return [o.orderId,new Date(o.date).toLocaleString(),o.status,c.name||'',c.mobile||'',c.email||'',(c.address||'').replace(/\n/g,' '),c.pincode||'',items,o.total];}); const csv=[header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='orders.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
+    if(orderFiltersReset) orderFiltersReset.addEventListener('click',()=>{ if(orderDateStart) orderDateStart.value=''; if(orderDateEnd) orderDateEnd.value=''; if(orderSort) orderSort.value='newest'; if(orderSearch) orderSearch.value=''; if(orderStatusFilter) orderStatusFilter.value=''; renderOrdersTable(ordersCache); if(liveStatus) liveStatus.textContent='Order filters cleared'; });
+    if(orderSearch) orderSearch.addEventListener('input',()=>renderOrdersTable(ordersCache));
+    if(orderStatusFilter) orderStatusFilter.addEventListener('change',()=>renderOrdersTable(ordersCache));
+    if(orderDateStart) orderDateStart.addEventListener('change',()=>renderOrdersTable(ordersCache));
+    if(orderDateEnd) orderDateEnd.addEventListener('change',()=>renderOrdersTable(ordersCache));
+    if(orderSort) orderSort.addEventListener('change',()=>renderOrdersTable(ordersCache));
+    if(exportOrdersBtn) exportOrdersBtn.addEventListener('click',async()=>{ const orders=filterOrders(await fetchOrders()); if(!orders.length){ notify('No orders to export.', 'info'); return;} const header=['Order ID','Date','Status','Customer Name','Mobile','Email','Address','PIN','Items','Total']; const rows=orders.map(o=>{const c=o.customer||{}; const items=o.items.map(i=>`${i.name} x${i.quantity} (₹${i.price*i.quantity})`).join('; '); return [o.orderId,new Date(o.date).toLocaleString(),o.status,c.name||'',c.mobile||'',c.email||'',(c.address||'').replace(/\n/g,' '),c.pincode||'',items,o.total];}); const csv=[header,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='orders.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); });
 
     // Image preview
     const imageUrlInput=document.getElementById('imageUrl'); const imageAssetSelect=document.getElementById('imageAsset'); const imagePreview=document.getElementById('image-preview'); const imagePreviewPlaceholder=document.getElementById('image-preview-placeholder');
@@ -687,15 +794,43 @@ const path=window.location.pathname;
         }catch(err){ console.warn('Failed to load product for edit', err); }
     }
 
-    // Initial renders
-    refreshCategoryOptions();
-    renderCards();
-    renderTable();
-    renderOrdersList();
-    renderOrdersTable();
-    updatePreview();
+    const bootstrapApp = async ()=>{
+        refreshCategoryOptions();
+        renderCards();
+        renderTable();
+        if(ordersTableBody || ordersContainer){
+            try{
+                await FirebaseAdapter.init();
+                const user = await FirebaseAdapter.getCurrentUser?.();
+                if(user){
+                    pendingOrdersSync = syncOrdersFromFirestore();
+                    const success = await pendingOrdersSync;
+                    if(success){
+                        autoSyncedOrdersAfterLogin = true;
+                    }
+                } else {
+                    await refreshOrdersUI(false, []);
+                }
+            }catch(err){
+                console.warn('Initial orders sync skipped', err);
+                await refreshOrdersUI(false, []);
+            }finally{
+                pendingOrdersSync = null;
+            }
+        }
+        updatePreview();
+        if((ordersTableBody || ordersContainer) && ordersCache.length){
+            console.log('✅ Orders loaded from Firestore');
+        }
+    };
 
-    // Ensure Firestore products are shown even if localStorage had stale/dummy data
+    if(document.readyState === 'loading'){
+        window.addEventListener('DOMContentLoaded', ()=>{ bootstrapApp().catch(err=>console.error('Bootstrap failed', err)); });
+    } else {
+        bootstrapApp().catch(err=>console.error('Bootstrap failed', err));
+    }
+
+    // Ensure Firestore products are shown
     (async function ensureRemoteProducts(){
         try{
             const st = await FirebaseAdapter.init();
@@ -716,7 +851,6 @@ const path=window.location.pathname;
                 // Keep any local unsynced items (no _docId) and append remote
                 const locals = Array.isArray(products)?products.filter(p=>!p._docId):[];
                 products = __dedupeProducts([...locals, ...mapped]);
-                __persistProducts(products);
                 refreshCategoryOptions();
                 renderCards();
                 renderTable();
@@ -738,7 +872,6 @@ const path=window.location.pathname;
             const looksRemote=Array.isArray(arr)&&arr.some(p=>p&&p._docId);
             if(!looksRemote){
                 products=__dedupeProducts(Array.isArray(arr)?arr:[]);
-                __persistProducts(products);
                 refreshCategoryOptions();
                 renderCards();
                 renderTable();
@@ -771,9 +904,7 @@ const path=window.location.pathname;
         });
         FirebaseAdapter.onOrdersSnapshot?.((arr)=>{
             if(Array.isArray(arr)){
-                localStorage.setItem('proJetOrders', JSON.stringify(arr));
-                renderOrdersList();
-                renderOrdersTable();
+                refreshOrdersUI(false, arr);
             }
         });
     }catch(e){ /* ignore if not configured */ }
@@ -788,7 +919,7 @@ const path=window.location.pathname;
         modal.setAttribute('aria-hidden','false'); modal.style.display='flex';
         try{
             await FirebaseAdapter.init();
-            const localAll = JSON.parse(localStorage.getItem('products')||'[]');
+            const localAll = Array.isArray(products)?products:[];
             const unsynced = localAll.filter(p=>!p._docId);
             if(!unsynced.length){
                 summary.textContent = 'All products are already synced.';
@@ -840,70 +971,197 @@ const path=window.location.pathname;
             }
             products = localAll;
             saveProducts(); refreshCategoryOptions(); renderCards(); renderTable();
-            // Now migrate orders optionally
-            const localOrders = JSON.parse(localStorage.getItem('proJetOrders')||'[]');
-            if(Array.isArray(localOrders) && localOrders.length){
-                if(confirm('Also migrate '+localOrders.length+' local orders to Firestore?')){
-                    summary.textContent = `Migrating ${localOrders.length} orders...`;
-                    for(let i=0;i<localOrders.length;i++){
-                        const o = localOrders[i];
-                        try{ const docId = await FirebaseAdapter.addOrder(o); if(docId) o._docId = docId; safeLog(`Order ${o.orderId} -> ${docId||'(local saved)'}`); }
-                        catch(err){ safeLog(`Failed order ${o.orderId}: ${err.message||err}`); }
-                        prog.style.width = Math.round(((i+1)/localOrders.length)*100)+'%';
-                    }
-                    localStorage.setItem('proJetOrders', JSON.stringify(localOrders));
-                }
-            }
+            // Migration of orders no longer needed - they're already in Firestore
             summary.textContent = 'Sync finished'; safeLog('Sync finished.');
         }catch(err){ console.error('Migration failed', err); summary.textContent = 'Migration failed: '+(err && err.message || err); }
         const cancel = document.getElementById('migration-cancel'); cancel.addEventListener('click',()=>{ modal.setAttribute('aria-hidden','true'); modal.style.display='none'; });
     }
     const migrateBtn=document.getElementById('migrate-firestore'); if(migrateBtn) migrateBtn.addEventListener('click', migrateToFirestore);
-    // Dashboard KPIs & Recent Orders (only if elements exist)
-    (function initDashboard(){
+    const refreshDashboardData=async ({showToast=false}={})=>{
         const kpiProducts=document.getElementById('db-kpi-products');
-        if(!kpiProducts) return; // not on dashboard
-        kpiProducts.textContent=products.length;
+        if(!kpiProducts) return false;
+        let firestoreEnabled=false;
+        let fetchedFromFirestore=false;
+        let productsRemote=null;
+        let ordersRemote=null;
+        try{
+            const st = await FirebaseAdapter.init();
+            firestoreEnabled = !!st.useFirestore;
+            if(firestoreEnabled){
+                const [productsResult, ordersResult] = await Promise.allSettled([
+                    FirebaseAdapter.getProducts(),
+                    FirebaseAdapter.getOrders()
+                ]);
+                if(productsResult.status==='fulfilled'){
+                    productsRemote = Array.isArray(productsResult.value)?productsResult.value:[];
+                    fetchedFromFirestore = true;
+                } else {
+                    console.warn('Dashboard products fetch failed', productsResult.reason);
+                }
+                if(ordersResult.status==='fulfilled'){
+                    ordersRemote = Array.isArray(ordersResult.value)?ordersResult.value:[];
+                    fetchedFromFirestore = true;
+                } else {
+                    console.warn('Dashboard orders fetch failed', ordersResult.reason);
+                }
+            }
+        }catch(err){
+            console.warn('Dashboard sync init failed', err);
+        }
+
+        if(Array.isArray(productsRemote)){
+            products = __dedupeProducts(productsRemote);
+            saveProducts();
+            refreshCategoryOptions();
+            renderCards();
+            renderTable();
+        }
+        if(kpiProducts){
+            kpiProducts.textContent = Array.isArray(products) ? products.length : 0;
+        }
+
+        let dashboardOrders=[];
+        if(Array.isArray(ordersRemote)){
+            dashboardOrders = setOrdersCache(ordersRemote);
+        } else if(Array.isArray(ordersCache) && ordersCache.length){
+            dashboardOrders = ordersCache.map((entry, idx)=>normalizeOrderRecord(entry, idx)).filter(Boolean);
+        }
+
         const monthOrdersEl=document.getElementById('db-kpi-orders');
         const monthOrdersSub=document.getElementById('db-kpi-orders-sub');
         const pendingEl=document.getElementById('db-kpi-pending');
         const pendingSub=document.getElementById('db-kpi-pending-sub');
         const deliveredEl=document.getElementById('db-kpi-delivered');
         const deliveredSub=document.getElementById('db-kpi-delivered-sub');
-        const orders=fetchOrders();
+        const ordersForMetrics=dashboardOrders;
         const now=new Date();
         const startOfMonth=new Date(now.getFullYear(),now.getMonth(),1);
         let monthCount=0,monthRevenue=0,pendingCount=0,deliveredCount=0;
-        orders.forEach(o=>{ const d=new Date(o.date); if(d>=startOfMonth){ monthCount++; monthRevenue+=o.total||0; if(o.status==='Delivered') deliveredCount++; if(o.status==='Pending'||o.status==='Processing'||o.status==='Shipped') pendingCount++; }});
+        ordersForMetrics.forEach(o=>{
+            const d=new Date(o.date);
+            if(d>=startOfMonth){
+                monthCount++;
+                monthRevenue+=Number(o.total)||0;
+                if(o.status==='Delivered') deliveredCount++;
+                if(o.status==='Pending'||o.status==='Processing'||o.status==='Shipped') pendingCount++;
+            }
+        });
         if(monthOrdersEl) monthOrdersEl.textContent=monthCount;
         if(monthOrdersSub) monthOrdersSub.textContent='₹'+monthRevenue.toLocaleString('en-IN');
         if(pendingEl) pendingEl.textContent=pendingCount;
         if(pendingSub) pendingSub.textContent='Open';
         if(deliveredEl) deliveredEl.textContent=deliveredCount;
         if(deliveredSub) deliveredSub.textContent='This Month';
-        // Sparkline: revenue per month for last 12 months
+
         const svg=document.getElementById('revenue-sparkline');
         if(svg){
             const nowM=new Date();
-            const months=[]; // [{label:'2025-01', total:1234}]
-            for(let i=11;i>=0;i--){ const d=new Date(nowM.getFullYear(),nowM.getMonth()-i,1); const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); months.push({ key, date:new Date(d.getFullYear(),d.getMonth(),1), total:0 }); }
-            orders.forEach(o=>{ const d=new Date(o.date); const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); const bucket=months.find(m=>m.key===key); if(bucket) bucket.total+=o.total||0; });
-            const w=160, h=38, padX=4, padY=4; svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.innerHTML='';
-            const max=Math.max(...months.map(m=>m.total),1); const min=Math.min(...months.map(m=>m.total));
-            const xStep=(w-2*padX)/(months.length-1);
-            const pts=months.map((m,i)=>{ const x=padX+i*xStep; const y=h-padY-( (m.total/max)*(h-2*padY) ); return {x,y,total:m.total}; });
-            const lineD=pts.map((p,i)=> (i? 'L':'M')+p.x.toFixed(2)+','+p.y.toFixed(2)).join(' ');
-            const areaD=lineD+' L '+pts[pts.length-1].x.toFixed(2)+','+(h-padY)+' L '+pts[0].x.toFixed(2)+','+(h-padY)+' Z';
-            const area=document.createElementNS('http://www.w3.org/2000/svg','path'); area.setAttribute('class','area'); area.setAttribute('d',areaD); svg.appendChild(area);
-            const path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('class','line'); path.setAttribute('d',lineD); svg.appendChild(path);
-            pts.forEach((p,i)=>{ if(i===pts.length-1 || i===pts.length-2){ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('class','dot'); c.setAttribute('cx',p.x); c.setAttribute('cy',p.y); c.setAttribute('r',2.4); c.setAttribute('data-value',p.total); svg.appendChild(c);} });
-            // Optional min/max labels
-            if(max!==min){ const minP=pts.reduce((a,b)=>b.total<a.total?b:a); const maxP=pts.reduce((a,b)=>b.total>a.total?b:a); const tMin=document.createElementNS('http://www.w3.org/2000/svg','text'); tMin.setAttribute('class','minimax'); tMin.setAttribute('x',minP.x+2); tMin.setAttribute('y',Math.min(h-2, minP.y+7)); tMin.textContent='₹'+minP.total.toLocaleString('en-IN'); svg.appendChild(tMin); const tMax=document.createElementNS('http://www.w3.org/2000/svg','text'); tMax.setAttribute('class','minimax'); tMax.setAttribute('x',maxP.x+2); tMax.setAttribute('y',Math.max(7, maxP.y-2)); tMax.textContent='₹'+maxP.total.toLocaleString('en-IN'); svg.appendChild(tMax); }
+            const months=[];
+            for(let i=11;i>=0;i--){
+                const d=new Date(nowM.getFullYear(),nowM.getMonth()-i,1);
+                const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+                months.push({ key, total:0 });
+            }
+            ordersForMetrics.forEach(o=>{
+                const d=new Date(o.date);
+                const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+                const bucket=months.find(m=>m.key===key);
+                if(bucket) bucket.total+=Number(o.total)||0;
+            });
+            const w=160, h=38, padX=4, padY=4;
+            svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+            svg.innerHTML='';
+            const totals=months.map(m=>m.total);
+            const max=Math.max(...totals,1);
+            const min=Math.min(...totals);
+            const xStep=months.length>1 ? (w-2*padX)/(months.length-1) : 0;
+            const pts=months.map((m,i)=>{
+                const x=padX+i*xStep;
+                const y=h-padY-((m.total/max)*(h-2*padY));
+                return {x,y,total:m.total};
+            });
+            if(pts.length){
+                const lineD=pts.map((p,i)=>(i?'L':'M')+p.x.toFixed(2)+','+p.y.toFixed(2)).join(' ');
+                const areaD=lineD+' L '+pts[pts.length-1].x.toFixed(2)+','+(h-padY)+' L '+pts[0].x.toFixed(2)+','+(h-padY)+' Z';
+                const area=document.createElementNS('http://www.w3.org/2000/svg','path');
+                area.setAttribute('class','area');
+                area.setAttribute('d',areaD);
+                svg.appendChild(area);
+                const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+                path.setAttribute('class','line');
+                path.setAttribute('d',lineD);
+                svg.appendChild(path);
+                pts.forEach((p,i)=>{
+                    if(i===pts.length-1 || i===pts.length-2){
+                        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+                        c.setAttribute('class','dot');
+                        c.setAttribute('cx',p.x);
+                        c.setAttribute('cy',p.y);
+                        c.setAttribute('r',2.4);
+                        c.setAttribute('data-value',p.total);
+                        svg.appendChild(c);
+                    }
+                });
+                if(max!==min){
+                    const minP=pts.reduce((a,b)=>b.total<a.total?b:a);
+                    const maxP=pts.reduce((a,b)=>b.total>a.total?b:a);
+                    const tMin=document.createElementNS('http://www.w3.org/2000/svg','text');
+                    tMin.setAttribute('class','minimax');
+                    tMin.setAttribute('x',minP.x+2);
+                    tMin.setAttribute('y',Math.min(h-2, minP.y+7));
+                    tMin.textContent='₹'+minP.total.toLocaleString('en-IN');
+                    svg.appendChild(tMin);
+                    const tMax=document.createElementNS('http://www.w3.org/2000/svg','text');
+                    tMax.setAttribute('class','minimax');
+                    tMax.setAttribute('x',maxP.x+2);
+                    tMax.setAttribute('y',Math.max(7, maxP.y-2));
+                    tMax.textContent='₹'+maxP.total.toLocaleString('en-IN');
+                    svg.appendChild(tMax);
+                }
+            }
         }
-        // Recent orders list (table)
+
         const recentBody=document.getElementById('recent-orders-body');
         const recentEmpty=document.getElementById('recent-orders-empty');
-        if(recentBody){ const recent=orders.sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8); if(!recent.length){ if(recentEmpty) recentEmpty.style.display='block'; } else { if(recentEmpty) recentEmpty.style.display='none'; recentBody.innerHTML=recent.map(o=>`<tr><td>${o.orderId}</td><td>${new Date(o.date).toLocaleDateString()}<br><span style='opacity:.6;font-size:.55rem;'>${new Date(o.date).toLocaleTimeString()}</span></td><td><span class='status-badge status-${o.status.toLowerCase()}'>${o.status}</span></td><td>₹${o.total.toLocaleString('en-IN')}</td></tr>`).join(''); }}
+        if(recentBody){
+            const recent=[...ordersForMetrics].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+            if(!recent.length){
+                recentBody.innerHTML='';
+                if(recentEmpty) recentEmpty.style.display='block';
+            } else {
+                if(recentEmpty) recentEmpty.style.display='none';
+                recentBody.innerHTML=recent.map(o=>{
+                    const date=new Date(o.date);
+                    const total=Number(o.total)||0;
+                    return `<tr><td>${o.orderId}</td><td>${date.toLocaleDateString()}<br><span style="opacity:.6;font-size:.55rem;">${date.toLocaleTimeString()}</span></td><td><span class='status-badge status-${o.status.toLowerCase()}'>${o.status}</span></td><td>₹${total.toLocaleString('en-IN')}</td></tr>`;
+                }).join('');
+            }
+        }
+
+        if(showToast){
+            if(fetchedFromFirestore){
+                notify('Dashboard data synced from Firestore.', 'success');
+            } else if(firestoreEnabled){
+                notify('Showing cached dashboard data (Firestore sync failed).', 'warn');
+            } else {
+                notify('Firestore not configured; showing local dashboard data.', 'warn');
+            }
+        }
+        return fetchedFromFirestore;
+    };
+
+    (async function initDashboard(){
+        const kpiProducts=document.getElementById('db-kpi-products');
+        if(!kpiProducts) return;
+        await refreshDashboardData();
+        const dashboardSyncBtn=document.getElementById('dashboard-sync-btn');
+        if(dashboardSyncBtn){
+            dashboardSyncBtn.addEventListener('click',()=>{
+                if(pendingDashboardSync) return;
+                pendingDashboardSync = refreshDashboardData({ showToast:true });
+                pendingDashboardSync.finally(()=>{ pendingDashboardSync=null; });
+            });
+        }
     })();
     // Settings page logic (WhatsApp number) - FIREBASE VERSION
     (async function(){

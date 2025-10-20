@@ -91,25 +91,6 @@
             <div id="migration-log"></div>
         </div>
     </div>
-        <!-- Try to sync products from Firebase into localStorage when available (non-blocking) -->
-        <script type="module">
-            import FirebaseAdapter from '../js/firebase-adapter.js';
-            (async function(){
-                try{
-                    // Only attempt sync if local products are empty
-                    const local = JSON.parse(localStorage.getItem('products')||'[]');
-                    if(local.length===0){
-                        await FirebaseAdapter.init();
-                        const prods = await FirebaseAdapter.getProducts();
-                        if (Array.isArray(prods) && prods.length>0){
-                            // normalize Firestore docs: map _docId -> stored _docId, keep id if present
-                            const mapped = prods.map(p=>({ id: p.id||Date.now()+Math.floor(Math.random()*1000), name: p.name||'', price: p.price||0, description: p.description||'', category: p.category||'', imageUrl: p.imageUrl||'', _docId: p._docId }));
-                            localStorage.setItem('products', JSON.stringify(mapped));
-                        }
-                    }
-                }catch(err){ console.warn('Firebase sync skipped or failed:', err); }
-            })();
-        </script>
         <script src="../js/utils.js" defer></script>
         <script type="module" src="admin.js"></script>
 </body>
