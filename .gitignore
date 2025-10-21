@@ -1,0 +1,13 @@
+node_modules/
+/.env
+/.firebase
+/.firebase/*
+dist/
+build/
+*.log
+*.env
+service-account.json
+**/service-account.json
+/.vscode/
+/.DS_Store
+package-lock.json
