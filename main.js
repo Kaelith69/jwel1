@@ -1,40 +1,82 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- DATA ---
-    // Initialize products from localStorage or use default data
-    const initializeProducts = () => {
-        const productsInStorage = localStorage.getItem('products');
-        if (!productsInStorage) {
-            const defaultProducts = [
-                { id: 1, name: 'Ethereal Diamond Necklace', price: 120000, description: 'A stunning necklace featuring a pear-cut diamond, surrounded by a halo of smaller gems.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Necklace' },
-                { id: 2, name: 'Sapphire Dream Ring', price: 95000, description: 'An elegant ring with a central blue sapphire, set in a white gold band.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Ring' },
-                { id: 3, name: 'Ruby Radiance Earrings', price: 78000, description: 'Exquisite drop earrings with vibrant rubies that catch the light beautifully.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
-                { id: 4, name: 'Emerald Isle Bracelet', price: 150000, description: 'A timeless bracelet adorned with square-cut emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Bracelet' },
-                { id: 5, name: 'Golden Grace Bangles', price: 67000, description: 'Classic gold bangles with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Bangles' },
-                { id: 6, name: 'Pearl Elegance Necklace', price: 54000, description: 'A string of lustrous pearls with a diamond-studded clasp.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
-                { id: 7, name: 'Opulent Choker Set', price: 112000, description: 'A regal choker set with emeralds and pearls.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Set' },
-                { id: 8, name: 'Classic Solitaire Ring', price: 89000, description: 'A timeless solitaire diamond ring in platinum.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Ring' },
-                { id: 9, name: 'Rose Gold Heart Pendant', price: 32000, description: 'A delicate heart pendant in rose gold with a tiny diamond.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Pendant' },
-                { id: 10, name: 'Majestic Kundan Set', price: 135000, description: 'Traditional kundan necklace set with matching earrings.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Set' },
-                { id: 11, name: 'Blue Topaz Studs', price: 21000, description: 'Elegant blue topaz stud earrings in silver.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Studs' },
-                { id: 12, name: 'Emerald Drop Earrings', price: 48000, description: 'Emerald drop earrings with diamond accents.', imageUrl: 'assets/IMG-20250812-WA0012.jpg', category: 'Earrings' },
-                { id: 13, name: 'Vintage Ruby Brooch', price: 39000, description: 'A vintage brooch with a central ruby and gold filigree.', imageUrl: 'assets/IMG-20250812-WA0013.jpg', category: 'Brooch' },
-                { id: 14, name: 'Diamond Tennis Bracelet', price: 125000, description: 'A sparkling tennis bracelet with round-cut diamonds.', imageUrl: 'assets/IMG-20250812-WA0001.jpg', category: 'Bracelet' },
-                { id: 15, name: 'Sapphire Halo Pendant', price: 61000, description: 'A sapphire pendant surrounded by a halo of diamonds.', imageUrl: 'assets/IMG-20250812-WA0002.jpg', category: 'Pendant' },
-                { id: 16, name: 'Pearl Drop Earrings', price: 27000, description: 'Classic pearl drop earrings with gold hooks.', imageUrl: 'assets/IMG-20250812-WA0003.jpg', category: 'Earrings' },
-                { id: 17, name: 'Gold Leaf Anklet', price: 18000, description: 'A dainty gold anklet with leaf charms.', imageUrl: 'assets/IMG-20250812-WA0004.jpg', category: 'Anklet' },
-                { id: 18, name: 'Emerald Cluster Ring', price: 73000, description: 'A cluster ring with emeralds and diamonds.', imageUrl: 'assets/IMG-20250812-WA0005.jpg', category: 'Ring' },
-                { id: 19, name: 'Ruby Bead Necklace', price: 56000, description: 'A necklace of ruby beads with gold spacers.', imageUrl: 'assets/IMG-20250812-WA0006.jpg', category: 'Necklace' },
-                { id: 20, name: 'Diamond Stud Earrings', price: 47000, description: 'Simple and elegant diamond stud earrings.', imageUrl: 'assets/IMG-20250812-WA0007.jpg', category: 'Studs' },
-                { id: 21, name: 'Gold Filigree Pendant', price: 25000, description: 'A gold pendant with intricate filigree work.', imageUrl: 'assets/IMG-20250812-WA0008.jpg', category: 'Pendant' },
-                { id: 22, name: 'Sapphire and Pearl Maang Tikka', price: 39000, description: 'A traditional maang tikka with sapphires and pearls.', imageUrl: 'assets/IMG-20250812-WA0009.jpg', category: 'Maang Tikka' },
-                { id: 23, name: 'Antique Gold Kada', price: 68000, description: 'A bold antique gold kada with engraved motifs.', imageUrl: 'assets/IMG-20250812-WA0010.jpg', category: 'Kada' },
-                { id: 24, name: 'Diamond Nose Pin', price: 12000, description: 'A tiny nose pin with a single sparkling diamond.', imageUrl: 'assets/IMG-20250812-WA0011.jpg', category: 'Nose Pin' }
-            ];
-            localStorage.setItem('products', JSON.stringify(defaultProducts));
-            return defaultProducts;
-        }
-        return JSON.parse(productsInStorage);
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize UI manager for accessibility, skip links, and cart sidebar behavior
+    if (window.UIManager) {
+        try { new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
+    }
+
+    const yearEl = document.getElementById('year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+    }
+    
+    // --- FIREBASE INTEGRATION ---
+    // Show loading indicator
+    const ensureLoadingStyles = () => {
+        if (document.getElementById('loading-gem-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'loading-gem-styles';
+        style.textContent = `
+            .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: #666; text-align: center; font-size: 1rem; }
+            .loading-state .loading-gem { display: inline-flex; align-items: center; justify-content: center; gap: 12px; transform: translateZ(0); perspective: 500px; }
+            .loading-state .loading-gem span { display: inline-block; width: clamp(24px, 3vw, 32px); height: clamp(24px, 3vw, 32px); background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%); border-radius: 18% 18% 42% 42%; transform: rotate(45deg) scale(0.88); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28); animation: gemPulse 1.2s ease-in-out infinite; opacity: 0.95; position: relative; overflow: hidden; will-change: transform, box-shadow, filter; }
+            .loading-state .loading-gem span::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), transparent 55%); opacity: 0.75; }
+            .loading-state .loading-gem span:nth-child(2) { animation-delay: 0.18s; }
+            .loading-state .loading-gem span:nth-child(3) { animation-delay: 0.36s; }
+            @keyframes gemPulse { 0%, 100% { transform: rotate(45deg) scale(0.82) translateY(0); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18); filter: brightness(0.92); } 45% { transform: rotate(45deg) scale(1.08) translateY(-8px); box-shadow: 0 18px 30px rgba(250, 204, 21, 0.4); filter: brightness(1.12); } 55% { transform: rotate(45deg) scale(1.05) translateY(-5px); box-shadow: 0 12px 26px rgba(96, 165, 250, 0.35); filter: brightness(1.05); } }
+        `;
+        document.head.appendChild(style);
     };
+
+    const showLoading = () => {
+        const grid = document.getElementById('product-grid');
+        if (!grid) return;
+        ensureLoadingStyles();
+        grid.innerHTML = `
+            <div class="loading-state" role="status" aria-live="polite" aria-label="Loading products">
+                <span class="loading-gem" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </div>
+        `.trim();
+    };
+    
+    const showError = (message) => {
+        if (document.getElementById('product-grid')) {
+            document.getElementById('product-grid').innerHTML = `<div style="text-align:center;padding:40px;color:#dc3545;"><p style="font-size:18px;">❌ ${message}</p><p style="margin-top:10px;"><a href="migrate-to-firebase.html" style="color:#3B82F6;">Go to Migration Tool</a></p></div>`;
+        }
+    };
+    
+    // Load Firebase Adapter
+    let FirebaseAdapter;
+    try {
+        const FirebaseAdapterModule = await import('./js/firebase-adapter.js');
+        FirebaseAdapter = FirebaseAdapterModule.default || FirebaseAdapterModule;
+    } catch (err) {
+        console.error('Failed to load Firebase adapter:', err);
+        showError('Failed to load Firebase adapter. Please check your setup.');
+        return;
+    }
+    
+    // --- DATA ---
+    // Load products from Firebase (NO localStorage fallback)
+    let products = [];
+    showLoading();
+    
+    try {
+        products = await FirebaseAdapter.getProducts();
+        console.log('✅ Loaded', products.length, 'products from Firebase');
+        
+        if (products.length === 0) {
+            showError('No products found in Firebase. Please use the migration tool to upload products.');
+            return;
+        }
+    } catch (err) {
+        console.error('Failed to load products from Firebase:', err);
+        showError('Failed to load products from Firebase: ' + err.message);
+        return;
+    }
 
     // Category normalization mapping (canonical categories)
     const CATEGORY_MAP = {
@@ -57,8 +99,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return CATEGORY_MAP[key] || cat; // keep original if not mapped so we don't lose intent
     };
 
-    const products = initializeProducts().map(p => ({ ...p, category: normalizeCategory(p.category) }));
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    // Normalize categories from Firebase data
+    products = products.map(p => {
+        const fallbackId = `fallback-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        const normalizedId = p.id != null
+            ? String(p.id)
+            : (p._docId != null ? String(p._docId) : fallbackId);
+        return {
+            ...p,
+            category: normalizeCategory(p.category),
+            id: normalizedId
+        };
+    });
+    
+    // Cart is always localStorage only
+    let cart = (JSON.parse(localStorage.getItem('cart')) || []).map(item => {
+        const normalizedId = item.id != null ? String(item.id) : null;
+        return normalizedId ? { ...item, id: normalizedId } : null;
+    }).filter(Boolean);
 
     // --- DOM Elements ---
     const productGrid = document.getElementById('product-grid');
@@ -72,28 +130,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutBtn = document.getElementById('checkout-btn');
     const checkoutSummaryContainer = document.getElementById('bill-items');
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
+    const whatsappQrWrapper = document.getElementById('whatsapp-qr-wrapper');
+    const whatsappQrProgress = document.getElementById('whatsapp-qr-progress');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
+    const floatingOrderBtn = document.getElementById('order-now-btn');
     // Product filter UI (only present on products page)
     const filterCategorySelect = document.getElementById('filter-category');
-    const filterSearchInput = document.getElementById('filter-search');
     const filterClearBtn = document.getElementById('filter-clear');
+    const filterSearchInput = document.getElementById('filter-search');
+    // Product detail modal elements
+    const productDetailModal = document.getElementById('product-detail-modal');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalProductImage = document.getElementById('modal-product-image');
+    const modalProductName = document.getElementById('modal-product-name');
+    const modalProductCategory = document.getElementById('modal-product-category');
+    const modalProductDescription = document.getElementById('modal-product-description');
+    const modalProductPrice = document.getElementById('modal-product-price');
+    const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
     let currentFilters = { category: '', search: '' };
+    const SHIPPING_CHARGE = 0;
 
     // --- RENDER FUNCTIONS ---
 
     // Render products on the products page
     const getFilteredProducts = () => {
-        const term = currentFilters.search.toLowerCase();
+        const q = (currentFilters.search || '').toLowerCase().trim();
         return products.filter(p => {
             const okCategory = !currentFilters.category || p.category === currentFilters.category;
-            if (!okCategory) return false;
-            if (!term) return true;
-            return (
-                p.name.toLowerCase().includes(term) ||
-                p.description.toLowerCase().includes(term)
-            );
+            const okSearch = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+            return okCategory && okSearch;
         });
     };
 
@@ -110,56 +177,85 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!productGrid) return;
         const list = getFilteredProducts();
         if (!list.length) {
-            productGrid.innerHTML = '<div style="grid-column:1/-1;padding:1rem;opacity:.7;font-size:.9rem;">No products match your filters.</div>';
+            productGrid.innerHTML = '<div class="no-products-message">No products match your filters.</div>';
             return;
         }
         productGrid.innerHTML = list.map(product => `
-            <div class="product-card">
-                <div class="glass-card">
+            <div class="product-card" data-product-id="${String(product.id)}">
+                <!-- Clean Image Section -->
+                <div class="product-image-section">
                     <div class="product-image-container">
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy" decoding="async" width="600" height="600" onerror="this.src='/logo/logo.png'">
                     </div>
-                    <div class="product-bottom">
-                        <div class="product-info">
-                            <h3 class="product-name">${product.name}</h3>
-                            <p class="product-description">${product.description}</p>
-                            <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
-                        </div>
-                        <button class="add-to-cart-btn" data-id="${product.id}" title="Add to Cart" aria-label="Add ${product.name} to cart">
-                            <i class="fas fa-plus" aria-hidden="true"></i>
-                        </button>
+                </div>
+                
+                <!-- Text Section Below Image -->
+                <div class="product-text-section">
+                    <div class="product-info">
+                        <h3 class="product-name">${product.name}</h3>
+                        <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
+                        <p class="product-description">${product.description}</p>
+                        <p class="product-description-secondary" style="display: none;">${product.category} • Premium Quality</p>
                     </div>
+                    
+                    <!-- Full-width Cart Button -->
+                    <button class="add-to-cart-btn liquidize" data-id="${String(product.id)}" title="Add to Cart" aria-label="Add ${product.name} to cart">
+                        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                        <span class="btn-text">Add to Cart</span>
+                    </button>
                 </div>
             </div>
         `).join('');
     };
 
+    // Show skeletons helper
+    const showSkeletons = (count = 6) => {
+        if (!productGrid) return;
+        const skeletons = Array.from({ length: count }).map(() => `
+            <div class="skeleton-card">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-text medium"></div>
+                <div class="skeleton-text small"></div>
+            </div>
+        `).join('');
+        productGrid.innerHTML = `<div class="skeleton-grid">${skeletons}</div>`;
+    };
+
     // Render items in the cart sidebar
     const renderCart = () => {
         if (!cartItemsContainer) return;
+        
+        // Clear existing content
         cartItemsContainer.innerHTML = '';
+        
         if (cart.length === 0) {
             cartItemsContainer.innerHTML = '<div class="cart-empty">Your bag is empty.</div>';
         } else {
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            
             cart.forEach(item => {
                 const cartItemEl = document.createElement('div');
                 cartItemEl.className = 'cart-item';
                 cartItemEl.innerHTML = `
-                    <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" onerror="this.src='assets/IMG-20250812-WA0001.jpg'">
+                    <img src="${item.imageUrl || '/logo/logo.png'}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='/logo/logo.png'">
                     <div class="cart-item-info">
                         <p class="cart-item-name">${item.name}</p>
                         <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
                         <div class="cart-item-quantity">
-                            <button class="quantity-btn" data-id="${item.id}" data-action="decrease">-</button>
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" aria-label="Decrease quantity">-</button>
                             <span class="quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn" data-id="${item.id}" data-action="increase">+</button>
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" aria-label="Increase quantity">+</button>
                         </div>
                     </div>
-                    <button class="remove-item-btn" data-id="${item.id}">&times;</button>
+                    <button class="remove-item-btn liquidize" data-id="${String(item.id)}" aria-label="Remove item">&times;</button>
                 `;
-                cartItemsContainer.appendChild(cartItemEl);
+                fragment.appendChild(cartItemEl);
             });
+            
+            cartItemsContainer.appendChild(fragment);
         }
+        
         updateCartSummary();
     };
 
@@ -170,28 +266,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (cartCountEl) {
             cartCountEl.textContent = totalItems;
-            // Always show count when there are items, hide when zero
             if (totalItems > 0) {
                 cartCountEl.style.display = 'flex';
                 cartCountEl.classList.add('show-as-main');
-                // Update cart button to show count instead of icon
-                const cartIcon = cartToggle?.querySelector('i');
-                if (cartIcon) cartIcon.style.display = 'none';
             } else {
                 cartCountEl.style.display = 'none';
                 cartCountEl.classList.remove('show-as-main');
-                // Show cart icon when no items
-                const cartIcon = cartToggle?.querySelector('i');
-                if (cartIcon) cartIcon.style.display = 'block';
             }
         }
         if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
+        if (floatingOrderBtn) {
+            const isDisabled = totalItems === 0;
+            floatingOrderBtn.disabled = isDisabled;
+            floatingOrderBtn.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+            // Provide hidden label text reflecting item count for SR users
+            floatingOrderBtn.setAttribute('title', isDisabled ? 'Cart is empty' : `Open cart (${totalItems} item${totalItems===1?'':'s'})`);
+        }
         saveCart();
     };
 
     // Render checkout page summary
     const renderCheckoutSummary = () => {
         if (!checkoutSummaryContainer) return;
+        const progress = document.getElementById('checkout-progress');
+        if (progress) { progress.style.display = 'block'; progress.setAttribute('aria-hidden','false'); }
 
         checkoutSummaryContainer.innerHTML = cart.map(item => `
             <div class="bill-item">
@@ -201,8 +299,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `).join('');
 
         const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-        const shipping = subtotal > 0 ? 500 : 0; // Rs 500 shipping if subtotal > 0
-        const grandTotal = subtotal + shipping;
+    const shipping = SHIPPING_CHARGE;
+    const grandTotal = subtotal + shipping;
         
         const billSubtotal = document.getElementById('bill-subtotal');
         const billShipping = document.getElementById('bill-shipping');
@@ -210,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (billSubtotal) billSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
         if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
         if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+        if (progress) { setTimeout(() => { progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
     };
 
     // --- EVENT HANDLERS ---
@@ -245,25 +344,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add product to cart
     const addToCart = (productId) => {
         try {
-            const productToAdd = products.find(p => p.id === productId);
+            const lookupId = String(productId);
+            // Only use local product data for cart
+            const productToAdd = products.find(p => String(p.id) === lookupId);
             if (!productToAdd) {
                 console.error('Product not found:', productId);
                 return;
             }
-            
-            const existingItem = cart.find(item => item.id === productId);
-
+            const existingItem = cart.find(item => String(item.id) === lookupId);
             if (existingItem) {
                 existingItem.quantity++;
             } else {
-                cart.push({ ...productToAdd, quantity: 1 });
+                cart.push({ ...productToAdd, id: lookupId, quantity: 1 });
             }
-            
             saveCart();
             renderCart();
-            
             // Show brief success feedback
-            const addButton = document.querySelector(`[data-id="${productId}"]`);
+            const addButton = document.querySelector(`[data-id="${lookupId}"]`);
             if (addButton) {
                 const originalText = addButton.innerHTML;
                 addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
@@ -280,7 +377,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update item quantity in cart
     const updateQuantity = (productId, action) => {
-        const item = cart.find(item => item.id === productId);
+        const lookupId = String(productId);
+        const item = cart.find(item => String(item.id) === lookupId);
         if (!item) return;
 
         if (action === 'increase') {
@@ -288,7 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'decrease') {
             item.quantity--;
             if (item.quantity <= 0) {
-                removeFromCart(productId);
+                removeFromCart(lookupId);
                 return;
             }
         }
@@ -298,7 +396,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Remove item from cart
     const removeFromCart = (productId) => {
-        cart = cart.filter(item => item.id !== productId);
+        const lookupId = String(productId);
+        cart = cart.filter(item => String(item.id) !== lookupId);
         saveCart();
         renderCart();
     };
@@ -311,43 +410,148 @@ document.addEventListener('DOMContentLoaded', () => {
     // Clear entire cart
     const clearCart = () => {
         if (cart.length === 0) return;
-        
-        if (confirm('Are you sure you want to clear your entire cart?')) {
-            cart = [];
-            saveCart();
-            renderCart();
-        }
+        cart = [];
+        saveCart();
+        renderCart();
+        notify('Cart cleared', 'success');
     };
 
-    // WhatsApp order logic (dynamic from admin settings)
-    function getWhatsAppNumber(){
-        try { const cfg=JSON.parse(localStorage.getItem('adminSettings')||'{}'); if(cfg.whatsappNumber && /^[0-9]{10,15}$/.test(cfg.whatsappNumber)) return cfg.whatsappNumber; } catch {}
-        return '919876543210'; // fallback default
+    // --- PRODUCT DETAIL MODAL FUNCTIONS ---
+    
+    // Open product detail modal
+    const openProductModal = (productId) => {
+        const lookupId = String(productId);
+        const product = products.find(p => String(p.id) === lookupId);
+        if (!product || !productDetailModal) return;
+
+        // Populate modal with product data
+        if (modalProductImage) {
+            modalProductImage.loading = 'lazy';
+            modalProductImage.decoding = 'async';
+            modalProductImage.src = product.imageUrl;
+            modalProductImage.alt = product.name;
+        }
+        if (modalProductName) modalProductName.textContent = product.name;
+        if (modalProductCategory) modalProductCategory.textContent = product.category;
+        if (modalProductDescription) modalProductDescription.textContent = product.description;
+        if (modalProductPrice) modalProductPrice.textContent = `₹${product.price.toLocaleString('en-IN')}`;
+        
+        // Set up the modal add to cart button
+        if (modalAddToCartBtn) {
+            modalAddToCartBtn.onclick = () => {
+                addToCart(lookupId);
+                closeProductModal();
+            };
+        }
+
+        // Show modal
+        productDetailModal.style.display = 'flex';
+        setTimeout(() => {
+            productDetailModal.classList.add('active');
+        }, 10);
+        
+        // Prevent body scroll when modal is open
+        document.body.style.overflow = 'hidden';
+    };
+
+    // WhatsApp order logic (dynamic from Firebase settings)
+    async function getWhatsAppNumber(){
+        try {
+            const settings = await FirebaseAdapter.getSettings();
+            if (settings?.whatsappNumber) {
+                const sanitized = String(settings.whatsappNumber).replace(/[^0-9]/g, '');
+                if (sanitized.length >= 10 && sanitized.length <= 15) {
+                    return sanitized;
+                }
+                console.warn('WhatsApp number from settings is invalid after sanitizing:', settings.whatsappNumber);
+            }
+        } catch (err) {
+            console.warn('Failed to load WhatsApp number from Firebase:', err);
+        }
+        return '919961165503'; // fallback default
+    }
+
+    const isMobileDevice = () => /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase());
+
+    function setWhatsAppButtonText(text, ariaLabel) {
+        if (!whatsappOrderBtn) return;
+        whatsappOrderBtn.textContent = text;
+        whatsappOrderBtn.setAttribute('aria-label', ariaLabel || text);
+    }
+
+    if (whatsappOrderBtn) {
+        if (isMobileDevice()) {
+            setWhatsAppButtonText('Place Order on WhatsApp');
+        } else {
+            setWhatsAppButtonText('Generate WhatsApp QR', 'Generate WhatsApp QR for WhatsApp order');
+        }
+    }
+
+    function buildWhatsAppUrl(phone, encodedMessage, { target = 'auto' } = {}) {
+        const baseParams = `phone=${phone}&text=${encodedMessage}`;
+        const resolvedTarget = target === 'auto'
+            ? (isMobileDevice() ? 'mobile' : 'web')
+            : target;
+        if (resolvedTarget === 'mobile') {
+            return `https://wa.me/${phone}?text=${encodedMessage}`;
+        }
+        return `https://web.whatsapp.com/send?${baseParams}`;
+    }
+
+    function renderWhatsAppQr(mobileUrl, desktopUrl) {
+        if (!whatsappQrWrapper) return;
+        const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${encodeURIComponent(mobileUrl)}`;
+        whatsappQrWrapper.innerHTML = `
+            <p class="qr-instructions">Scan this QR code with WhatsApp on your phone to continue your order.</p>
+            <img src="${qrSrc}" alt="WhatsApp order QR code" class="whatsapp-qr-image" loading="lazy" decoding="async">
+            <a href="${desktopUrl}" target="_blank" rel="noopener" class="qr-fallback-link">Open on WhatsApp Web instead</a>
+        `;
+        // Hide the QR progress bar once image loads or fails
+        try {
+            const img = whatsappQrWrapper.querySelector('.whatsapp-qr-image');
+            if (img) {
+                const hideProgress = () => { if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); } };
+                img.addEventListener('load', hideProgress, { once: true });
+                img.addEventListener('error', hideProgress, { once: true });
+            }
+        } catch(_) {}
+        whatsappQrWrapper.hidden = false;
+        whatsappQrWrapper.classList.add('visible');
     }
 
     function validateEmail(email) {
-        // Simple email regex
-        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+        // Simple email regex with null check
+        if (!email || typeof email !== 'string') return false;
+        return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim());
     }
 
     function validateMobile(mobile) {
-        // Validate 10-digit mobile number
-        return /^[0-9]{10}$/.test(mobile);
+        // Validate 10-digit mobile number with null check
+        if (!mobile || typeof mobile !== 'string') return false;
+        return /^[0-9]{10}$/.test(mobile.trim());
     }
 
     function validatePincode(pincode) {
-        // Validate 6-digit PIN code
-        return /^[0-9]{6}$/.test(pincode);
+        // Validate 6-digit PIN code with null check
+        if (!pincode || typeof pincode !== 'string') return false;
+        return /^[0-9]{6}$/.test(pincode.trim());
     }
 
-    function handleWhatsAppOrder(e) {
+    async function handleWhatsAppOrder(e) {
         if (e) e.preventDefault();
         
         // Clear any previous errors
         if (checkoutError) {
             checkoutError.style.display = 'none';
+            checkoutError.style.color = '';
             checkoutError.textContent = '';
         }
+        if (whatsappQrWrapper) {
+            whatsappQrWrapper.hidden = true;
+            whatsappQrWrapper.classList.remove('visible');
+            whatsappQrWrapper.innerHTML = '';
+        }
+        if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
         
         if (!cart || cart.length === 0) {
             if (checkoutError) {
@@ -378,8 +582,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     {field: document.getElementById('customer-pincode'), value: pincode}
                 ].forEach(({field, value}) => {
                     if (field && !value) {
+                        field.setAttribute('aria-invalid', 'true');
                         field.style.borderColor = '#e53935';
                         field.addEventListener('input', function handler() {
+                            field.removeAttribute('aria-invalid');
                             field.style.borderColor = '';
                             field.removeEventListener('input', handler);
                         });
@@ -395,6 +601,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.textContent = 'Please enter a valid 10-digit mobile number.';
                 checkoutError.style.display = 'block';
             }
+            const f = document.getElementById('customer-mobile');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
+            }
             return;
         }
         
@@ -403,6 +615,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (checkoutError) {
                 checkoutError.textContent = 'Please enter a valid 6-digit PIN code.';
                 checkoutError.style.display = 'block';
+            }
+            const f = document.getElementById('customer-pincode');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
         }
@@ -413,94 +631,264 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkoutError.textContent = 'Please enter a valid email address (example: name@example.com).';
                 checkoutError.style.display = 'block';
             }
-            return;
-        }
-        
-        if (name.length < 2) {
-            if (checkoutError) {
-                checkoutError.textContent = 'Please enter a valid name (at least 2 characters).';
-                checkoutError.style.display = 'block';
+            const f = document.getElementById('customer-email');
+            if (f) {
+                f.setAttribute('aria-invalid', 'true');
+                f.style.borderColor = '#e53935';
+                f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
         }
-        
-        if (address.length < 10) {
-            if (checkoutError) {
-                checkoutError.textContent = 'Please enter a complete address (at least 10 characters).';
-                checkoutError.style.display = 'block';
-            }
-            return;
-        }
-        if (checkoutError) checkoutError.style.display = 'none';
-
-        // Show loading state
-        const submitButton = document.getElementById('whatsapp-order-btn');
+        const submitButton = whatsappOrderBtn;
         if (submitButton) {
             submitButton.disabled = true;
-            submitButton.textContent = 'Processing Order...';
+            if (isMobileDevice()) {
+                setWhatsAppButtonText('Processing...');
+            } else {
+                setWhatsAppButtonText('Generating WhatsApp QR...', 'Generating WhatsApp QR for WhatsApp order');
+            }
         }
-
+        if (!isMobileDevice() && whatsappQrProgress) { whatsappQrProgress.style.display='block'; whatsappQrProgress.setAttribute('aria-hidden','false'); }
+        
         try {
-            // Prepare order summary
-            const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const shipping = subtotal > 0 ? 500 : 0;
-            const grandTotal = subtotal + shipping;
-            let orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
-
-            const message =
-`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
-
-            // Save order to localStorage
-            const order = {
-                orderId: 'ORD-' + Date.now(),
-                customer: { name, mobile, email, address, pincode },
-                items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
-                total: grandTotal,
-                date: new Date().toISOString()
-            };
-            let orders = JSON.parse(localStorage.getItem('proJetOrders') || '[]');
-            orders.push(order);
-            localStorage.setItem('proJetOrders', JSON.stringify(orders));
-
-            // Show confirmation message
-            if (checkoutError) {
-                checkoutError.textContent = 'Order placed! Please complete your order in WhatsApp.';
-                checkoutError.style.display = 'block';
-                checkoutError.style.color = '#080';
+            const whatsappNumber = await getWhatsAppNumber();
+            if (!whatsappNumber) {
+                if (checkoutError) {
+                    checkoutError.textContent = 'WhatsApp number is not configured. Please update it in settings.';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#dc3545';
+                }
+                if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
+                return;
             }
 
-            // WhatsApp redirect with small delay for better UX
-            setTimeout(() => {
-                const encodedMsg = encodeURIComponent(message);
-                window.location.href = `https://wa.me/${getWhatsAppNumber()}?text=${encodedMsg}`;
-                // Clear cart after redirect
-                cart = [];
-                saveCart();
-                updateCartSummary();
-                renderCheckoutSummary();
-            }, 1000);
-            
+            // Prepare order summary
+            const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const shipping = SHIPPING_CHARGE;
+            const grandTotal = subtotal + shipping;
+            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const placedAt = new Date();
+            const orderReference = `ORD-${placedAt.getTime()}`;
+            const orderTimestampIso = placedAt.toISOString();
+            const orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
+
+            const message =
+`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Order ID:* ${orderReference}\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
+
+            // Save order to Firebase (required)
+            const order = {
+                orderId: orderReference,
+                status: 'Pending',
+                source: 'storefront-checkout',
+                channel: 'whatsapp',
+                currency: 'INR',
+                subtotal,
+                shipping,
+                total: grandTotal,
+                itemCount,
+                date: orderTimestampIso,
+                createdAt: orderTimestampIso,
+                updatedAt: orderTimestampIso,
+                customer: {
+                    name,
+                    mobile,
+                    email: email || null,
+                    address,
+                    pincode
+                },
+                items: cart.map(item => ({
+                    id: item.id || item._docId,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    lineTotal: item.price * item.quantity
+                })),
+                statusHistory: [
+                    { status: 'Pending', changedAt: orderTimestampIso, changedBy: 'customer' }
+                ],
+                whatsappMessage: message,
+                notes: 'Order initiated via checkout form and shared over WhatsApp.'
+            };
+
+            try {
+                const firestoreDocId = await FirebaseAdapter.addOrder(order);
+                console.log('\u2705 Order saved to Firebase:', firestoreDocId);
+            } catch (err) {
+                console.error('Failed to save order to Firebase:', err);
+                if (checkoutError) {
+                    checkoutError.textContent = 'Failed to save order: ' + err.message;
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#dc3545';
+                }
+                return; // Don't proceed if order can't be saved
+            }
+
+            // Show confirmation message briefly before redirecting
+            const encodedMsg = encodeURIComponent(message);
+            const whatsappMobileUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'mobile' });
+            const whatsappWebUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'web' });
+
+            if (isMobileDevice()) {
+                if (checkoutError) {
+                    checkoutError.textContent = 'Order placed! Redirecting you to WhatsApp...';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#080';
+                }
+                const newWindow = window.open(whatsappMobileUrl, '_blank', 'noopener');
+                if (!newWindow) {
+                    window.location.href = whatsappMobileUrl;
+                }
+            } else {
+                if (checkoutError) {
+                    checkoutError.textContent = 'Order placed! Scan the QR code below with your phone to continue on WhatsApp.';
+                    checkoutError.style.display = 'block';
+                    checkoutError.style.color = '#080';
+                }
+                renderWhatsAppQr(whatsappMobileUrl, whatsappWebUrl);
+                setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');
+            }
+
+            cart = [];
+            saveCart();
+            updateCartSummary();
+            renderCheckoutSummary();
         } catch (error) {
             console.error('Error processing order:', error);
             if (checkoutError) {
                 checkoutError.textContent = 'An error occurred while processing your order. Please try again.';
                 checkoutError.style.display = 'block';
             }
+            if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
         } finally {
-            // Reset button state
             if (submitButton) {
                 setTimeout(() => {
                     submitButton.disabled = false;
-                    submitButton.textContent = 'Place Order on WhatsApp';
+                    if (isMobileDevice()) {
+                        setWhatsAppButtonText('Place Order on WhatsApp');
+                    } else if (whatsappQrWrapper && whatsappQrWrapper.classList.contains('visible')) {
+                        setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');
+                    } else {
+                        setWhatsAppButtonText('Generate WhatsApp QR', 'Generate WhatsApp QR for WhatsApp order');
+                    }
                 }, 2000);
+            }
+            if (!whatsappQrWrapper || !whatsappQrWrapper.classList.contains('visible')) {
+                if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
             }
         }
     }
 
     // --- EVENT LISTENERS ---
 
+    // Mobile nav toggle
+    const navToggle = document.getElementById('nav-toggle');
+    const mainNav = document.getElementById('site-main-nav');
+    if (navToggle && mainNav) {
+        const navIcon = navToggle.querySelector('i');
+        const setNavIcon = (open) => {
+            if (!navIcon) return;
+            navIcon.classList.remove('fa-bars', 'fa-xmark');
+            navIcon.classList.add('fa-solid', open ? 'fa-xmark' : 'fa-bars');
+            navToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        };
+        // Ensure initial state
+        setNavIcon(false);
+
+        navToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = mainNav.classList.toggle('open');
+            navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            setNavIcon(isOpen);
+            
+            // Handle body scroll
+            if (isOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close nav when clicking outside
+        document.addEventListener('click', (e) => {
+            if (mainNav.classList.contains('open') && 
+                !mainNav.contains(e.target) && 
+                !navToggle.contains(e.target)) {
+                mainNav.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                setNavIcon(false);
+                document.body.style.overflow = '';
+            }
+        });
+        
+        // Close nav with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mainNav.classList.contains('open')) {
+                mainNav.classList.remove('open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                setNavIcon(false);
+                document.body.style.overflow = '';
+            }
+        });
+    }
+
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
+    if (floatingOrderBtn) {
+        // Initialize disabled state on load
+        const initialItems = cart.reduce((s,i)=>s+i.quantity,0);
+        floatingOrderBtn.disabled = initialItems === 0;
+        floatingOrderBtn.setAttribute('aria-disabled', initialItems === 0 ? 'true' : 'false');
+        floatingOrderBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (cart.length === 0) {
+                if (typeof window.notify === 'function') {
+                    window.notify('Your bag is empty.', 'error');
+                } else {
+                    alert('Your bag is empty.');
+                }
+                return;
+            }
+
+            if (window.location.pathname.endsWith('checkout.html')) {
+                if (cartSidebar && !cartSidebar.classList.contains('open')) {
+                    toggleCart();
+                } else if (!cartSidebar) {
+                    document.getElementById('checkout-summary')?.scrollIntoView({ behavior: 'smooth' });
+                }
+                return;
+            }
+
+            if (cartSidebar) {
+                if (!cartSidebar.classList.contains('open')) {
+                    toggleCart();
+                } else {
+                    cartCloseBtn?.focus();
+                }
+                return;
+            }
+
+            window.location.href = 'checkout.html';
+        });
+    }
+    
+    // Product detail modal event listeners
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeProductModal);
+    if (productDetailModal) {
+        productDetailModal.addEventListener('click', (e) => {
+            // Close modal when clicking on the overlay (not the modal content)
+            if (e.target === productDetailModal || e.target.classList.contains('modal-overlay')) {
+                closeProductModal();
+            }
+        });
+    }
+    
+    // Keyboard event handling for modal
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && productDetailModal && productDetailModal.classList.contains('active')) {
+            closeProductModal();
+        }
+    });
     
     // Improved overlay click handling
     if (sidebarOverlay) {
@@ -514,26 +902,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Event delegation for dynamically created buttons
     document.body.addEventListener('click', (e) => {
+        // Product card click to open modal (but not for add-to-cart button)
+        const productCard = e.target.closest('.product-card');
+        if (productCard && !e.target.closest('.add-to-cart-btn')) {
+            const productId = productCard.dataset.productId;
+            if (productId) {
+                openProductModal(productId);
+                return;
+            }
+        }
+
         // Use closest() so clicks on child elements (like icons) still work
         const addBtn = e.target.closest('.add-to-cart-btn');
         if (addBtn) {
-            const id = parseInt(addBtn.dataset.id, 10);
-            if (!isNaN(id)) addToCart(id);
+            const id = addBtn.dataset.id;
+            if (id) addToCart(id);
             return; // Prevent falling through to other handlers
         }
 
         const qtyBtn = e.target.closest('.quantity-btn');
         if (qtyBtn) {
-            const id = parseInt(qtyBtn.dataset.id, 10);
+            const id = qtyBtn.dataset.id;
             const action = qtyBtn.dataset.action;
-            if (!isNaN(id) && action) updateQuantity(id, action);
+            if (id && action) updateQuantity(id, action);
             return;
         }
 
         const removeBtn = e.target.closest('.remove-item-btn');
         if (removeBtn) {
-            const id = parseInt(removeBtn.dataset.id, 10);
-            if (!isNaN(id)) removeFromCart(id);
+            const id = removeBtn.dataset.id;
+            if (id) removeFromCart(id);
         }
     });
 
@@ -542,7 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cart.length > 0) {
                 window.location.href = 'checkout.html';
             } else {
-                alert('Your bag is empty.');
+                notify('Your bag is empty.', 'error');
             }
         });
     }
@@ -561,17 +959,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filterCategorySelect) {
         filterCategorySelect.addEventListener('change', () => {
             currentFilters.category = filterCategorySelect.value;
-            renderProducts();
-        });
-    }
-    if (filterSearchInput) {
-        let searchDebounce;
-        filterSearchInput.addEventListener('input', () => {
-            clearTimeout(searchDebounce);
-            searchDebounce = setTimeout(() => {
-                currentFilters.search = filterSearchInput.value.trim();
-                renderProducts();
-            }, 150);
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
         });
     }
     if (filterClearBtn) {
@@ -579,13 +968,31 @@ document.addEventListener('DOMContentLoaded', () => {
             currentFilters = { category: '', search: '' };
             if (filterCategorySelect) filterCategorySelect.value = '';
             if (filterSearchInput) filterSearchInput.value = '';
-            renderProducts();
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
+        });
+    }
+
+    if (filterSearchInput) {
+        const doSearch = () => {
+            currentFilters.search = filterSearchInput.value || '';
+            showSkeletons(6);
+            setTimeout(renderProducts, 250);
+        };
+        filterSearchInput.addEventListener('input', () => {
+            // Debounce lightweight: wait a tick
+            clearTimeout(filterSearchInput._t);
+            filterSearchInput._t = setTimeout(doSearch, 200);
+        });
+        filterSearchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
         });
     }
 
     // --- INITIAL LOAD ---
     populateCategoryFilter();
-    renderProducts();
+    showSkeletons(6);
+    setTimeout(renderProducts, 250);
     renderCart();
     renderCheckoutSummary();
 
@@ -604,4 +1011,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {
         checkoutBtn.style.display = 'none';
     }
+
+    // Make functions globally accessible for onclick handlers
+    window.addToCart = addToCart;
+    window.removeFromCart = removeFromCart;
+    window.updateQuantity = updateQuantity;
+    window.openProductDetail = openProductModal; // Map to the correct function name
 });

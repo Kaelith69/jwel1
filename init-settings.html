@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initialize Firebase Settings</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 16px;
+        }
+        .status.loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        /* Initially hidden areas (toggled by JS) */
+        #details { display: none; }
+        #actions { display: none; }
+    </style>
+    <link rel="stylesheet" href="neumorphic.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Initialize Firebase Settings</h1>
+        <div id="status" class="status loading">Initializing...</div>
+    <div id="details" class="details"></div>
+    <div id="actions">
+            <button class="button" onclick="location.reload()">Refresh</button>
+            <button class="button secondary" onclick="location.href='admin/settings.html'">Go to Settings</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import FirebaseAdapter from './js/firebase-adapter.js';
+
+        const statusEl = document.getElementById('status');
+        const detailsEl = document.getElementById('details');
+        const actionsEl = document.getElementById('actions');
+
+        async function initialize() {
+            try {
+                // Initialize Firebase
+                statusEl.textContent = '🔄 Connecting to Firebase...';
+                statusEl.className = 'status loading';
+                
+                await FirebaseAdapter.init();
+                
+                // Check if settings exist
+                statusEl.textContent = '🔍 Checking for existing settings...';
+                let settings;
+                try {
+                    settings = await FirebaseAdapter.getSettings();
+                    statusEl.textContent = '✅ Settings already exist!';
+                    statusEl.className = 'status success';
+                    detailsEl.innerHTML = `<strong>Current Settings:</strong><br>WhatsApp Number: ${settings.whatsappNumber}`;
+                    detailsEl.style.display = 'block';
+                    actionsEl.style.display = 'block';
+                    return;
+                } catch (err) {
+                    // Settings don't exist, create them
+                }
+
+                // Create default settings
+                statusEl.textContent = '📝 Creating default settings...';
+                const defaultSettings = {
+                    whatsappNumber: '919961165503'
+                };
+
+                await FirebaseAdapter.saveSettings(defaultSettings);
+
+                statusEl.textContent = '✅ Settings initialized successfully!';
+                statusEl.className = 'status success';
+                detailsEl.innerHTML = `<strong>Created Settings:</strong><br>WhatsApp Number: ${defaultSettings.whatsappNumber}<br><br>You can now update this in the admin panel.`;
+                detailsEl.style.display = 'block';
+                actionsEl.style.display = 'block';
+
+            } catch (error) {
+                statusEl.textContent = '❌ Error: ' + error.message;
+                statusEl.className = 'status error';
+                detailsEl.innerHTML = `<strong>Error Details:</strong><br>${error.stack || error.message}`;
+                detailsEl.style.display = 'block';
+                actionsEl.style.display = 'block';
+            }
+        }
+
+        // Run on load
+        initialize();
+    </script>
+</body>
+</html>

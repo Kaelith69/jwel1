@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Admin Login - VastraVeda Jewelleries</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header class="admin-header with-nav">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><a href="../index.html">Site Home</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <a href="#login-main" class="skip-link">Skip to login form</a>
+    <div class="login-container" id="login-main" role="main">
+        <div class="glass-panel login-panel">
+            <h2>Admin Login</h2>
+            <p>Sign in with your admin email/password (or use demo password <strong>admin123</strong> if Firebase isn't configured).</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="admin-button" aria-describedby="error-message">Login</button>
+                <p id="error-message" class="error-message" role="alert" aria-live="assertive"></p>
+            </form>
+            <a href="../index.html" class="back-link">← Back to Site</a>
+        </div>
+    </div>
+    <script type="module">
+        import FirebaseAdapter from '../js/firebase-adapter.js';
+        const form = document.getElementById('login-form');
+        form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const errEl = document.getElementById('error-message');
+            try{
+                await FirebaseAdapter.init();
+                if(FirebaseAdapter.signIn){
+                    await FirebaseAdapter.signIn(email, pass);
+                    // successful login
+                    localStorage.setItem('vastravedajewlleries-admin-auth','true');
+                    window.location.href='dashboard.html';
+                    return;
+                }
+            }catch(err){ console.warn('Firebase sign-in failed or not configured', err); }
+            // fallback to demo password
+            if(pass === 'admin123'){
+                localStorage.setItem('vastravedajewlleries-admin-auth','true');
+                window.location.href='dashboard.html';
+                return;
+            }
+            if(errEl) errEl.textContent = 'Login failed';
+        });
+    </script>
+</body>
+</html>

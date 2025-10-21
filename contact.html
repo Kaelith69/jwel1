@@ -3,9 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
-    <link rel="stylesheet" href="styles-consistent.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>About &amp; Contact - Luxury Jewelleries</title>
+    <meta name="description" content="Learn about our craft and reach us via Instagram, WhatsApp, phone, or email.">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="icon" href="logo/logo.png" sizes="any">
+    <meta property="og:title" content="About &amp; Contact - Luxury Jewelleries">
+    <meta property="og:description" content="Discover our story and reach us on Instagram, WhatsApp, phone, or email.">
+    <meta property="og:image" content="logo/logo.png">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="liquid-button.css">
+    <link rel="stylesheet" href="neumorphic.css">
+    <link rel="stylesheet" href="loader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             background: #f7f6f3;
@@ -13,24 +23,83 @@
             padding: 0;
         }
         .contact-container {
-            max-width: 420px;
-            margin: 60px auto 0 auto;
+            max-width: 1024px;
+            margin: 84px auto 56px auto;
+            padding: 0 20px;
         }
-        .contact-card {
-            /* Use glass-card style from consistent CSS */
-            background: rgba(255,255,255,0.85);
-            box-shadow: 0 4px 24px rgba(212,175,55,0.08);
-            border-radius: 16px;
-            padding: 32px 24px 28px 24px;
-            border: 1px solid #e0e0e0;
-        }
-        .contact-title {
+        .page-title {
             text-align: center;
             font-family: 'Rozha One', serif;
-            font-size: 2.2rem;
-            color: #b08d23;
-            margin-bottom: 1.2em;
-            letter-spacing: 1px;
+            font-size: 2.4rem;
+            color: #1E40AF;
+            margin-bottom: 1.6em;
+            letter-spacing: 0.5px;
+        }
+        .info-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+        .info-card {
+            background: rgba(255,255,255,0.85);
+            box-shadow: 0 4px 24px rgba(59,130,246,0.12);
+            border-radius: 16px;
+            padding: 32px 28px 28px 28px;
+            border: 1px solid #e0e0e0;
+        }
+        .section-title {
+            font-family: 'Rozha One', serif;
+            font-size: 1.8rem;
+            color: #1E40AF;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+        }
+        .about-card {
+            display: flex;
+            flex-direction: column;
+        }
+        .about-card p {
+            color: #4b5563;
+            line-height: 1.7;
+            margin: 0;
+        }
+        .about-card p + p {
+            margin-top: 1rem;
+        }
+        .about-card .about-signature {
+            font-family: 'Rozha One', serif;
+            color: #1E3A8A;
+            letter-spacing: 0.4px;
+        }
+        .about-card .about-signature span {
+            color: #ef4444;
+            margin-left: 6px;
+        }
+        .about-highlights {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+        .about-highlights li {
+            position: relative;
+            padding-left: 28px;
+            color: #374151;
+            line-height: 1.5;
+        }
+        .about-highlights li::before {
+            content: '+';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #3B82F6;
+            font-size: 1rem;
+        }
+        .visit-note {
+            font-size: 0.95rem;
+            color: #1E40AF;
+            font-weight: 500;
         }
         .contact-list {
             list-style: none;
@@ -45,16 +114,16 @@
             font-size: 1.13rem;
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 1px 4px rgba(212,175,55,0.04);
+            box-shadow: 0 1px 4px rgba(59,130,246,0.08);
             padding: 12px 18px;
             transition: box-shadow 0.2s;
         }
         .contact-list li:hover {
-            box-shadow: 0 2px 12px rgba(212,175,55,0.13);
+            box-shadow: 0 2px 12px rgba(59,130,246,0.18);
         }
         .contact-list i {
             font-size: 1.7rem;
-            color: #d4af37;
+            color: #3B82F6;
             width: 36px;
             text-align: center;
         }
@@ -65,49 +134,133 @@
             transition: color 0.2s;
         }
         .contact-list a:hover {
-            color: #b08d23;
+            color: #1E40AF;
+        }
+        .back-to-products-button {
+            width: 54px;
+            height: 54px;
+            min-width: 54px;
+            min-height: 54px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            padding: 0;
+            box-shadow: 0 6px 18px rgba(59,130,246,0.22);
+        }
+        .back-to-products-button i {
+            font-size: 1.2rem;
+        }
+        .back-to-products-container {
+            margin-top: 1.4rem;
+            display: flex;
+            justify-content: flex-start;
         }
         @media (max-width: 600px) {
             .contact-container {
-                margin: 24px 2vw 0 2vw;
+                margin: 32px 2vw 40px 2vw;
+                padding: 0;
             }
-            .contact-card {
-                padding: 12px 2vw 10px 2vw;
+            .page-title {
+                font-size: 1.6rem;
+                margin-bottom: 1.2em;
             }
-            .contact-title {
-                font-size: 1.1rem;
+            .info-card {
+                padding: 20px 18px 18px 18px;
             }
             .contact-list li {
                 font-size: 0.97rem;
-                padding: 8px 4px;
+                padding: 8px 10px;
             }
-            .cta-button {
-                min-width: 90px !important;
-                font-size: 0.97rem;
-                padding: 0.7em 1em;
-                border-radius: 32px !important;
-                text-decoration: none !important;
+            .back-to-products-button {
+                width: 48px;
+                height: 48px;
+                min-width: 48px;
+                min-height: 48px;
+                box-shadow: 0 4px 12px rgba(59,130,246,0.24);
             }
         }
     </style>
 </head>
 <body>
-    <div class="contact-container">
-        <div class="contact-card glass-card">
-            <div class="contact-title">Contact Us</div>
-            <ul class="contact-list">
-                <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/yourprofile" target="_blank">@yourprofile</a></li>
-                <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/1234567890" target="_blank">+1 234 567 890</a></li>
-                <li><i class="fas fa-phone"></i> <a href="tel:+1234567890">+1 234 567 890</a></li>
-                <li><i class="fas fa-envelope"></i> <a href="mailto:info@example.com">info@example.com</a></li>
+        <!-- Page loader overlay -->
+        <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading">
+                <div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+    
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="main-header">
+        <div class="logo">
+            <a href="index.html"><img src="logo/logo.png" alt="Store logo" class="logo"></a>
+        </div>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
+        </button>
+        <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
+            <ul>
+                <li><a href="index.html" class="liquid-button">Home</a></li>
+                <li><a href="products.html" class="liquid-button">Collections</a></li>
+                <li><a href="contact.html" aria-current="page" class="liquid-button">About &amp; Contact</a></li>
             </ul>
-            <div style="text-align:center;margin-top:2.2em;">
-                <a href="products.html" class="cta-button" style="background:#d4af37;color:#fff;min-width:140px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:32px;text-decoration:none;padding:1em 1.5em;">
-                    <i class="fas fa-arrow-left" style="margin:0 auto 4px auto;display:block;font-size:1.3em;"></i>
-                    <span style="display:block;">Back to Products</span>
-                </a>
-            </div>
+        </nav>
+        <div class="header-actions">
+            <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
+                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                <span id="cart-count">0</span>
+            </button>
+        </div>
+    </header>
+    <div id="app-container">
+    <div class="contact-container" id="main-content" role="main">
+        <h1 class="page-title">About &amp; Contact</h1>
+        <div class="info-grid">
+            <section class="info-card about-card glass-card" aria-labelledby="about-title">
+                <h2 id="about-title" class="section-title">Our Story</h2>
+                <p>One came from the world of corporate precision, the other from the art of nurturing minds. Two sisters, two worlds, one dream.</p>
+                <p>Vastraveda Abharana was born from our shared love for timeless tradition and the belief that jewellery is more than adornment — it’s emotion, elegance, and legacy.</p>
+                <p>From antique classics to 18K gold-plated treasures, each piece reflects our journey, where passion met purpose, and two sisters turned a dream into a sparkle.</p>
+                <p class="about-signature">— Haritha &amp; Neethu <span>&hearts; &hearts;</span></p>
+                 </section>
+            <section class="info-card contact-card glass-card" aria-labelledby="contact-title">
+                <h2 id="contact-title" class="section-title">Connect With Us</h2>
+                <ul class="contact-list">
+                    <li><i class="fab fa-instagram"></i> <a href="https://instagram.com/vastravedabyharinee" target="_blank" rel="noopener">@vastravedabyharinee</a></li>
+                    <li><i class="fab fa-whatsapp"></i> <a href="https://wa.me/919961165503" target="_blank" rel="noopener">+91 99611 65503</a></li>
+                    <li><i class="fas fa-phone"></i> <a href="tel:+919961165503">+91 99611 65503</a></li>
+                    <li><i class="fas fa-envelope"></i> <a href="mailto:vastraveda2@gmail.com">vastraveda2@gmail.com</a></li>
+                </ul>
+                <div class="back-to-products-container">
+                    <a href="products.html" class="cta-button back-to-products-button liquidize" aria-label="Back to products">
+                        <i class="fas fa-arrow-left back-to-products-icon" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </section>
         </div>
     </div>
+    <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
+        <div class="cart-header">
+            <h2>Your Bag</h2>
+            <button id="cart-close-btn" class="close-btn liquidize" type="button" aria-label="Close cart">&times;</button>
+        </div>
+        <div id="cart-items" class="cart-items"></div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cart-total-price">₹0</span>
+            </div>
+            <div class="cart-footer-actions">
+                <button id="clear-cart-btn" class="checkout-button clear-cart-btn liquidize" type="button">Clear</button>
+                <button id="checkout-btn" class="checkout-button liquidize" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
+            </div>
+        </div>
+    </aside>
+    <div id="sidebar-overlay" role="presentation" aria-hidden="true"></div>
+    </div>
+    <script src="js/utils.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="js/liquid-button.js" defer></script>
+    <script src="js/nav-active.js" defer></script>
+    <script src="js/nav-loading.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,109 @@
+/* Neuromorphic buttons – light and dark friendly
+   Applies softly to existing buttons without changing colors or sizes.
+   Opt-out by adding class "no-neu" to any element. */
+
+:root {
+  /* Light surface tokens */
+  --neu-border: rgba(255, 255, 255, 0.6);
+  --neu-shadow-rest: 6px 6px 12px rgba(0, 0, 0, 0.12), -6px -6px 12px rgba(255, 255, 255, 0.95);
+  --neu-shadow-hover: 8px 8px 18px rgba(0, 0, 0, 0.16), -8px -8px 18px rgba(255, 255, 255, 1);
+  --neu-shadow-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.10), inset -4px -4px 8px rgba(255, 255, 255, 0.75);
+  --neu-focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+/* Base targets: all typical buttons across the site */
+button:not(.no-neu),
+.button:not(.no-neu),
+.cta-button:not(.no-neu),
+.admin-button:not(.no-neu),
+.checkout-button:not(.no-neu),
+.quantity-btn:not(.no-neu),
+.remove-item-btn:not(.no-neu),
+.cart-button:not(.no-neu),
+.close-btn:not(.no-neu),
+.nav-toggle:not(.no-neu),
+.floating-order-btn:not(.no-neu) {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid var(--neu-border);
+  box-shadow: var(--neu-shadow-rest);
+  transition: box-shadow 0.2s ease, transform 0.06s ease;
+}
+
+/* Give circular toggles a visible surface if they were transparent */
+.nav-toggle:not(.no-neu) {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+}
+
+/* Hover/active/focus states */
+button:not(.no-neu):hover,
+.button:not(.no-neu):hover,
+.cta-button:not(.no-neu):hover,
+.admin-button:not(.no-neu):hover,
+.checkout-button:not(.no-neu):hover,
+.quantity-btn:not(.no-neu):hover,
+.remove-item-btn:not(.no-neu):hover,
+.cart-button:not(.no-neu):hover,
+.close-btn:not(.no-neu):hover,
+.nav-toggle:not(.no-neu):hover,
+.floating-order-btn:not(.no-neu):hover {
+  box-shadow: var(--neu-shadow-hover);
+  transform: translateY(-1px);
+}
+
+button:not(.no-neu):active,
+.button:not(.no-neu):active,
+.cta-button:not(.no-neu):active,
+.admin-button:not(.no-neu):active,
+.checkout-button:not(.no-neu):active,
+.quantity-btn:not(.no-neu):active,
+.remove-item-btn:not(.no-neu):active,
+.cart-button:not(.no-neu):active,
+.close-btn:not(.no-neu):active,
+.nav-toggle:not(.no-neu):active,
+.floating-order-btn:not(.no-neu):active {
+  box-shadow: var(--neu-shadow-inset);
+  transform: translateY(0);
+}
+
+button:not(.no-neu):focus-visible,
+.button:not(.no-neu):focus-visible,
+.cta-button:not(.no-neu):focus-visible,
+.admin-button:not(.no-neu):focus-visible,
+.checkout-button:not(.no-neu):focus-visible,
+.quantity-btn:not(.no-neu):focus-visible,
+.remove-item-btn:not(.no-neu):focus-visible,
+.cart-button:not(.no-neu):focus-visible,
+.close-btn:not(.no-neu):focus-visible,
+.nav-toggle:not(.no-neu):focus-visible,
+.floating-order-btn:not(.no-neu):focus-visible {
+  outline: none;
+  box-shadow: var(--neu-shadow-rest), var(--neu-focus-ring);
+}
+
+button[disabled],
+button[aria-disabled="true"],
+.button:disabled {
+  filter: saturate(0.85) brightness(0.98);
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Dark-tuned shadows for admin buttons specifically (dark pages) */
+.admin-button:not(.no-neu) {
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.55), -6px -6px 12px rgba(255, 255, 255, 0.045);
+}
+.admin-button:not(.no-neu):hover {
+  box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.6), -8px -8px 16px rgba(255, 255, 255, 0.05);
+}
+.admin-button:not(.no-neu):active {
+  box-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.55), inset -4px -4px 9px rgba(255, 255, 255, 0.035);
+}
+
+/* Utility: force neuromorphic when needed */
+.neu {
+  border: 1px solid var(--neu-border) !important;
+  box-shadow: var(--neu-shadow-rest) !important;
+}

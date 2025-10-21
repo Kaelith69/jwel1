@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Products - VastraVeda Jewelleries</title>
+    <title>Admin Products - Luxury Jewelleries</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../neumorphic.css">
 </head>
 <body>
     <a href="#main" class="skip-link">Skip to main content</a>
@@ -17,11 +18,15 @@
                 <li><a href="add-product.html">Add Product</a></li>
                 <li><a href="dashboard.html">Dashboard</a></li>
                 <li><a href="settings.html">Settings</a></li>
-                <ul>
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="../contact.html">Contact</a></li>
-                </ul>
+                <li><a href="../index.html">Site Home</a></li>
+                <li><a href="../contact.html">About &amp; Contact</a></li>
+            </ul>
+        </nav>
+        <div class="admin-header-actions">
+            <div id="conn-indicator" class="conn-indicator state-offline" title="Firebase connection">
+                <span class="conn-dot" aria-hidden="true"></span>
+                <span id="conn-label">Offline</span>
+            </div>
             <button id="logout-btn" class="admin-button secondary">Logout</button>
         </div>
     </header>
@@ -29,7 +34,7 @@
     <main id="main" class="page-container" tabindex="-1">
         <section class="glass-panel" aria-labelledby="products-title">
             <header class="panel-head">
-                <h2 id="products-title" style="margin:0;">Products</h2>
+                <h2 id="products-title" class="title-compact">Products</h2>
                 <div class="inline-stats" id="product-count" aria-live="polite"></div>
             </header>
             <div class="toolbar" role="region" aria-label="Product filters and tools">
@@ -47,7 +52,13 @@
                     <option value="Studs">Studs</option>
                 </select>
                 <button type="button" id="clear-filters" class="admin-button secondary">Reset</button>
-                <a class="admin-button" href="add-product.html">➕ Add Product</a>
+                <a class="admin-button requires-auth" href="add-product.html" aria-disabled="true">➕ Add Product</a>
+                <button type="button" id="migrate-firestore" class="admin-button requires-auth" title="Sync unsynced products to Firestore" aria-disabled="true">⬆️ Sync to Firestore</button>
+            </div>
+            <!-- Inline loader shown during Firestore refresh -->
+            <div id="products-loading" class="inline-loader" aria-live="polite" hidden>
+                <div class="spinner" role="status" aria-label="Loading products"></div>
+                <span>Loading products…</span>
             </div>
             <div class="table-wrapper" role="region" aria-label="Products table">
                 <table class="data-table products-table" id="products-table">
@@ -68,6 +79,38 @@
         </section>
         <div id="live-status" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
     </main>
-    <script src="admin.js"></script>
+    <!-- Migration modal / progress (hidden by default) -->
+    <div id="migration-modal" class="migration-modal" aria-hidden="true">
+        <div role="dialog" aria-modal="true" class="migration-dialog">
+            <header class="migration-header">
+                <h3>Migrating to Firestore</h3>
+                <button id="migration-cancel" class="admin-button secondary">Cancel</button>
+            </header>
+            <div id="migration-summary">Preparing…</div>
+            <div id="migration-progress-bar"><div id="migration-progress"></div></div>
+            <div id="migration-log"></div>
+        </div>
+    </div>
+        <!-- Try to sync products from Firebase into localStorage when available (non-blocking) -->
+        <script type="module">
+            import FirebaseAdapter from '../js/firebase-adapter.js';
+            (async function(){
+                try{
+                    // Only attempt sync if local products are empty
+                    const local = JSON.parse(localStorage.getItem('products')||'[]');
+                    if(local.length===0){
+                        await FirebaseAdapter.init();
+                        const prods = await FirebaseAdapter.getProducts();
+                        if (Array.isArray(prods) && prods.length>0){
+                            // normalize Firestore docs: map _docId -> stored _docId, keep id if present
+                            const mapped = prods.map(p=>({ id: p.id||Date.now()+Math.floor(Math.random()*1000), name: p.name||'', price: p.price||0, description: p.description||'', category: p.category||'', imageUrl: p.imageUrl||'', _docId: p._docId }));
+                            localStorage.setItem('products', JSON.stringify(mapped));
+                        }
+                    }
+                }catch(err){ console.warn('Firebase sync skipped or failed:', err); }
+            })();
+        </script>
+        <script src="../js/utils.js" defer></script>
+        <script type="module" src="admin.js"></script>
 </body>
 </html>

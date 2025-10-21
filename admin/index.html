@@ -1,25 +1,37 @@
-    <nav>
-        <ul>
-            <li><a href="../index.html">Home</a></li>
-            <li><a href="products.html">Products</a></li>
-            <li><a href="../contact.html">Contact</a></li>
-        </ul>
-    </nav>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Login - VastraVeda Jewelleries</title>
+    <title>Admin Login - Luxury Jewelleries</title>
     <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="../neumorphic.css">
 </head>
 <body>
+    <header class="admin-header login-page">
+        <h1 class="site-title">Admin</h1>
+        <nav class="admin-nav" aria-label="Primary">
+            <ul>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="orders.html">Orders</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="settings.html">Settings</a></li>
+                <li><a href="../index.html">Site Home</a></li>
+                <li><a href="../contact.html">About &amp; Contact</a></li>
+            </ul>
+        </nav>
+    </header>
     <a href="#login-main" class="skip-link">Skip to login form</a>
     <div class="login-container" id="login-main" role="main">
         <div class="glass-panel login-panel">
             <h2>Admin Login</h2>
-            <p>Demo Password: <strong>admin123</strong></p>
+            <p>Sign in with your admin email/password.</p>
             <form id="login-form">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" required>
@@ -30,6 +42,7 @@
             <a href="../index.html" class="back-link">← Back to Site</a>
         </div>
     </div>
-    <script src="admin.js"></script>
+    <script src="../js/utils.js" defer></script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>
