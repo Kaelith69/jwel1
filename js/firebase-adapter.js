@@ -156,9 +156,13 @@ async function addProduct(product) {
       return ref.id;
     } catch (err) {
       console.error('Failed to add product to Firestore:', err);
-      console.error('Error details:', err.code, err.message);
+      console.error('Error details:', err && err.code, err && err.message);
       console.error('Product data:', product);
-      throw new Error(`Failed to add product: ${err.message}`);
+      // Detect permission errors and provide a helpful message to the admin UI
+      if (err && (err.code === 'permission-denied' || (err.code && String(err.code).toLowerCase().includes('permission')))) {
+        throw new Error('Permission denied: you must be an admin to add products. Grant admin via scripts/grant-admin-claim.mjs or add a document in /admins/{uid}.');
+      }
+      throw new Error(`Failed to add product: ${err.message || err}`);
     }
   } else {
     throw new Error('Firebase is not initialized. Cannot add product.');

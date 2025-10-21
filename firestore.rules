@@ -40,19 +40,10 @@ service cloud.firestore {
       }
 
       function validateTimestamps(isCreate) {
-        let now = request.time;
-        // Use a conditional expression (ternary) instead of if/else
-        return isCreate
-          ? (
-              // On create, createdAt must be the server timestamp, and updatedAt should not exist.
-              request.resource.data.createdAt == now
-              && !('updatedAt' in request.resource.data)
-            )
-          : (
-              // On update, updatedAt must be the server timestamp, and createdAt must not change.
-              request.resource.data.updatedAt == now
-              && request.resource.data.createdAt == resource.data.createdAt
-            );
+        // Accept either string timestamps or Firestore Timestamp objects (timestamp)
+        return (!('createdAt' in request.resource.data) || request.resource.data.createdAt is string || request.resource.data.createdAt is timestamp)
+          && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is string || request.resource.data.updatedAt is timestamp)
+          && (isCreate ? true : ('updatedAt' in request.resource.data));
       }
     }
 

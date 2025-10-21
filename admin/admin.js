@@ -1,9 +1,13 @@
 // Clean reimplementation of admin logic (now an ES module)
 import FirebaseAdapter from '../js/firebase-adapter.js';
+// Expose for quick debugging in the browser console
+try{ window.FirebaseAdapter = FirebaseAdapter; }catch(e){/* no-op in non-browser env */}
 
 const ADMIN_AUTH_KEY='vastravedajewlleries-admin-auth';
 let __useFirestore = false;
 const __createLocalId=(()=>{let seq=0;return ()=>`local_${Date.now()}_${seq++}`;})();
+// Normalize relative asset paths when rendering from /admin/* pages
+const __normalizeAssetUrl=(u)=>{ try { if(typeof u==='string' && u.startsWith('assets/')) return '/'+u; }catch(_){} return u; };
 // UI helpers: connection indicator + auth gating
 function setConnState(connected){
     const el = document.getElementById('conn-indicator');
@@ -219,9 +223,9 @@ const path=window.location.pathname;
     const toggleFormBtn=document.getElementById('toggle-form-btn');
 
     const filterProducts=()=>{const term=(productSearch?.value||'').toLowerCase(); const cat=categoryFilter?.value||''; return products.filter(p=>{const t=!term||p.name.toLowerCase().includes(term)||p.description.toLowerCase().includes(term); const c=!cat||p.category===cat; return t&&c;});};
-    const renderCards=()=>{ if(!productList) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productList.innerHTML='<p style="opacity:.7;margin:0;">No products match your filters.</p>';return;} productList.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}" class="pl-img">`:'<div class="pl-img placeholder">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const statusLabel = (!p._docId && __useFirestore) ? `<span class="muted" style="font-size:.7rem;margin-left:6px;">Unsynced</span>` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : '';
+    const renderCards=()=>{ if(!productList) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productList.innerHTML='<p style="opacity:.7;margin:0;">No products match your filters.</p>';return;} productList.innerHTML=f.map(p=>{const src=__normalizeAssetUrl(p.imageUrl); const img=src?`<img src="${src}" alt="${p.name}" class="pl-img">`:'<div class="pl-img placeholder">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const statusLabel = (!p._docId && __useFirestore) ? `<span class="muted" style="font-size:.7rem;margin-left:6px;">Unsynced</span>` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : '';
         return `<article class="product-card" data-id="${p.id}" ${docAttr}>${img}<div class="pc-main"><header class="pc-head"><h4>${p.name}</h4><span class="pc-price">₹${p.price.toLocaleString('en-IN')}</span></header><div class="pc-meta"><span>${p.category||''}</span>${statusLabel}</div><footer class="pc-actions"><a class="admin-button secondary" href="${editHref}">Edit</a>${syncBtn}<button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></footer></div></article>`;}).join(''); };
-    const renderTable=()=>{ if(!productsTableBody) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productsTableBody.innerHTML='<tr><td colspan="7" style="opacity:.7;">No products match your filters.</td></tr>';return;} productsTableBody.innerHTML=f.map(p=>{const img=p.imageUrl?`<img src="${p.imageUrl}" alt="${p.name}">`:'<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#222;border-radius:8px;">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : ''; const categoryMeta = (!p._docId && __useFirestore) ? `${p.category||''} · Unsynced` : (p.category||'');
+    const renderTable=()=>{ if(!productsTableBody) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productsTableBody.innerHTML='<tr><td colspan="7" style="opacity:.7;">No products match your filters.</td></tr>';return;} productsTableBody.innerHTML=f.map(p=>{const src=__normalizeAssetUrl(p.imageUrl); const img=src?`<img src="${src}" alt="${p.name}">`:'<div style="width:60px;height:60px;display:flex;align-items:center;justify-content:center;background:#222;border-radius:8px;">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : ''; const categoryMeta = (!p._docId && __useFirestore) ? `${p.category||''} · Unsynced` : (p.category||'');
         return `<tr data-id="${p.id}" ${docAttr}><td class="nowrap">${p.id}</td><td>${img}</td><td><strong>${p.name}</strong><div class="muted" style="font-size:.7rem;margin-top:2px;">${categoryMeta}</div></td><td class="nowrap"><span class="badge">${p.category||''}</span></td><td class="nowrap">${p.price.toLocaleString('en-IN')}</td><td class="clamp">${p.description}</td><td class="actions-cell"><a class="admin-button secondary" href="${editHref}">Edit</a>${syncBtn}<button class="admin-button danger delete-btn" data-id="${p.id}" ${docAttr}>Delete</button></td></tr>`;}).join(''); };
 
     const resetForm=()=>{ if(!productForm) return; productForm.reset(); productForm.dataset.docid=''; const idEl=document.getElementById('product-id'); if(idEl) idEl.value=''; if(formTitle) formTitle.textContent='Add New Product'; if(submitBtn) submitBtn.textContent='Add Product'; if(cancelBtn) cancelBtn.style.display='none'; };
@@ -348,8 +352,15 @@ const path=window.location.pathname;
             if(liveStatus) liveStatus.textContent=`Synced ${product.name} to Firestore`;
         }catch(err){
             console.warn('Sync failed', err);
-            notify('Failed to sync product: '+(err && err.message ? err.message : err), 'error');
-            if(liveStatus) liveStatus.textContent='Sync failed; product saved locally.';
+            const msg = (err && err.message) ? String(err.message) : String(err || 'Unknown error');
+            // If this looks like a permission issue, provide guidance
+            if(/permission|permission-denied|not authorized|requires authentication/i.test(msg)){
+                notify('Failed to sync product: Insufficient permissions. Ensure your user is an admin (see README or run scripts/grant-admin-claim.mjs).', 'error');
+                if(liveStatus) liveStatus.textContent='Sync failed due to permissions. Product saved locally.';
+            } else {
+                notify('Failed to sync product: '+msg, 'error');
+                if(liveStatus) liveStatus.textContent='Sync failed; product saved locally.';
+            }
         }
     };
 

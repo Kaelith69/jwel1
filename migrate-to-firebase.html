@@ -326,7 +326,12 @@
                     log(`✅ Migrated: ${product.name} (ID: ${docId})`, 'success');
                     success++;
                 } catch (error) {
-                    log(`❌ Failed to migrate: ${product.name} - ${error.message}`, 'error');
+                    const msg = error && error.message ? String(error.message) : String(error || 'Unknown error');
+                    if (/permission|permission-denied|not authorized|requires authentication/i.test(msg)) {
+                        log(`❌ Failed to migrate: ${product.name} - Permission denied. Ensure your user is an admin or run scripts/grant-admin-claim.mjs to add your UID to /admins.`, 'error');
+                    } else {
+                        log(`❌ Failed to migrate: ${product.name} - ${msg}`, 'error');
+                    }
                     failed++;
                 }
             }
