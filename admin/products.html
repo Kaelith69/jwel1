@@ -54,6 +54,7 @@
                 <button type="button" id="clear-filters" class="admin-button secondary">Reset</button>
                 <a class="admin-button requires-auth" href="add-product.html" aria-disabled="true">➕ Add Product</a>
                 <button type="button" id="migrate-firestore" class="admin-button requires-auth" title="Sync unsynced products to Firestore" aria-disabled="true">⬆️ Sync to Firestore</button>
+                <button type="button" id="sync-from-firestore" class="admin-button requires-auth" title="Fetch latest products from Firestore and replace local list" aria-disabled="true">🔄 Sync from Firestore</button>
             </div>
             <!-- Inline loader shown during Firestore refresh -->
             <div id="products-loading" class="inline-loader" aria-live="polite" hidden>
