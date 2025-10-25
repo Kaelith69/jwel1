@@ -733,14 +733,14 @@ input[type=number] {
     position: relative;
 }
 
-/* Mobile view - 2 columns */
+
+/* Mobile view - always 2 columns */
 @media (max-width: 767px) {
     .products-main {
         padding: 64px 10px 28px;
     }
-    
     .product-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr) !important;
         gap: 12px;
         padding: 16px 12px;
     }
