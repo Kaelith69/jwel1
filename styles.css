@@ -744,22 +744,24 @@ input[type=number] {
     }
 }
 
-/* Tablet view - 3 columns */
-@media (min-width: 768px) and (max-width: 1023px) {
+
+/* Tablet & Desktop view - 2 columns (make products display as two columns/rows) */
+@media (min-width: 768px) {
     .product-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 18px;
         padding: 24px 20px;
-        max-width: 900px;
+        max-width: 1100px;
     }
 }
 
-/* Desktop view - 4 columns */
-@media (min-width: 1024px) {
+/* Larger desktop - keep two columns but increase spacing */
+@media (min-width: 1200px) {
     .product-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        padding: 32px 24px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        padding: 40px 32px;
+        max-width: 1400px;
     }
 }
 
