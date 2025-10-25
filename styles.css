@@ -1,3 +1,9 @@
+/* FINAL OVERRIDE: Always 2 columns on mobile, after all other breakpoints */
+@media (max-width: 767px) {
+    .product-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
 /* WhatsApp Order Button - Green Style */
 .cta-button#whatsapp-order-btn {
     background: #1fb757;
