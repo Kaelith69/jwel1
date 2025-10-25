@@ -112,11 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     });
     
-    // Cart is always localStorage only
-    let cart = (JSON.parse(localStorage.getItem('cart')) || []).map(item => {
-        const normalizedId = item.id != null ? String(item.id) : null;
-        return normalizedId ? { ...item, id: normalizedId } : null;
-    }).filter(Boolean);
+    // Use CartManager for all cart operations
+    const cartManager = new window.CartManager();
 
     // --- DOM Elements ---
     const productGrid = document.getElementById('product-grid');
@@ -124,9 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const cartSidebar = document.getElementById('cart-sidebar');
     const cartCloseBtn = document.getElementById('cart-close-btn');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
-    const cartItemsContainer = document.getElementById('cart-items');
-    const cartCountEl = document.getElementById('cart-count');
-    const cartTotalPriceEl = document.getElementById('cart-total-price');
     const checkoutBtn = document.getElementById('checkout-btn');
     const checkoutSummaryContainer = document.getElementById('bill-items');
     const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
@@ -134,7 +128,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const whatsappQrProgress = document.getElementById('whatsapp-qr-progress');
     const customerDetailsForm = document.getElementById('customer-details-form');
     const checkoutError = document.getElementById('checkout-error');
-    const floatingOrderBtn = document.getElementById('order-now-btn');
+    // New floating cart button
+    const floatingCartBtn = document.getElementById('floating-cart-btn');
+    // Floating cart count badge removed
     // Product filter UI (only present on products page)
     const filterCategorySelect = document.getElementById('filter-category');
     const filterClearBtn = document.getElementById('filter-clear');
@@ -180,32 +176,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             productGrid.innerHTML = '<div class="no-products-message">No products match your filters.</div>';
             return;
         }
-        productGrid.innerHTML = list.map(product => `
-            <div class="product-card" data-product-id="${String(product.id)}">
-                <!-- Clean Image Section -->
-                <div class="product-image-section">
-                    <div class="product-image-container">
-                        <img src="${product.imageUrl}" alt="${product.name}" class="product-image" loading="lazy" decoding="async" width="600" height="600" onerror="this.src='/logo/logo.png'">
-                    </div>
-                </div>
-                
-                <!-- Text Section Below Image -->
-                <div class="product-text-section">
-                    <div class="product-info">
-                        <h3 class="product-name">${product.name}</h3>
-                        <p class="product-price">₹${product.price.toLocaleString('en-IN')}</p>
-                        <p class="product-description">${product.description}</p>
-                        <p class="product-description-secondary" style="display: none;">${product.category} • Premium Quality</p>
-                    </div>
-                    
-                    <!-- Full-width Cart Button -->
-                    <button class="add-to-cart-btn liquidize" data-id="${String(product.id)}" title="Add to Cart" aria-label="Add ${product.name} to cart">
-                        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-                        <span class="btn-text">Add to Cart</span>
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        productGrid.innerHTML = list.map(product => {
+            // Fallback for image property (imageUrl or image)
+            const imgSrc = product.imageUrl || product.image || '/logo/logo.png';
+            // Fallback for price formatting
+            const price = typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price;
+            // Compose data-product attribute for SSR/JS parity
+            const dataProduct = JSON.stringify({
+                name: product.name,
+                price: price,
+                image: imgSrc,
+                category: product.category,
+                description: product.description
+            });
+            return `
+<article class="product-card" tabindex="0" data-product='${dataProduct}' data-product-id="${String(product.id)}">
+    <div class="product-image-container" aria-hidden="true">
+        <img class="product-image" src="${imgSrc}" alt="${product.name}" loading="lazy" decoding="async" onerror="this.src='/logo/logo.png'">
+    </div>
+    <div class="product-info">
+        <div class="product-name">${product.name}</div>
+        <div class="product-price">${price}</div>
+        <div class="product-category">${product.category || ''}</div>
+        <div class="product-actions">
+            <button class="add-to-cart-btn" type="button" data-id="${String(product.id)}" aria-label="Add to cart">
+                <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+            </button>
+            <button class="view-details-btn" type="button" aria-label="View details" data-id="${String(product.id)}">View</button>
+        </div>
+    </div>
+</article>
+            `;
+        }).join('');
     };
 
     // Show skeletons helper
@@ -221,68 +223,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         productGrid.innerHTML = `<div class="skeleton-grid">${skeletons}</div>`;
     };
 
-    // Render items in the cart sidebar
+    // Use CartManager's render for cart sidebar
     const renderCart = () => {
-        if (!cartItemsContainer) return;
-        
-        // Clear existing content
-        cartItemsContainer.innerHTML = '';
-        
-        if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<div class="cart-empty">Your bag is empty.</div>';
-        } else {
-            // Use DocumentFragment for better performance
-            const fragment = document.createDocumentFragment();
-            
-            cart.forEach(item => {
-                const cartItemEl = document.createElement('div');
-                cartItemEl.className = 'cart-item';
-                cartItemEl.innerHTML = `
-                    <img src="${item.imageUrl || '/logo/logo.png'}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async" width="80" height="80" onerror="this.src='/logo/logo.png'">
-                    <div class="cart-item-info">
-                        <p class="cart-item-name">${item.name}</p>
-                        <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
-                        <div class="cart-item-quantity">
-                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" aria-label="Decrease quantity">-</button>
-                            <span class="quantity-display">${item.quantity}</span>
-                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" aria-label="Increase quantity">+</button>
-                        </div>
-                    </div>
-                    <button class="remove-item-btn liquidize" data-id="${String(item.id)}" aria-label="Remove item">&times;</button>
-                `;
-                fragment.appendChild(cartItemEl);
-            });
-            
-            cartItemsContainer.appendChild(fragment);
-        }
-        
-        updateCartSummary();
+        cartManager.render();
     };
 
-    // Update cart count and total price
+    // Update floating cart button count using CartManager
     const updateCartSummary = () => {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-        if (cartCountEl) {
-            cartCountEl.textContent = totalItems;
-            if (totalItems > 0) {
-                cartCountEl.style.display = 'flex';
-                cartCountEl.classList.add('show-as-main');
+        const { itemCount } = cartManager.getTotals();
+        if (floatingCartBtn) {
+            const cartSidebarOpen = cartSidebar && cartSidebar.classList.contains('open');
+            if (itemCount > 0 && !cartSidebarOpen) {
+                floatingCartBtn.removeAttribute('hidden');
             } else {
-                cartCountEl.style.display = 'none';
-                cartCountEl.classList.remove('show-as-main');
+                floatingCartBtn.setAttribute('hidden', '');
             }
         }
-        if (cartTotalPriceEl) cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
-        if (floatingOrderBtn) {
-            const isDisabled = totalItems === 0;
-            floatingOrderBtn.disabled = isDisabled;
-            floatingOrderBtn.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
-            // Provide hidden label text reflecting item count for SR users
-            floatingOrderBtn.setAttribute('title', isDisabled ? 'Cart is empty' : `Open cart (${totalItems} item${totalItems===1?'':'s'})`);
-        }
-        saveCart();
     };
 
     // Render checkout page summary
@@ -312,8 +268,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // --- EVENT HANDLERS ---
+
+    // Product card click/tap opens modal with details
+    if (productGrid) {
+        productGrid.addEventListener('click', function(e) {
+            // If 'View' button is clicked, open modal with full details
+            const viewBtn = e.target.closest('.view-details-btn');
+            if (viewBtn) {
+                const card = viewBtn.closest('.product-card');
+                if (!card) return;
+                const productId = card.getAttribute('data-product-id');
+                if (productId) openProductModal(productId, true);
+                return;
+            }
+            // Only open modal if the click is on the card but not on add-to-cart or view button
+            const card = e.target.closest('.product-card');
+            if (!card) return;
+            if (e.target.classList && (e.target.classList.contains('add-to-cart-btn') || e.target.closest('.add-to-cart-btn'))) return;
+            const productId = card.getAttribute('data-product-id');
+            if (productId) openProductModal(productId);
+        });
+        // Keyboard accessibility: open modal on Enter/Space
+        productGrid.addEventListener('keydown', function(e) {
+            if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('product-card')) {
+                e.preventDefault();
+                const productId = e.target.getAttribute('data-product-id');
+                if (productId) openProductModal(productId);
+            }
+        });
+    }
     
-    // Toggle cart sidebar
+    // Toggle cart sidebar with overlay and ESC key support
+    // sidebarOverlay is now declared at top scope
     const toggleCart = () => {
         if (!cartSidebar) return;
         const isOpen = cartSidebar.classList.contains('open');
@@ -322,17 +308,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartSidebar.setAttribute('aria-hidden', 'true');
             cartToggle?.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            if (sidebarOverlay) sidebarOverlay.style.display = 'none';
             document.removeEventListener('keydown', handleCartKeydown);
             cartToggle?.focus();
+            if (floatingCartBtn) floatingCartBtn.removeAttribute('hidden');
         } else {
             cartSidebar.classList.add('open');
             cartSidebar.setAttribute('aria-hidden', 'false');
             cartToggle?.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
+            if (sidebarOverlay) sidebarOverlay.style.display = 'block';
             document.addEventListener('keydown', handleCartKeydown);
             setTimeout(() => { cartCloseBtn?.focus(); }, 60);
+            if (floatingCartBtn) floatingCartBtn.setAttribute('hidden', '');
         }
     };
+
+    // Overlay click closes cart (moved to after DOMContentLoaded)
 
     // Handle keyboard navigation in cart
     const handleCartKeydown = (e) => {
@@ -341,101 +333,71 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Add product to cart
+    // Add product to cart using CartManager
     const addToCart = (productId) => {
-        try {
-            const lookupId = String(productId);
-            // Only use local product data for cart
-            const productToAdd = products.find(p => String(p.id) === lookupId);
-            if (!productToAdd) {
-                console.error('Product not found:', productId);
-                return;
-            }
-            const existingItem = cart.find(item => String(item.id) === lookupId);
-            if (existingItem) {
-                existingItem.quantity++;
-            } else {
-                cart.push({ ...productToAdd, id: lookupId, quantity: 1 });
-            }
-            saveCart();
-            renderCart();
-            // Show brief success feedback
-            const addButton = document.querySelector(`[data-id="${lookupId}"]`);
-            if (addButton) {
-                const originalText = addButton.innerHTML;
-                addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
-                addButton.style.background = '#2e7d32';
-                setTimeout(() => {
-                    addButton.innerHTML = originalText;
-                    addButton.style.background = '';
-                }, 800);
-            }
-        } catch (error) {
-            console.error('Error adding to cart:', error);
+        const productToAdd = products.find(p => String(p.id) === String(productId));
+        if (!productToAdd) {
+            console.error('Product not found:', productId);
+            return;
         }
+        cartManager.addItem(productToAdd);
+        updateCartSummary();
     };
 
-    // Update item quantity in cart
+    // Update item quantity in cart using CartManager
     const updateQuantity = (productId, action) => {
-        const lookupId = String(productId);
-        const item = cart.find(item => String(item.id) === lookupId);
+        const item = cartManager.cart.find(item => String(item.id) === String(productId));
         if (!item) return;
-
         if (action === 'increase') {
-            item.quantity++;
+            cartManager.updateQuantity(productId, item.quantity + 1);
         } else if (action === 'decrease') {
-            item.quantity--;
-            if (item.quantity <= 0) {
-                removeFromCart(lookupId);
-                return;
-            }
+            cartManager.updateQuantity(productId, item.quantity - 1);
         }
-        saveCart();
-        renderCart();
+        updateCartSummary();
     };
     
-    // Remove item from cart
+    // Remove item from cart using CartManager
     const removeFromCart = (productId) => {
-        const lookupId = String(productId);
-        cart = cart.filter(item => String(item.id) !== lookupId);
-        saveCart();
-        renderCart();
+        cartManager.removeItem(productId);
+        updateCartSummary();
     };
     
-    // Save cart to localStorage
+    // Save cart to localStorage (now handled by CartManager)
     const saveCart = () => {
-        localStorage.setItem('cart', JSON.stringify(cart));
+        cartManager.saveCart();
     };
 
-    // Clear entire cart
+    // Clear entire cart using CartManager
     const clearCart = () => {
-        if (cart.length === 0) return;
-        cart = [];
-        saveCart();
-        renderCart();
-        notify('Cart cleared', 'success');
+        cartManager.clear();
+        updateCartSummary();
     };
 
     // --- PRODUCT DETAIL MODAL FUNCTIONS ---
     
     // Open product detail modal
-    const openProductModal = (productId) => {
+    const openProductModal = (productId, floating = false) => {
         const lookupId = String(productId);
         const product = products.find(p => String(p.id) === lookupId);
         if (!product || !productDetailModal) return;
+
+        // Fallback for image property (imageUrl or image)
+        const imgSrc = product.imageUrl || product.image || '/logo/logo.png';
+        // Fallback for price formatting
+        const price = typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price;
 
         // Populate modal with product data
         if (modalProductImage) {
             modalProductImage.loading = 'lazy';
             modalProductImage.decoding = 'async';
-            modalProductImage.src = product.imageUrl;
+            modalProductImage.src = imgSrc;
             modalProductImage.alt = product.name;
         }
         if (modalProductName) modalProductName.textContent = product.name;
         if (modalProductCategory) modalProductCategory.textContent = product.category;
-        if (modalProductDescription) modalProductDescription.textContent = product.description;
-        if (modalProductPrice) modalProductPrice.textContent = `₹${product.price.toLocaleString('en-IN')}`;
-        
+        if (modalProductDescription) modalProductDescription.textContent = product.description || '';
+        if (modalProductPrice) modalProductPrice.textContent = price;
+
         // Set up the modal add to cart button
         if (modalAddToCartBtn) {
             modalAddToCartBtn.onclick = () => {
@@ -444,15 +406,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
         }
 
-        // Show modal
+        // Show modal (floating style always for this site)
         productDetailModal.style.display = 'flex';
         setTimeout(() => {
             productDetailModal.classList.add('active');
+            modalCloseBtn && modalCloseBtn.focus();
         }, 10);
-        
+
         // Prevent body scroll when modal is open
         document.body.style.overflow = 'hidden';
     };
+
+    // Modal close logic
+    if (typeof modalCloseBtn !== 'undefined' && modalCloseBtn) {
+        modalCloseBtn.onclick = closeProductModal;
+    }
+    if (typeof productDetailModal !== 'undefined' && productDetailModal) {
+        productDetailModal.addEventListener('click', (e) => {
+            if (e.target === productDetailModal) closeProductModal();
+        });
+    }
+    document.addEventListener('keydown', (e) => {
+        if (productDetailModal && productDetailModal.style.display !== 'none' && (e.key === 'Escape' || e.key === 'Esc')) {
+            closeProductModal();
+        }
+    });
+
+    function closeProductModal() {
+        if (!productDetailModal) return;
+        productDetailModal.classList.remove('active');
+        setTimeout(() => {
+            productDetailModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }, 180);
+    }
 
     // WhatsApp order logic (dynamic from Firebase settings)
     async function getWhatsAppNumber(){
@@ -834,41 +821,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
-    if (floatingOrderBtn) {
-        // Initialize disabled state on load
-        const initialItems = cart.reduce((s,i)=>s+i.quantity,0);
-        floatingOrderBtn.disabled = initialItems === 0;
-        floatingOrderBtn.setAttribute('aria-disabled', initialItems === 0 ? 'true' : 'false');
-        floatingOrderBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (cart.length === 0) {
-                if (typeof window.notify === 'function') {
-                    window.notify('Your bag is empty.', 'error');
-                } else {
-                    alert('Your bag is empty.');
-                }
-                return;
+    // Floating cart button click opens cart sidebar
+    if (floatingCartBtn) {
+        floatingCartBtn.addEventListener('click', function() {
+            if (cartSidebar && !cartSidebar.classList.contains('open')) {
+                cartSidebar.classList.add('open');
+                cartSidebar.setAttribute('aria-hidden', 'false');
             }
-
-            if (window.location.pathname.endsWith('checkout.html')) {
-                if (cartSidebar && !cartSidebar.classList.contains('open')) {
-                    toggleCart();
-                } else if (!cartSidebar) {
-                    document.getElementById('checkout-summary')?.scrollIntoView({ behavior: 'smooth' });
-                }
-                return;
-            }
-
-            if (cartSidebar) {
-                if (!cartSidebar.classList.contains('open')) {
-                    toggleCart();
-                } else {
-                    cartCloseBtn?.focus();
-                }
-                return;
-            }
-
-            window.location.href = 'checkout.html';
         });
     }
     

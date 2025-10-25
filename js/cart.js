@@ -130,21 +130,25 @@ class CartManager {
 
         this.cartItemsContainer.innerHTML = this.cart.map(item => `
             <div class="cart-item">
-         <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async"
-             onerror="this.src='/logo/logo.png'">
+                <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async"
+                    onerror="this.src='/logo/logo.png'">
                 <div class="cart-item-info">
-                    <p class="cart-item-name">${item.name}</p>
-                    <p class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</p>
-                    <div class="cart-item-quantity">
-            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" 
+                    <div class="cart-item-row">
+                        <span class="cart-item-name">${item.name}</span>
+                        <span class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="cart-item-actions">
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" 
                                 aria-label="Decrease quantity">-</button>
-                        <span class="quantity-display">${item.quantity}</span>
-            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" 
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" 
                                 aria-label="Increase quantity">+</button>
+                        </div>
+                        <button class="remove-item-btn liquidize" data-id="${String(item.id)}" 
+                            aria-label="Remove ${item.name} from cart">&times;</button>
                     </div>
                 </div>
-    <button class="remove-item-btn liquidize" data-id="${String(item.id)}" 
-                        aria-label="Remove ${item.name} from cart">&times;</button>
             </div>
         `).join('');
     }

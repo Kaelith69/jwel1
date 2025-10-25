@@ -1,0 +1,25 @@
+<!-- product-card.html
+     Drop this snippet where you render individual product cards.
+     It contains component-scoped CSS and an example markup.
+     Ensure classes match your JS (data-product, .add-to-cart-btn, etc.)
+-->
+
+</style>
+<!-- Styles moved to components/product-card.css. Ensure this file is included in your HTML. -->
+</style>
+
+<!-- Example card markup (matches the classes your main.js / cart code expect) -->
+<article class="product-card" tabindex="0" data-product='{"name":"Example Pendant","price":"₹650.00","image":"https://picsum.photos/seed/example/800/600","category":"Necklace","description":"A beautiful pendant for everyday elegance."}'>
+    <div class="product-image-container" aria-hidden="true">
+        <img class="product-image" src="https://picsum.photos/seed/example/800/600" alt="Example Pendant">
+    </div>
+    <div class="product-info">
+        <div class="product-name">Example Pendant</div>
+        <div class="product-price">₹650</div>
+        <div class="product-category">Necklace</div>
+        <div class="product-actions">
+            <button class="add-to-cart-btn" type="button">Add to cart</button>
+            <button class="view-details-btn" type="button" aria-label="View details">View</button>
+        </div>
+    </div>
+</article>

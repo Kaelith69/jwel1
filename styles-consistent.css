@@ -552,18 +552,9 @@ h1.main-title::after {
 }
 
 /* Product card redesign */
-.product-card {
-    background: transparent;
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+/* .product-card removed for deduplication, see styles.css */
 
-.product-card .glass-card {
+.legacy-product-card .glass-card {
     width: 100%;
     height: 100%;
     display: flex;
@@ -580,13 +571,13 @@ h1.main-title::after {
 }
 
 /* Hover effects */
-.product-card:hover .glass-card {
+.legacy-product-card:hover .glass-card {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 /* Product image container - enforce square ratio */
-.product-image-container {
+.legacy-product-image-container {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -595,14 +586,9 @@ h1.main-title::after {
     background: #f8f8f8;
 }
 
-.product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
+/* .product-image removed for deduplication, see styles.css */
 
-.product-card:hover .product-image {
+.legacy-product-card:hover .legacy-product-image {
     transform: scale(1.04);
 }
 
@@ -662,7 +648,7 @@ h1.main-title::after {
     opacity: 0;
 }
 
-.product-card:hover .add-to-cart-btn {
+.legacy-product-card:hover .add-to-cart-btn {
     opacity: 1;
 }
 
@@ -678,7 +664,7 @@ h1.main-title::after {
 
 /* Mobile adjustments */
 @media (max-width: 767px) {
-    .product-card .glass-card {
+    .legacy-product-card .glass-card {
         padding: 8px;
         gap: 8px;
     }
@@ -708,7 +694,7 @@ h1.main-title::after {
 
 /* Desktop hover enhancements */
 @media (min-width: 768px) {
-    .product-card .glass-card {
+    .legacy-product-card .glass-card {
         padding: 16px;
         gap: 14px;
     }
@@ -1271,7 +1257,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Consistent spacing for better visual hierarchy */
-.product-card + .product-card,
+.legacy-product-card + .legacy-product-card,
 .admin-section + .admin-section,
 .form-group + .form-group {
     margin-top: 1.5rem;
