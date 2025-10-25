@@ -37,7 +37,7 @@ class FormValidator {
     showFieldError(field, message) {
         if (!field) return;
         
-        field.style.borderColor = '#e53935';
+        field.style.borderColor = '#3e632a';
         field.setAttribute('aria-invalid', 'true');
         
         // Remove existing error message
@@ -141,7 +141,7 @@ class FormValidator {
         // Show general error message
         errorContainer.textContent = 'Please correct the highlighted fields above';
         errorContainer.style.display = 'block';
-        errorContainer.style.color = '#e53935';
+        errorContainer.style.color = '#3e632a';
         
         // Focus first error field
         if (errors.length > 0) {
@@ -210,8 +210,8 @@ function notify(message, type = 'info', duration = 3000) {
         toast.style.marginTop = '8px';
         toast.style.padding = '10px 14px';
         toast.style.borderRadius = '8px';
-        toast.style.color = '#fff';
-        toast.style.background = type === 'error' ? '#e53935' : (type === 'success' ? '#2e7d32' : '#333');
+        toast.style.color = '#fdfefd';
+        toast.style.background = type === 'error' ? '#3e632a' : (type === 'success' ? '#9dbb52' : '#6b8e23');
         toast.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
         toast.style.fontSize = '14px';
         toast.style.maxWidth = '320px';

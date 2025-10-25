@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         style.textContent = `
             .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: #666; text-align: center; font-size: 1rem; }
             .loading-state .loading-gem { display: inline-flex; align-items: center; justify-content: center; gap: 12px; transform: translateZ(0); perspective: 500px; }
-            .loading-state .loading-gem span { display: inline-block; width: clamp(24px, 3vw, 32px); height: clamp(24px, 3vw, 32px); background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%); border-radius: 18% 18% 42% 42%; transform: rotate(45deg) scale(0.88); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28); animation: gemPulse 1.2s ease-in-out infinite; opacity: 0.95; position: relative; overflow: hidden; will-change: transform, box-shadow, filter; }
+            .loading-state .loading-gem span { display: inline-block; width: clamp(24px, 3vw, 32px); height: clamp(24px, 3vw, 32px); background: linear-gradient(135deg, #3e632a 0%, #6b8e23 50%, #9dbb52 100%); border-radius: 18% 18% 42% 42%; transform: rotate(45deg) scale(0.88); box-shadow: 0 6px 14px rgba(178,145,61,0.22); animation: gemPulse 1.2s ease-in-out infinite; opacity: 0.95; position: relative; overflow: hidden; will-change: transform, box-shadow, filter; }
             .loading-state .loading-gem span::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), transparent 55%); opacity: 0.75; }
             .loading-state .loading-gem span:nth-child(2) { animation-delay: 0.18s; }
             .loading-state .loading-gem span:nth-child(3) { animation-delay: 0.36s; }
-            @keyframes gemPulse { 0%, 100% { transform: rotate(45deg) scale(0.82) translateY(0); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18); filter: brightness(0.92); } 45% { transform: rotate(45deg) scale(1.08) translateY(-8px); box-shadow: 0 18px 30px rgba(250, 204, 21, 0.4); filter: brightness(1.12); } 55% { transform: rotate(45deg) scale(1.05) translateY(-5px); box-shadow: 0 12px 26px rgba(96, 165, 250, 0.35); filter: brightness(1.05); } }
+            @keyframes gemPulse { 0%, 100% { transform: rotate(45deg) scale(0.82) translateY(0); box-shadow: 0 6px 14px rgba(178,145,61,0.16); filter: brightness(0.92); } 45% { transform: rotate(45deg) scale(1.08) translateY(-8px); box-shadow: 0 18px 30px rgba(178,145,61,0.28); filter: brightness(1.12); } 55% { transform: rotate(45deg) scale(1.05) translateY(-5px); box-shadow: 0 12px 26px rgba(178,145,61,0.22); filter: brightness(1.05); } }
         `;
         document.head.appendChild(style);
     };
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const showError = (message) => {
         if (document.getElementById('product-grid')) {
-            document.getElementById('product-grid').innerHTML = `<div style="text-align:center;padding:40px;color:#dc3545;"><p style="font-size:18px;">❌ ${message}</p><p style="margin-top:10px;"><a href="migrate-to-firebase.html" style="color:#3B82F6;">Go to Migration Tool</a></p></div>`;
+            document.getElementById('product-grid').innerHTML = `<div style="text-align:center;padding:40px;color:#3e632a;"><p style="font-size:18px;">❌ ${message}</p><p style="margin-top:10px;"><a href="migrate-to-firebase.html" style="color:#3e632a;">Go to Migration Tool</a></p></div>`;
         }
     };
     
@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (addButton) {
                 const originalText = addButton.innerHTML;
                 addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
-                addButton.style.background = '#2e7d32';
+                addButton.style.background = '#9dbb52';
                 setTimeout(() => {
                     addButton.innerHTML = originalText;
                     addButton.style.background = '';
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (checkoutError) {
                 checkoutError.textContent = 'Please fill in all required fields marked with *';
                 checkoutError.style.display = 'block';
-                checkoutError.style.color = '#e53935';
+                checkoutError.style.color = '#3e632a';
                 
                 // Highlight empty required fields
                 [
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ].forEach(({field, value}) => {
                     if (field && !value) {
                         field.setAttribute('aria-invalid', 'true');
-                        field.style.borderColor = '#e53935';
+                        field.style.borderColor = '#3e632a';
                         field.addEventListener('input', function handler() {
                             field.removeAttribute('aria-invalid');
                             field.style.borderColor = '';
@@ -604,7 +604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const f = document.getElementById('customer-mobile');
             if (f) {
                 f.setAttribute('aria-invalid', 'true');
-                f.style.borderColor = '#e53935';
+                f.style.borderColor = '#3e632a';
                 f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const f = document.getElementById('customer-pincode');
             if (f) {
                 f.setAttribute('aria-invalid', 'true');
-                f.style.borderColor = '#e53935';
+                f.style.borderColor = '#3e632a';
                 f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
@@ -634,7 +634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const f = document.getElementById('customer-email');
             if (f) {
                 f.setAttribute('aria-invalid', 'true');
-                f.style.borderColor = '#e53935';
+                f.style.borderColor = '#3e632a';
                 f.addEventListener('input', function handler(){ f.removeAttribute('aria-invalid'); f.style.borderColor=''; f.removeEventListener('input', handler); });
             }
             return;
@@ -656,7 +656,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (checkoutError) {
                     checkoutError.textContent = 'WhatsApp number is not configured. Please update it in settings.';
                     checkoutError.style.display = 'block';
-                    checkoutError.style.color = '#dc3545';
+                    checkoutError.style.color = '#3e632a';
                 }
                 if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
                 return;
@@ -718,7 +718,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (checkoutError) {
                     checkoutError.textContent = 'Failed to save order: ' + err.message;
                     checkoutError.style.display = 'block';
-                    checkoutError.style.color = '#dc3545';
+                    checkoutError.style.color = '#3e632a';
                 }
                 return; // Don't proceed if order can't be saved
             }

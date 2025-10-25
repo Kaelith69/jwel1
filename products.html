@@ -2,12 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+        <style>
+                    .footer-links h3, .footer-care h3 {
+                        color: #d4af37 !important;
+                        font-family: 'Cormorant Garamond', serif !important;
+                        font-weight: 700 !important;
+                        text-shadow: 0 1px 6px rgba(62,99,42,0.18) !important;
+                        font-size: 1.35em !important;
+                        margin-bottom: 0.7em !important;
+                    }
+                    .footer-social .neu-icon {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 50%;
+                        background: #3e632a;
+                        box-shadow: 8px 8px 16px rgba(0,0,0,0.3), 
+                                    -8px -8px 16px rgba(107,142,35,0.15);
+                        color: #d4af37;
+                        font-size: 1.4rem;
+                        transition: all 0.3s ease;
+                    }
+                    .footer-social .neu-icon:hover {
+                        box-shadow: 4px 4px 8px rgba(0,0,0,0.3), 
+                                    -4px -4px 8px rgba(107,142,35,0.15);
+                        transform: translateY(-2px);
+                        color: #fdfefd;
+                    }
+                    .footer-social .neu-icon:active {
+                        box-shadow: inset 4px 4px 8px rgba(0,0,0,0.3), 
+                                    inset -4px -4px 8px rgba(107,142,35,0.1);
+                        transform: translateY(0);
+                    }
+        </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Collection - Luxury Jewelleries</title>
     <meta name="description" content="Browse our exquisite collection of luxury jewelry.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="liquid-button.css">
     <link rel="stylesheet" href="neumorphic.css">
@@ -20,20 +55,20 @@
         }
 
         :root {
-            --primary-gold: #3B82F6;
-            --dark-gold: #1E40AF;
-            --light-gold: #93C5FD;
-            --text-dark: #2c3e50;
-            --text-light: #6c757d;
-            --bg-light: #f8f9fa;
-            --white: #ffffff;
+            --primary-gold: #3e632a;
+            --dark-gold: #6b8e23;
+            --light-gold: #fdfefd;
+            --text-dark: #3e632a;
+            --text-light: #6b8e23;
+            --bg-light: #fdfefd;
+            --white: #fdfefd;
             --shadow: rgba(0,0,0,0.1);
             --border-radius: 12px;
             --transition: all 0.3s ease;
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Lora', serif;
             background: var(--bg-light);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
@@ -119,7 +154,7 @@
         button:focus-visible,
         select:focus-visible,
         input:focus-visible {
-            outline: 3px solid rgba(59,130,246,0.6);
+            outline: 3px solid rgba(62,99,42,0.6);
             outline-offset: 2px;
             border-radius: 6px;
         }
@@ -147,7 +182,7 @@
         }
 
         .hero-banner__title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 20px;
@@ -178,7 +213,7 @@
         }
 
         .products-main h1 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant Garamond', serif;
             font-size: 32px;
             text-align: center;
             color: var(--text-dark);
@@ -232,12 +267,19 @@
         .filter-search-input,
         .filter-category-select {
             width: 100%;
-            padding: 12px 12px 12px 40px;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
+            /* use explicit height and symmetric padding so icons vertically center */
+            height: 44px;
+            padding: 0 40px 0 40px; /* left space reserved for icon */
+            border: 2px solid #fdfefd;
+            border-radius: 999px; /* pill */
             font-size: 16px;
+            line-height: 1; /* avoid strange centering due to font metrics */
+            display: inline-block;
             transition: var(--transition);
             background: var(--white);
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
         }
 
         .filter-search-input:focus,
@@ -252,9 +294,15 @@
         }
 
         .select-wrapper i {
+            position: absolute;
             right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             left: auto;
             pointer-events: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1;
         }
 
         .filter-clear-btn {
@@ -271,7 +319,7 @@
 
         .filter-clear-btn:active {
             transform: scale(0.98);
-            background: #495057;
+            background: #3e632a;
         }
 
         /* Product Grid */
@@ -403,14 +451,14 @@
 
         .cart-header {
             padding: 20px;
-            border-bottom: 1px solid #e9ecef;
+            border-bottom: 1px solid #fdfefd;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .cart-header h2 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant Garamond', serif;
             color: var(--text-dark);
         }
 
@@ -435,7 +483,7 @@
             align-items: center;
             gap: 12px;
             padding: 12px 0;
-            border-bottom: 1px solid #f1f3f4;
+            border-bottom: 1px solid #fdfefd;
         }
         .cart-item-img {
             width: 60px;
@@ -444,10 +492,10 @@
             border-radius: 8px;
         }
         .cart-item-details { flex: 1; }
-        .cart-item-name { font-weight: 500; font-size: 14px; color: #2c3e50; }
-        .cart-item-qty { color: #6c757d; font-size: 12px; }
+        .cart-item-name { font-weight: 500; font-size: 14px; color: #3e632a; }
+        .cart-item-qty { color: #6b8e23; font-size: 12px; }
     .cart-item-price { color: var(--primary-gold); font-weight: 600; }
-        .remove-btn { background: none; border: none; color: #dc3545; font-size: 16px; cursor: pointer; padding: 8px; }
+        .remove-btn { background: none; border: none; color: #3e632a; font-size: 16px; cursor: pointer; padding: 8px; }
 
         .cart-item-quantity {
             display: flex;
@@ -456,14 +504,14 @@
             margin-top: 8px;
         }
 
-        .cart-item-quantity .quantity-btn {
+    .cart-item-quantity .quantity-btn {
             width: 44px;
             height: 44px;
             min-width: 44px;
             min-height: 44px;
             border-radius: 50%;
             border: none;
-            background: #2563eb;
+            background: var(--primary-gold);
             color: #fff;
             font-weight: 600;
             font-size: 1.1rem;
@@ -475,7 +523,7 @@
         }
 
         .cart-item-quantity .quantity-btn:hover {
-            background: #1d4ed8;
+            background: #6b8e23;
             transform: translateY(-1px);
         }
 
@@ -486,7 +534,7 @@
             border-radius: 14px;
             border: 1px solid rgba(37, 99, 235, 0.45);
             background: rgba(255, 255, 255, 0.9);
-            color: #1f2937;
+            color: #3e632a;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -495,7 +543,7 @@
 
         .cart-footer {
             padding: 20px;
-            border-top: 1px solid #e9ecef;
+            border-top: 1px solid #fdfefd;
         }
 
         .cart-total {
@@ -621,7 +669,7 @@
         }
 
         .footer-tagline {
-            color: #bdc3c7;
+            color: #fdfefd;
             font-style: italic;
             margin-bottom: 16px;
         }
@@ -641,7 +689,7 @@
 
         .footer-links a,
         .footer-care a {
-            color: #bdc3c7;
+            color: #fdfefd;
             text-decoration: none;
             transition: var(--transition);
         }
@@ -659,7 +707,7 @@
         }
 
         .footer-social a {
-            color: #bdc3c7;
+            color: #fdfefd;
             font-size: 20px;
             transition: var(--transition);
         }
@@ -676,9 +724,9 @@
         .newsletter-form input {
             flex: 1;
             padding: 12px;
-            border: 1px solid #495057;
+            border: 1px solid #3e632a;
             border-radius: 6px 0 0 6px;
-            background: #495057;
+            background: #3e632a;
             color: var(--white);
         }
 
@@ -695,9 +743,9 @@
         .footer-bottom {
             text-align: center;
             padding-top: 20px;
-            border-top: 1px solid #495057;
+            border-top: 1px solid #3e632a;
             margin-top: 20px;
-            color: #bdc3c7;
+            color: #fdfefd;
         }
 
         /* Utility */
@@ -744,10 +792,10 @@
             display: inline-block;
             width: clamp(24px, 3vw, 32px);
             height: clamp(24px, 3vw, 32px);
-            background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%);
+            background: linear-gradient(135deg, #3e632a 0%, #6b8e23 50%, #9dbb52 100%);
             border-radius: 18% 18% 42% 42%;
             transform: rotate(45deg) scale(0.88);
-            box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28);
+            box-shadow: 0 6px 14px rgba(62, 99, 42, 0.28);
             animation: gemPulse 1.2s ease-in-out infinite;
             opacity: 0.95;
             position: relative;
@@ -1099,7 +1147,7 @@
                         <li><a href="https://wa.me/919961165503">WhatsApp</a></li>
                     </ul>
                     <div class="footer-social">
-                        <a href="https://instagram.com/vastravedabyharinee" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
+                        <a href="https://instagram.com/vastravedabyharinee" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener" class="neu-icon">
                             <i class="fa-brands fa-instagram" aria-hidden="true"></i>
                             <span class="visually-hidden">Instagram</span>
                         </a>

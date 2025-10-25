@@ -3,9 +3,9 @@
     padding: 14px 28px;
     font-size: 16px;
     font-weight: 500;
-    color: white;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fdfefd;
+    background: rgba(253, 254, 253, 0.06);
+    border: 1px solid rgba(253, 254, 253, 0.1);
     border-radius: 20px;
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     backdrop-filter: blur(20px) saturate(180%);

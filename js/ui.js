@@ -131,10 +131,10 @@ class UIManager {
         
         // Type-specific styling
         const colors = {
-            success: '#2e7d32',
-            error: '#e53935',
-            info: '#1976d2',
-            warning: '#f57c00'
+            success: '#9dbb52',
+            error: '#3e632a',
+            info: '#3e632a',
+            warning: '#6b8e23'
         };
         
         notification.style.background = colors[type] || colors.info;
@@ -232,9 +232,9 @@ class UIManager {
         const style = document.createElement('style');
         style.textContent = `
             .enhanced-focus:focus-visible {
-                outline: 3px solid var(--accent-color, #3B82F6);
+                outline: 3px solid var(--accent-color, #3e632a);
                 outline-offset: 2px;
-                box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.2);
+                box-shadow: 0 0 0 6px rgba(62, 99, 42, 0.12);
             }
         `;
         document.head.appendChild(style);
