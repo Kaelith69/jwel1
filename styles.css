@@ -246,9 +246,11 @@ a {
     .cart-item-img { width: 28px; height: 28px; }
     .cart-item-quantity .quantity-display { min-width: 32px; height: 28px; font-size: 0.8em; padding: 0 6px; }
     .quantity-btn, .remove-item-btn { width: 22px; height: 22px; font-size: 0.8em; }
-    .product-grid { grid-template-columns: 1fr; gap: 0.15rem; }
-    .product-card { height: 60px; }
-    .product-image { height: 28px; }
+    /* Make product grid two columns even on very small screens */
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 0.15rem; }
+    /* Allow product cards to size naturally on small screens */
+    .product-card { height: auto; }
+    .product-image { height: auto; }
     h1, h2, h3, .product-name { font-size: 1.1em; }
     .glass-text { font-size: 1em; padding: 0.18em 0.5em; }
     .cart-header, .cart-footer, .cart-items { padding: 0.2rem; }
