@@ -128,25 +128,27 @@ class CartManager {
             return;
         }
 
-        this.cartItemsContainer.innerHTML = this.cart.map(item => `
-            <div class="cart-item">
+        this.cartItemsContainer.innerHTML = this.cart.map((item, index) => `
+            <div class="cart-item" role="listitem" aria-label="${item.name}, quantity ${item.quantity}, price ₹${item.price.toLocaleString('en-IN')}">
                 <img src="${item.imageUrl}" alt="${item.name}" class="cart-item-img" loading="lazy" decoding="async"
                     onerror="this.src='/logo/logo.png'">
                 <div class="cart-item-info">
                     <div class="cart-item-row">
                         <span class="cart-item-name">${item.name}</span>
-                        <span class="cart-item-price">₹${item.price.toLocaleString('en-IN')}</span>
+                        <span class="cart-item-price" aria-label="Price: ₹${item.price.toLocaleString('en-IN')}">₹${item.price.toLocaleString('en-IN')}</span>
                     </div>
                     <div class="cart-item-actions">
-                        <div class="cart-item-quantity">
+                        <div class="cart-item-quantity" role="group" aria-label="Quantity controls for ${item.name}">
                             <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" 
-                                aria-label="Decrease quantity">-</button>
-                            <span class="quantity-display">${item.quantity}</span>
+                                aria-label="Decrease quantity of ${item.name} to ${Math.max(1, item.quantity - 1)}" 
+                                ${item.quantity <= 1 ? 'disabled aria-disabled="true"' : ''}>-</button>
+                            <span class="quantity-display" aria-label="${item.quantity} items" role="status" aria-live="polite">${item.quantity}</span>
                             <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" 
-                                aria-label="Increase quantity">+</button>
+                                aria-label="Increase quantity of ${item.name} to ${item.quantity + 1}">+</button>
                         </div>
                         <button class="remove-item-btn liquidize" data-id="${String(item.id)}" 
-                            aria-label="Remove ${item.name} from cart">&times;</button>
+                            aria-label="Remove ${item.name} from cart" aria-describedby="remove-item-${item.id}">&times;</button>
+                        <div id="remove-item-${item.id}" class="sr-only">Remove this item from your shopping cart</div>
                     </div>
                 </div>
             </div>
@@ -159,16 +161,39 @@ class CartManager {
         const addButton = document.querySelector(`[data-id="${lookupId}"]`);
         if (addButton) {
             const originalHTML = addButton.innerHTML;
+            const originalAriaLabel = addButton.getAttribute('aria-label') || '';
             addButton.innerHTML = '<i class="fas fa-check" aria-hidden="true"></i>';
             addButton.style.background = '#2e7d32';
             addButton.disabled = true;
-            
+            addButton.setAttribute('aria-label', 'Item added to cart');
+
             setTimeout(() => {
                 addButton.innerHTML = originalHTML;
                 addButton.style.background = '';
                 addButton.disabled = false;
+                addButton.setAttribute('aria-label', originalAriaLabel || 'Add to cart');
             }, 1000);
         }
+
+        // Announce to screen readers
+        const product = this.cart.find(item => String(item.id) === lookupId);
+        if (product) {
+            this.announceToScreenReader(`${product.name} added to cart. Cart now has ${this.cart.length} item${this.cart.length !== 1 ? 's' : ''}.`);
+        }
+    }
+
+    // Screen reader announcements
+    announceToScreenReader(message) {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
     }
 
     // Get cart data for checkout

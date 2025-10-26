@@ -303,26 +303,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const toggleCart = () => {
         if (!cartSidebar) return;
         const isOpen = cartSidebar.classList.contains('open');
+        const isMobile = window.innerWidth <= 900;
+
         if (isOpen) {
             cartSidebar.classList.remove('open');
             cartSidebar.setAttribute('aria-hidden', 'true');
             cartToggle?.setAttribute('aria-expanded', 'false');
+            cartToggle?.setAttribute('aria-label', 'Open shopping cart');
             document.body.style.overflow = '';
-            // remove cart-open marker so page returns to normal spacing
-            document.body.classList.remove('cart-open');
             if (sidebarOverlay) sidebarOverlay.style.display = 'none';
             document.removeEventListener('keydown', handleCartKeydown);
+            // Remove focus trap
+            document.removeEventListener('keydown', trapFocus);
             cartToggle?.focus();
+            // Remove close mode on mobile when closing
+            if (isMobile) {
+                cartToggle?.classList.remove('cart-close-mode');
+            }
+            // Announce cart closed to screen readers
+            announceToScreenReader('Shopping cart closed');
         } else {
             cartSidebar.classList.add('open');
             cartSidebar.setAttribute('aria-hidden', 'false');
             cartToggle?.setAttribute('aria-expanded', 'true');
+            cartToggle?.setAttribute('aria-label', 'Close shopping cart');
             document.body.style.overflow = 'hidden';
-            // add a class to allow CSS to reserve space for footer/safe-area
-            document.body.classList.add('cart-open');
             if (sidebarOverlay) sidebarOverlay.style.display = 'block';
             document.addEventListener('keydown', handleCartKeydown);
-            setTimeout(() => { cartCloseBtn?.focus(); }, 60);
+            // Add focus trap
+            document.addEventListener('keydown', trapFocus);
+            setTimeout(() => {
+                const firstFocusable = cartSidebar.querySelector('button, [tabindex]:not([tabindex="-1"])');
+                firstFocusable?.focus();
+            }, 60);
+            // Add close mode on mobile when opening
+            if (isMobile) {
+                cartToggle?.classList.add('cart-close-mode');
+            }
+            // Announce cart opened to screen readers
+            announceToScreenReader('Shopping cart opened');
         }
         updateCartSummary();
     };
@@ -334,6 +353,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (e.key === 'Escape') {
             toggleCart();
         }
+    };
+
+    // Focus trap for cart sidebar
+    const trapFocus = (e) => {
+        if (!cartSidebar?.classList.contains('open')) return;
+
+        const focusableElements = cartSidebar.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.key === 'Tab') {
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    };
+
+    // Screen reader announcements
+    const announceToScreenReader = (message) => {
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        document.body.appendChild(announcement);
+
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
     };
 
     // Add product to cart using CartManager
@@ -351,16 +409,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const updateQuantity = (productId, action) => {
         const item = cartManager.cart.find(item => String(item.id) === String(productId));
         if (!item) return;
+
+        const oldQuantity = item.quantity;
+        let newQuantity;
+
         if (action === 'increase') {
-            cartManager.updateQuantity(productId, item.quantity + 1);
+            newQuantity = oldQuantity + 1;
+            cartManager.updateQuantity(productId, newQuantity);
+            announceToScreenReader(`Quantity of ${item.name} increased to ${newQuantity}`);
         } else if (action === 'decrease') {
-            cartManager.updateQuantity(productId, item.quantity - 1);
+            if (oldQuantity > 1) {
+                newQuantity = oldQuantity - 1;
+                cartManager.updateQuantity(productId, newQuantity);
+                announceToScreenReader(`Quantity of ${item.name} decreased to ${newQuantity}`);
+            }
         }
         updateCartSummary();
     };
-    
+
     // Remove item from cart using CartManager
     const removeFromCart = (productId) => {
+        const item = cartManager.cart.find(item => String(item.id) === String(productId));
+        if (item) {
+            announceToScreenReader(`${item.name} removed from cart`);
+        }
         cartManager.removeItem(productId);
         updateCartSummary();
     };
@@ -824,6 +896,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (cartToggle) cartToggle.addEventListener('click', toggleCart);
     if (cartCloseBtn) cartCloseBtn.addEventListener('click', toggleCart);
+    
+    // Handle window resize to update cart button state
+    window.addEventListener('resize', () => {
+        const isMobile = window.innerWidth <= 900;
+        const isCartOpen = cartSidebar?.classList.contains('open');
+        
+        if (isMobile && isCartOpen) {
+            cartToggle?.classList.add('cart-close-mode');
+            cartToggle?.setAttribute('aria-label', 'Close shopping cart');
+        } else {
+            cartToggle?.classList.remove('cart-close-mode');
+            cartToggle?.setAttribute('aria-label', 'Open shopping cart');
+        }
+    });
+    
     // Floating cart button click opens cart sidebar
     if (floatingCartBtn) {
         floatingCartBtn.addEventListener('click', function() {
@@ -906,12 +993,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 notify('Your bag is empty.', 'error');
             }
         });
-    }
-
-    // Clear cart button
-    const clearCartBtn = document.getElementById('clear-cart-btn');
-    if (clearCartBtn) {
-        clearCartBtn.addEventListener('click', clearCart);
     }
 
     if (customerDetailsForm) {

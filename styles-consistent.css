@@ -1046,29 +1046,29 @@ h1, h2, h3, h4, h5, h6,
 
 /* Override CSS custom properties for consistent branding */
 :root {
-    --primary-color: #232323;
-    --secondary-color: #707070;
+    --primary-color: #1e3a8a;
+    --secondary-color: #475569;
     --accent-color: #3B82F6;
-    --accent-dark: #c19b28;
-    --accent-darker: #b8911f;
-    --background-light: #ffffff;
-    --background-dark: #f8f9fa;
-    --text-primary: #232323;
-    --text-secondary: #707070;
-    --text-light: #999999;
-    --border-light: #e0e0e0;
-    --border-lighter: #f0f0f0;
-    --error-color: #e53935;
-    --success-color: #2e7d32;
-    --warning-color: #ff9800;
-    --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.1);
-    --shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.15);
+    --accent-dark: #2563EB;
+    --accent-darker: #1d4ed8;
+    --background-light: #f0f4ff;
+    --background-dark: #e0e7ff;
+    --text-primary: #1e3a8a;
+    --text-secondary: #475569;
+    --text-light: #64748b;
+    --border-light: #cbd5e1;
+    --border-lighter: #e2e8f0;
+    --error-color: #dc2626;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --shadow-light: 0 2px 8px rgba(59, 130, 246, 0.08);
+    --shadow-medium: 0 4px 16px rgba(59, 130, 246, 0.12);
+    --shadow-heavy: 0 8px 24px rgba(59, 130, 246, 0.18);
 }
 
 /* Global background */
 body {
-    background-color: var(--background-light);
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #cbd5e1 100%);
     color: var(--text-primary);
 }
 
