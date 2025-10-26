@@ -43,17 +43,34 @@ let isAnalyticsSupportedRef = null;
 let initPromise = null;
 
 async function importFirebase(version) {
-	const [appMod, authMod, fsMod, storageMod, analyticsMod] = await Promise.all([
-		import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
-		import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
-		import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`),
-		import(`https://www.gstatic.com/firebasejs/${version}/firebase-storage.js`),
-		import(`https://www.gstatic.com/firebasejs/${version}/firebase-analytics.js`).catch((err) => {
-			console.warn(`[firebase-config] Failed to load analytics SDK v${version}`, err);
-			return null;
-		})
-	]);
-	return { appMod, authMod, fsMod, storageMod, analyticsMod };
+	// Add timeout for mobile devices
+	const timeout = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 10000 : 5000;
+	
+	const importWithTimeout = (url) => {
+		return Promise.race([
+			import(url),
+			new Promise((_, reject) => 
+				setTimeout(() => reject(new Error(`Import timeout for ${url}`)), timeout)
+			)
+		]);
+	};
+
+	try {
+		const [appMod, authMod, fsMod, storageMod, analyticsMod] = await Promise.all([
+			importWithTimeout(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
+			importWithTimeout(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
+			importWithTimeout(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`),
+			importWithTimeout(`https://www.gstatic.com/firebasejs/${version}/firebase-storage.js`),
+			importWithTimeout(`https://www.gstatic.com/firebasejs/${version}/firebase-analytics.js`).catch((err) => {
+				console.warn(`[firebase-config] Failed to load analytics SDK v${version}`, err);
+				return null;
+			})
+		]);
+		return { appMod, authMod, fsMod, storageMod, analyticsMod };
+	} catch (err) {
+		console.error(`[firebase-config] Import failed for version ${version}:`, err);
+		throw err;
+	}
 }
 
 async function ensureInitialized() {
@@ -65,9 +82,18 @@ async function ensureInitialized() {
 		initPromise = (async () => {
 			let mods;
 			try {
+				console.log('[firebase-config] Attempting to load Firebase v11.0.1...');
 				mods = await importFirebase('11.0.1');
+				console.log('[firebase-config] Successfully loaded Firebase v11.0.1');
 			} catch (err) {
-				mods = await importFirebase('10.12.5');
+				console.warn('[firebase-config] Failed to load Firebase v11.0.1, trying v10.12.5...', err);
+				try {
+					mods = await importFirebase('10.12.5');
+					console.log('[firebase-config] Successfully loaded Firebase v10.12.5');
+				} catch (err2) {
+					console.error('[firebase-config] Failed to load both Firebase versions:', err2);
+					throw new Error(`Firebase SDK loading failed. This may be due to network restrictions on mobile devices. Error: ${err2.message}`);
+				}
 			}
 
 			const { appMod, authMod, fsMod, storageMod, analyticsMod } = mods;
