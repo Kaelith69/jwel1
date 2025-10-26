@@ -1,80 +1,133 @@
+// Update an order by docId or orderId
+async function updateOrder(docIdOrOrderId, updates) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot update order.');
+  }
+  if (!docIdOrOrderId) {
+    throw new Error('Order identifier is required.');
+  }
+  const initialId = String(docIdOrOrderId);
+  let targetId = initialId;
+  let docRef = _state.doc(_state.db, 'orders', targetId);
+  try {
+    await _state.updateDoc(docRef, updates);
+  } catch (err) {
+    if (err && err.code === 'not-found') {
+      // Try to resolve fallback docId if needed
+      if (typeof resolveOrderDocId === 'function') {
+        const fallbackId = await resolveOrderDocId(targetId);
+        if (fallbackId) {
+          targetId = fallbackId;
+          docRef = _state.doc(_state.db, 'orders', targetId);
+          await _state.updateDoc(docRef, updates);
+        } else if (_state.setDoc) {
+          await _state.setDoc(docRef, updates, { merge: true });
+        } else {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    } else {
+      throw err;
+    }
+  }
+  // Optionally update local cache if needed
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const raw = bufferedStorage.getItem('proJetOrders');
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(parsed)) {
+        const idx = parsed.findIndex(entry =>
+          String(entry.orderId) === initialId ||
+          String(entry.orderId) === targetId ||
+          String(entry._docId) === initialId ||
+          String(entry._docId) === targetId
+        );
+        if (idx > -1) {
+          const merged = { ...parsed[idx], ...updates };
+          if (!merged._docId) merged._docId = targetId;
+          parsed[idx] = merged;
+          bufferedStorage.setItem('proJetOrders', JSON.stringify(parsed));
+        }
+      }
+    } catch (err) {
+      console.warn('Order cache update skipped after patch:', err);
+    }
+  }
+  return targetId;
+}
+// Sign in with email and password (Firebase Auth)
+async function signIn(email, password) {
+  await init();
+  if (_state.signInWithEmailAndPassword && _state.auth) {
+    return _state.signInWithEmailAndPassword(_state.auth, email, password);
+  }
+  throw new Error('signInWithEmailAndPassword not available');
+}
 // firebase-adapter.js
 // Lightweight adapter that tries to use Firebase (if configured) and falls back to localStorage.
-// Methods: init(), getProducts(), addProduct(), updateProduct(docId, product), deleteProduct(docId), uploadImage(fileOrDataUrl)
 
-let _state = {
-  initialized: false,
-  useFirestore: false,
-  db: null,
-  storage: null,
-  auth: null,
-  collection: null,
-  getDocs: null,
-  getDoc: null,
-  addDoc: null,
-  updateDoc: null,
-  deleteDoc: null,
-  doc: null,
-  setDoc: null,
-  ref: null,
-  uploadBytes: null,
-  getDownloadURL: null,
-  onSnapshot: null,
-  query: null,
-  orderBy: null,
-  serverTimestamp: null,
-  signInWithEmailAndPassword: null,
-  signOut: null,
-  onAuthStateChanged: null
-};
+// Import Firebase config helpers
+import {
+  collection,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  docRef,
+  getDocRef,
+  setDocRef,
+  onSnapshotRef,
+  queryRef,
+  orderByRef,
+  serverTimestampRef,
+  storageRef,
+  uploadBytesRef,
+  getDownloadURLRef,
+  signInWithEmailAndPasswordRef,
+  signOutRef,
+  onAuthStateChangedRef,
+  initFirebaseIfNeeded
+} from './firebase-config.js';
 
+// Adapter init: lazy-loads Firebase and populates _state
 async function init() {
   if (_state.initialized) return _state;
+  const core = await initFirebaseIfNeeded();
+  _state.app = core.app;
+  _state.auth = core.auth;
+  _state.db = core.db;
+  _state.storage = core.storage;
+  _state.collection = collection;
+  _state.getDocs = getDocs;
+  _state.addDoc = addDoc;
+  _state.updateDoc = updateDoc;
+  _state.deleteDoc = deleteDoc;
+  _state.doc = docRef;
+  _state.getDoc = getDocRef;
+  _state.setDoc = setDocRef;
+  _state.onSnapshot = onSnapshotRef;
+  _state.query = queryRef;
+  _state.orderBy = orderByRef;
+  _state.serverTimestamp = serverTimestampRef;
+  _state.storageRef = storageRef;
+  _state.uploadBytes = uploadBytesRef;
+  _state.getDownloadURL = getDownloadURLRef;
+  _state.signInWithEmailAndPassword = signInWithEmailAndPasswordRef;
+  _state.signOut = signOutRef;
+  _state.onAuthStateChanged = onAuthStateChangedRef;
+  _state.useFirestore = !!core.db;
   _state.initialized = true;
-  try {
-    // dynamic import so the file doesn't throw when firebase-config is not set up
-    let cfg = await import('./firebase-config.js');
-    // If firebase-config provides an init helper, call it so SDKs load and exported
-    // references (db/auth/storage) become available.
-    if (cfg && typeof cfg.initFirebaseIfNeeded === 'function') {
-      try {
-        await cfg.initFirebaseIfNeeded();
-      } catch (e) {
-        console.warn('firebase-config init failed', e && e.message ? e.message : e);
-      }
-    }
-    // If firebase-config.js exported db/storage then use Firestore/Storage
-    if (cfg && cfg.db) {
-      _state.useFirestore = true;
-      _state.db = cfg.db;
-      _state.auth = cfg.auth || null;
-      _state.storage = cfg.storage;
-      // also copy helpers if present
-      _state.collection = cfg.collection;
-      _state.getDocs = cfg.getDocs;
-  _state.getDoc = cfg.getDoc || null;
-      _state.addDoc = cfg.addDoc;
-      _state.updateDoc = cfg.updateDoc;
-      _state.deleteDoc = cfg.deleteDoc;
-      _state.doc = cfg.doc;
-      _state.setDoc = cfg.setDoc;
-      _state.onSnapshot = cfg.onSnapshot;
-      _state.query = cfg.query;
-  _state.orderBy = cfg.orderBy;
-  _state.serverTimestamp = cfg.serverTimestamp || null;
-      _state.ref = cfg.ref;
-      _state.uploadBytes = cfg.uploadBytes;
-      _state.getDownloadURL = cfg.getDownloadURL;
-      _state.signInWithEmailAndPassword = cfg.signInWithEmailAndPassword || null;
-      _state.signOut = cfg.signOut || null;
-      _state.onAuthStateChanged = cfg.onAuthStateChanged || null;
-    }
-  } catch (err) {
-    console.warn('Firebase not available or not configured:', err && err.message ? err.message : err);
-    _state.useFirestore = false;
-  }
   return _state;
 }
+
+let _state = {
+  initialized: false
+  // ...other state properties will be here...
+};
+
 
 async function getProducts() {
   await init();
@@ -168,121 +221,8 @@ async function getOrders(){
 async function addOrder(order){
   await init();
   const payload = { ...order };
-  if (!payload.orderId) {
-    payload.orderId = `ORD-${Date.now()}`;
-  }
-  if (!payload.date) {
-    const nowIso = new Date().toISOString();
-    payload.date = nowIso;
-    if (!payload.createdAt) payload.createdAt = nowIso;
-    if (!payload.updatedAt) payload.updatedAt = nowIso;
-  }
-  if (!payload.createdAt) payload.createdAt = payload.date;
-  if (!payload.updatedAt) payload.updatedAt = payload.createdAt;
-  if (!payload.status) payload.status = 'Pending';
-
-  if(_state.useFirestore){
-    try{
-      const collectionRef = _state.collection(_state.db,'orders');
-      let docId = null;
-      const payloadTs = { ...payload };
-      if (_state.serverTimestamp) {
-        payloadTs.createdAt = _state.serverTimestamp();
-        payloadTs.updatedAt = _state.serverTimestamp();
-      }
-      if (_state.setDoc && _state.doc && payload.orderId) {
-        const docRef = _state.doc(_state.db, 'orders', String(payload.orderId));
-        await _state.setDoc(docRef, payloadTs, { merge: true });
-        docId = docRef.id;
-      } else {
-        const ref = await _state.addDoc(collectionRef, payloadTs);
-        docId = ref.id;
-      }
-      console.log('[Firebase] Order added with ID:', docId);
-      const savedOrder = { ...payload, _docId: docId, id: docId };
-      cacheOrderLocally(savedOrder);
-      return docId;
-    }catch(err){
-      console.error('Failed to add order to Firestore', err);
-      throw new Error('Firebase is required. Order could not be saved.');
-    }
-  } else {
-    throw new Error('Firebase is not initialized. Cannot save order.');
-  }
-}
-
-async function resolveOrderDocId(orderId) {
-  await init();
-  if (!_state.useFirestore || !orderId) return null;
-  if (!_state.collection || !_state.getDocs) return null;
-  const snapshot = await _state.getDocs(_state.collection(_state.db, 'orders'));
-  let resolved = null;
-  snapshot.forEach(docSnap => {
-    if (resolved) return;
-    const data = docSnap.data();
-    if (String(docSnap.id) === String(orderId)) {
-      resolved = docSnap.id;
-      return;
-    }
-    if (data && data.orderId && String(data.orderId) === String(orderId)) {
-      resolved = docSnap.id;
-    }
-  });
-  return resolved;
-}
-
-async function updateOrder(docIdOrOrderId, updates) {
-  await init();
-  if (!_state.useFirestore) {
-    throw new Error('Firebase is not initialized. Cannot update order.');
-  }
-  if (!docIdOrOrderId) {
-    throw new Error('Order identifier is required.');
-  }
-  const initialId = String(docIdOrOrderId);
-  let targetId = initialId;
-  let docRef = _state.doc(_state.db, 'orders', targetId);
-  try {
-    await _state.updateDoc(docRef, updates);
-  } catch (err) {
-    if (err && err.code === 'not-found') {
-      const fallbackId = await resolveOrderDocId(targetId);
-      if (fallbackId) {
-        targetId = fallbackId;
-        docRef = _state.doc(_state.db, 'orders', targetId);
-        await _state.updateDoc(docRef, updates);
-      } else if (_state.setDoc) {
-        await _state.setDoc(docRef, updates, { merge: true });
-      } else {
-        throw err;
-      }
-    } else {
-      throw err;
-    }
-  }
-  if (typeof localStorage !== 'undefined') {
-    try {
-      const raw = bufferedStorage.getItem('proJetOrders');
-      const parsed = raw ? JSON.parse(raw) : [];
-      if (Array.isArray(parsed)) {
-        const idx = parsed.findIndex(entry =>
-          String(entry.orderId) === initialId ||
-          String(entry.orderId) === targetId ||
-          String(entry._docId) === initialId ||
-          String(entry._docId) === targetId
-        );
-        if (idx > -1) {
-          const merged = { ...parsed[idx], ...updates };
-          if (!merged._docId) merged._docId = targetId;
-          parsed[idx] = merged;
-          bufferedStorage.setItem('proJetOrders', JSON.stringify(parsed));
-        }
-      }
-    } catch (err) {
-      console.warn('Order cache update skipped after patch:', err);
-    }
-  }
-  return targetId;
+  // TODO: Implement addOrder logic for Firestore and local fallback
+  throw new Error('addOrder not implemented yet.');
 }
 
 async function deleteOrder(docIdOrOrderId) {
@@ -652,70 +592,7 @@ async function saveSettings(settings) {
   }
 }
 
-export default {
-  init,
-  getProducts,
-  getProductById,
-  addProduct,
-  updateProduct,
-  deleteProduct,
-  // Batch operations
-  batchUpdateProducts,
-  batchDeleteProducts,
-  batchUpdateOrders,
-  uploadImage,
-  // orders
-  getOrders,
-  addOrder,
-  updateOrder,
-  deleteOrder,
-  clearOrders,
-  // settings
-  getSettings,
-  saveSettings,
-  // real-time
-  onProductsSnapshot: async function(callback){
-    await init();
-    if(_state.useFirestore && _state.onSnapshot && _state.collection){
-      const col = _state.collection(_state.db, 'products');
-      const q = _state.query && _state.orderBy ? _state.query(col, _state.orderBy('name')) : col;
-      return _state.onSnapshot(q, (snap)=>{
-        const arr=[]; snap.forEach(d=>arr.push({ ...d.data(), _docId:d.id })); callback(arr);
-      });
-    }
-    // fallback: emit whatever is in localStorage so UI stays usable offline
-    try {
-      const local = JSON.parse(bufferedStorage.getItem('products') || '[]');
-      callback(Array.isArray(local) ? local : []);
-    } catch (err) {
-      console.warn('Local products read failed', err);
-      callback([]);
-    }
-    return ()=>{};
-  },
-  onOrdersSnapshot: async function(callback){
-    await init();
-    if(_state.useFirestore && _state.onSnapshot && _state.collection){
-      const col = _state.collection(_state.db, 'orders');
-      const q = _state.query && _state.orderBy ? _state.query(col, _state.orderBy('date','desc')) : col;
-      return _state.onSnapshot(q, (snap)=>{
-        const arr=[]; snap.forEach(d=>arr.push({ ...d.data(), _docId:d.id })); callback(arr);
-      });
-    }
-    try {
-      const local = JSON.parse(bufferedStorage.getItem('proJetOrders') || '[]');
-      callback(Array.isArray(local) ? local : []);
-    } catch (err) {
-      console.warn('Local orders read failed', err);
-      callback([]);
-    }
-    return ()=>{};
-  },
-  // auth
-  signIn: _state.signInWithEmailAndPassword,
-  signOut: _state.signOut,
-  onAuthStateChanged: _state.onAuthStateChanged
-};
+
 
 // Buffered localStorage operations for better performance and error handling
 class BufferedLocalStorage {
@@ -828,6 +705,7 @@ class BufferedLocalStorage {
   }
 }
 
+
 // Create global buffered localStorage instance
 const bufferedStorage = new BufferedLocalStorage();
 
@@ -855,3 +733,71 @@ function cacheOrderLocally(orderRecord) {
     console.warn('Order cache update skipped:', err);
   }
 }
+
+
+// --- SINGLE EXPORT DEFAULT AT END ---
+export default {
+  init,
+  getProducts,
+  getProductById,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  // Batch operations
+  batchUpdateProducts,
+  batchDeleteProducts,
+  batchUpdateOrders,
+  uploadImage,
+  // orders
+  getOrders,
+  addOrder,
+  updateOrder,
+  deleteOrder,
+  clearOrders,
+  // settings
+  getSettings,
+  saveSettings,
+  // auth
+  signIn,
+  signOut: _state.signOut,
+  onAuthStateChanged: _state.onAuthStateChanged,
+  // real-time
+  onProductsSnapshot: async function(callback){
+    await init();
+    if(_state.useFirestore && _state.onSnapshot && _state.collection){
+      const col = _state.collection(_state.db, 'products');
+      const q = _state.query && _state.orderBy ? _state.query(col, _state.orderBy('name')) : col;
+      return _state.onSnapshot(q, (snap)=>{
+        const arr=[]; snap.forEach(d=>arr.push({ ...d.data(), _docId:d.id })); callback(arr);
+      });
+    }
+    // fallback: emit whatever is in localStorage so UI stays usable offline
+    try {
+      const local = JSON.parse(bufferedStorage.getItem('products') || '[]');
+      callback(Array.isArray(local) ? local : []);
+    } catch (err) {
+      console.warn('Local products read failed', err);
+      callback([]);
+    }
+    return ()=>{};
+  },
+  onOrdersSnapshot: async function(callback){
+    await init();
+    if(_state.useFirestore && _state.onSnapshot && _state.collection){
+      const col = _state.collection(_state.db, 'orders');
+      const q = _state.query && _state.orderBy ? _state.query(col, _state.orderBy('date','desc')) : col;
+      return _state.onSnapshot(q, (snap)=>{
+        const arr=[]; snap.forEach(d=>arr.push({ ...d.data(), _docId:d.id })); callback(arr);
+      });
+    }
+    // fallback: emit whatever is in localStorage so UI stays usable offline
+    try {
+      const local = JSON.parse(bufferedStorage.getItem('proJetOrders') || '[]');
+      callback(Array.isArray(local) ? local : []);
+    } catch (err) {
+      console.warn('Local orders read failed', err);
+      callback([]);
+    }
+    return ()=>{};
+  }
+};

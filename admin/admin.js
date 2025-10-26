@@ -368,6 +368,36 @@ const path=window.location.pathname;
     if(cancelBtn) cancelBtn.addEventListener('click',resetForm);
     if(toggleFormBtn && productFormWrapper) toggleFormBtn.addEventListener('click',()=>{const c=productFormWrapper.classList.toggle('collapsed'); toggleFormBtn.textContent=c?'➕ Add Product':'✖ Close Form'; toggleFormBtn.setAttribute('aria-expanded',c?'false':'true'); if(!c) document.getElementById('name')?.focus();});
     if(clearFiltersBtn) clearFiltersBtn.addEventListener('click',()=>{ if(productSearch) productSearch.value=''; if(categoryFilter) categoryFilter.value=''; renderCards(); renderTable(); if(liveStatus) liveStatus.textContent='Filters cleared'; });
+    // Manual "Sync from Firestore" button: replace local products with remote list
+    const syncFromFirestoreBtn = document.getElementById('sync-from-firestore');
+    if(syncFromFirestoreBtn) syncFromFirestoreBtn.addEventListener('click', async ()=>{
+        if(!__useFirestore){ notify('Firestore not configured.', 'warn'); return; }
+        try{
+            syncFromFirestoreBtn.disabled = true;
+            syncFromFirestoreBtn.textContent = '🔄 Syncing…';
+            await FirebaseAdapter.init();
+            const remote = await FirebaseAdapter.getProducts();
+            if(!Array.isArray(remote)){
+                notify('No products returned from Firestore.', 'warn');
+                return;
+            }
+            // Normalize and dedupe remote products; preserve _docId as id when present
+            const mapped = remote.map(p=>({ id: p._docId||p.id||Date.now()+Math.floor(Math.random()*1000), name: p.name||'', price: p.price||0, description: p.description||'', category: p.category||'', imageUrl: p.imageUrl||'', _docId: p._docId }));
+            // Replace local list with deduped remote list
+            products = __dedupeProducts(mapped);
+            saveProducts();
+            refreshCategoryOptions();
+            renderCards();
+            renderTable();
+            notify(`Imported ${products.length} product${products.length===1?'':'s'} from Firestore.`, 'success');
+            if(liveStatus) liveStatus.textContent = `Imported ${products.length} products from Firestore`;
+        }catch(err){
+            console.warn('Sync from Firestore failed', err);
+            notify('Failed to fetch products from Firestore: '+(err && err.message ? err.message : err), 'error');
+        } finally {
+            if(syncFromFirestoreBtn){ syncFromFirestoreBtn.disabled = false; syncFromFirestoreBtn.textContent = '🔄 Sync from Firestore'; }
+        }
+    });
     if(productSearch) productSearch.addEventListener('input',()=>{renderCards();renderTable();});
     if(categoryFilter) categoryFilter.addEventListener('change',()=>{renderCards();renderTable();});
     if(productList) productList.addEventListener('click',e=>{const sync=e.target.closest('.sync-btn'); if(sync){ const id = sync.dataset.docid || sync.dataset.id; syncProductToFirestore(id); return; } const del=e.target.closest('.delete-btn'); if(del){ const docid = del.dataset.docid; const id = docid || del.dataset.id; handleDelete(id); } });

@@ -93,9 +93,9 @@ async function ensureInitialized() {
 			uploadBytesRef = storageMod.uploadBytes;
 			getDownloadURLRef = storageMod.getDownloadURL;
 
-			signInWithEmailAndPasswordRef = authMod.signInWithEmailAndPassword || null;
-			signOutRef = authMod.signOut || null;
-			onAuthStateChangedRef = authMod.onAuthStateChanged || null;
+			signInWithEmailAndPasswordRef = authMod.signInWithEmailAndPassword || (auth && authMod && authMod['signInWithEmailAndPassword']) || null;
+			signOutRef = authMod.signOut || (auth && authMod && authMod['signOut']) || null;
+			onAuthStateChangedRef = authMod.onAuthStateChanged || (auth && authMod && authMod['onAuthStateChanged']) || null;
 
 			getAnalyticsRef = analyticsMod ? analyticsMod.getAnalytics || null : null;
 			isAnalyticsSupportedRef = analyticsMod ? analyticsMod.isSupported || null : null;
@@ -125,7 +125,6 @@ const _initPromise = ensureInitialized().catch((err) => {
 	console.warn('[firebase-config] Lazy initialization failed', err);
 	return { app: null, auth: null, db: null, storage: null };
 });
-
 export {
 	app,
 	auth,
@@ -137,21 +136,21 @@ export {
 	addDoc,
 	updateDoc,
 	deleteDoc,
-	docRef as doc,
-	getDocRef as getDoc,
-	setDocRef as setDoc,
-	onSnapshotRef as onSnapshot,
-	queryRef as query,
-	orderByRef as orderBy,
-	serverTimestampRef as serverTimestamp,
-	storageRef as ref,
-	uploadBytesRef as uploadBytes,
-	getDownloadURLRef as getDownloadURL,
-	signInWithEmailAndPasswordRef as signInWithEmailAndPassword,
-	signOutRef as signOut,
-	onAuthStateChangedRef as onAuthStateChanged,
-	getAnalyticsRef as getAnalytics,
-	isAnalyticsSupportedRef as isAnalyticsSupported,
+	docRef,
+	getDocRef,
+	setDocRef,
+	onSnapshotRef,
+	queryRef,
+	orderByRef,
+	serverTimestampRef,
+	storageRef,
+	uploadBytesRef,
+	getDownloadURLRef,
+	signInWithEmailAndPasswordRef,
+	signOutRef,
+	onAuthStateChangedRef,
+	getAnalyticsRef,
+	isAnalyticsSupportedRef,
 	initFirebaseIfNeeded,
-	_initPromise as initPromise
+	_initPromise
 };
