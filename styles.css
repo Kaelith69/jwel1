@@ -8,12 +8,14 @@
         border-radius: 0;
         box-shadow: 0 -2px 16px rgba(0,0,0,0.10);
         margin: 0;
-        width: 100vw;
-        max-width: 100vw;
-        padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+        /* Size relative to the parent (sidebar) to avoid overflowing the sidebar on non-fullscreen layouts */
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
     }
     .cart-items {
-        margin-bottom: 120px !important;
+        margin-bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
     }
 }
 /* New Floating Cart Button Styles */
@@ -22,7 +24,7 @@
 .floating-cart-btn {
     position: fixed !important;
     right: 24px !important;
-    bottom: 24px !important;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     left: auto !important;
     top: auto !important;
     width: 56px;
@@ -42,6 +44,20 @@
     outline: none;
     padding: 0;
     pointer-events: auto;
+}
+.root-helpers, :root {
+    --cart-footer-height: 84px; /* fallback value used for padding calculations */
+}
+
+/* When cart is open, ensure sidebar has room above the fixed footer
+   so the total price is never obscured by mobile browser navigation UI. */
+.cart-sidebar.open {
+    padding-bottom: calc(var(--cart-footer-height) + env(safe-area-inset-bottom, 0px));
+}
+
+/* Also allow adding a class on body for additional spacing if needed */
+body.cart-open {
+    padding-bottom: calc(var(--cart-footer-height) + env(safe-area-inset-bottom, 0px));
 }
 .floating-cart-btn[hidden] {
     display: none !important;
@@ -658,7 +674,7 @@
     position: fixed;
     top: 0;
     left: 0;
-        width: 100%;
+    width: 100%;
     height: 100vh;
     z-index: 1001;
     display: flex;
@@ -666,10 +682,8 @@
     transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.3s ease;
     background: #fff;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 6px rgba(0,0,0,0.10);
-    border-radius: 18px 18px 0 0;
-    color: #232323;
     border-radius: 0;
-    /* box-shadow moved above */
+    color: #232323;
     pointer-events: none;
     will-change: transform, opacity;
     transform: translateY(-100%);
@@ -731,12 +745,12 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     cursor: pointer;
     transition: all 0.2s ease;
     border-radius: 50%;
-    /* Removed all mobile overrides for product-card, product-image-section, product-image, product-text-section to prevent conflicts. */
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-right: 15px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     border: 2px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -744,7 +758,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    padding: 10px 0;
+    padding: 12px 0;
 }
 
 .cart-item-img {
@@ -792,27 +806,15 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
 .cart-item-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 2px;
-}
-
-.cart-item-name {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 5px;
-        color: #232323;
-}
-
-.cart-item-price {
-    font-size: 0.9rem;
-        color: #2563eb;
-    font-weight: 500;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
 }
 
 .cart-item-quantity {
     display: flex;
     align-items: center;
-    margin-top: 8px;
     gap: 8px;
     flex-wrap: nowrap;
 }
@@ -965,6 +967,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     .cart-item-name {
         font-size: 0.85rem;
         line-height: 1.1;
+        max-width: 70%;
     }
     
     .cart-item-price {
@@ -972,22 +975,22 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     }
     
     .quantity-btn, .remove-item-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 0.75rem;
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
     }
     
     .cart-item-quantity .quantity-btn {
-        min-width: 32px;
-        min-height: 32px;
+        min-width: 40px;
+        min-height: 40px;
         border-radius: 50%;
         font-size: 0.95rem;
     }
     
     .cart-item-quantity .quantity-display {
-        min-width: 32px;
-        height: 32px;
-        font-size: 0.8rem;
+        min-width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
         border-radius: 10px;
     }
     
@@ -1629,13 +1632,19 @@ h1.glass-text, h2.glass-text, h3.glass-text, .product-name.glass-text, .main-hea
     overscroll-behavior: contain;
     background: #f9fafb;
     min-height: 120px;
-    max-height: 48vh;
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
     border-bottom: 1.5px solid #e0e7ef;
     padding: 1.2rem 1.2rem 0.5rem 1.2rem;
     box-sizing: border-box;
     border-radius: 0 0 16px 16px;
     margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    .cart-items {
+        max-height: calc(100vh - 200px - env(safe-area-inset-bottom, 0px));
+    }
 }
 
 /* Prevent zoom on input focus on iOS */

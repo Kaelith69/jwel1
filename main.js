@@ -308,6 +308,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartSidebar.setAttribute('aria-hidden', 'true');
             cartToggle?.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            // remove cart-open marker so page returns to normal spacing
+            document.body.classList.remove('cart-open');
             if (sidebarOverlay) sidebarOverlay.style.display = 'none';
             document.removeEventListener('keydown', handleCartKeydown);
             cartToggle?.focus();
@@ -316,6 +318,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartSidebar.setAttribute('aria-hidden', 'false');
             cartToggle?.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
+            // add a class to allow CSS to reserve space for footer/safe-area
+            document.body.classList.add('cart-open');
             if (sidebarOverlay) sidebarOverlay.style.display = 'block';
             document.addEventListener('keydown', handleCartKeydown);
             setTimeout(() => { cartCloseBtn?.focus(); }, 60);
