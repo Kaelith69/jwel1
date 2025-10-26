@@ -101,9 +101,9 @@ const bufferedUIUpdates = {
                     const billShipping = document.getElementById(shippingId);
                     const billGrandTotal = document.getElementById(grandTotalId);
                     const itemCount = document.getElementById(itemCountId);
-                    if (billSubtotal) billSubtotal.textContent = 'Rs. 0';
-                    if (billShipping) billShipping.textContent = 'Rs. 0';
-                    if (billGrandTotal) billGrandTotal.textContent = 'Rs. 0';
+                    if (billSubtotal) billSubtotal.textContent = '₹0';
+                    if (billShipping) billShipping.textContent = '₹0';
+                    if (billGrandTotal) billGrandTotal.textContent = '₹0';
                     if (itemCount) itemCount.textContent = '0 items';
                     // Disable order button if present
                     const orderBtn = document.getElementById('whatsapp-order-btn');
@@ -119,12 +119,12 @@ const bufferedUIUpdates = {
                 container.innerHTML = cartWithLatest.map(item => `
                     <div class="order-item">
                         <div class="order-item-name">${item.name} <small>(x${item.quantity})</small></div>
-                        <div class="order-item-price">Rs. ${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                        <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
                 `).join('');
 
                 const subtotal = cartWithLatest.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                                // Calculate shipping: Free shipping above Rs. 5000, otherwise Rs. 200
+                // Calculate shipping: Free shipping above ₹5000, otherwise ₹200
                 const shipping = 0;
                 const grandTotal = subtotal + shipping;
 
@@ -133,9 +133,9 @@ const bufferedUIUpdates = {
                 const billGrandTotal = document.getElementById(grandTotalId);
                 const itemCount = document.getElementById(itemCountId);
 
-                if (billSubtotal) billSubtotal.textContent = `Rs. ${subtotal.toLocaleString('en-IN')}`;
-                if (billShipping) billShipping.textContent = `Rs. ${shipping.toLocaleString('en-IN')}`;
-                if (billGrandTotal) billGrandTotal.textContent = `Rs. ${grandTotal.toLocaleString('en-IN')}`;
+                if (billSubtotal) billSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+                if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
+                if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
                 if (itemCount) itemCount.textContent = `${cartWithLatest.length} item${cartWithLatest.length !== 1 ? 's' : ''}`;
 
                 // Hide checkout summary loaders
@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Fallback for image property (imageUrl or image)
             const imgSrc = product.imageUrl || product.image || '/logo/logo.png';
             // Fallback for price formatting
-            const price = typeof product.price === 'number' ? `Rs. ${product.price.toLocaleString('en-IN')}` : product.price;
+            const price = typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price;
             // Compose data-product attribute for SSR/JS parity
             const dataProduct = JSON.stringify({
                 name: product.name,
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Fallback for image property (imageUrl or image)
         const imgSrc = product.imageUrl || product.image || '/logo/logo.png';
         // Fallback for price formatting
-        const price = typeof product.price === 'number' ? `Rs. ${product.price.toLocaleString('en-IN')}` : product.price;
+        const price = typeof product.price === 'number' ? `₹${product.price.toLocaleString('en-IN')}` : product.price;
 
         // Populate modal with product data
         if (modalProductImage) {
@@ -880,10 +880,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const placedAt = new Date();
             const orderReference = `ORD-${placedAt.getTime()}`;
             const orderTimestampIso = placedAt.toISOString();
-            const orderSummary = cartManager.cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - Rs. ${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
+            const orderSummary = cartManager.cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
 
             const message =
-`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Order ID:* ${orderReference}\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: Rs. ${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
+`Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Order ID:* ${orderReference}\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
 
             // Save order to Firebase (required)
             const order = {
