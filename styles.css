@@ -1,4 +1,8 @@
 @media (max-width: 600px) {
+    .cart-sidebar {
+        padding-right: 1.5cm;
+        padding-bottom: 1cm;
+    }
     .cart-footer {
         position: fixed;
         left: 0;
@@ -10,8 +14,10 @@
         margin: 0;
         width: 100vw;
         max-width: 100vw;
-        /* Add 1cm space for safe area, plus any device inset */
-        padding-bottom: calc(1cm + env(safe-area-inset-bottom, 0px));
+    /* Add 1.5cm space for safe area, plus any device inset */
+    padding-bottom: calc(1.5cm + env(safe-area-inset-bottom, 0px));
+    padding-left: 16px;
+    padding-right: 16px;
     }
     .cart-items {
         margin-bottom: 120px !important;
