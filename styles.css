@@ -2780,25 +2780,12 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     margin-bottom: 2.5rem;
     max-height: 300px;
     overflow-y: auto;
-}
-
-@supports (scrollbar-width: thin) {
-    .order-items {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
-    }
+    scrollbar-width: thin;
+    scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
 }
 
 .order-items::-webkit-scrollbar {
     width: 4px;
-}
-
-.order-items::-webkit-scrollbar-thumb {
-    background-color: rgba(16, 185, 129, 0.3);
-}
-
-.order-items::-webkit-scrollbar-track {
-    background-color: transparent;
 }
 
 .order-items::-webkit-scrollbar-track {

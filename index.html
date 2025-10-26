@@ -244,7 +244,10 @@
         <main class="modern-hero">
             <div class="modern-hero-content">
                 <div class="logo-container">
-                    <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-logo">
+                    <picture>
+                        <source srcset="/logo/logo.webp" type="image/webp">
+                        <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-logo">
+                    </picture>
                 </div>
             <!-- <h1 class="modern-title">Luxury Jewelleries</h1> -->
                 <p class="modern-tagline">Redefining elegance for the modern era</p>
@@ -275,7 +278,10 @@
         </section>
         <footer class="modern-footer">
             <div class="modern-footer-inner">
-                <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-footer-logo">
+                <picture>
+                    <source srcset="/logo/logo.webp" type="image/webp">
+                    <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-footer-logo">
+                </picture>
                 <div class="modern-footer-brand">VastraVeda Jewelleries</div>
                 <div class="modern-footer-links">
                     <a href="/products.html">Collections</a>
@@ -301,10 +307,10 @@
                     }
                     .modern-hero-content {
                         background: rgba(255,255,255,0.18);
-                        border-radius: 3rem 3rem 4rem 4rem/2.5rem 2.5rem 5rem 5rem;
+                        border-radius: 3rem;
                         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-                    -webkit-backdrop-filter: blur(18px) saturate(1.3);
-                    backdrop-filter: blur(18px) saturate(1.3);
+                        -webkit-backdrop-filter: blur(18px) saturate(1.3);
+                        backdrop-filter: blur(18px) saturate(1.3);
                         border: 2.5px solid rgba(255,255,255,0.22);
                         padding: 2.5rem 1.2rem 2rem 1.2rem;
                         max-width: 440px;
@@ -316,32 +322,32 @@
                         gap: 1.5rem;
                         margin-top: 2.5rem;
                     }
-                                                                    .logo-container {
-                                                                        width: 340px;
-                                                                        height: 340px;
-                                                                        max-width: 90vw;
-                                                                        max-height: 40vh;
-                                                                        margin-bottom: 0.7rem;
-                                                                        border-radius: 0.8rem;
-                                                                        box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.08), 0 1px 8px 0 rgba(59,130,246,0.04);
-                                                                        background: rgba(255,255,255,0.08);
-                                                                        border: 1px solid rgba(255,255,255,0.08);
-                                                                        -webkit-backdrop-filter: blur(8px) saturate(1.05);
-                                                                        backdrop-filter: blur(8px) saturate(1.05);
-                                                                        transition: border-radius 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
-                                                                        display: flex;
-                                                                        align-items: center;
-                                                                        justify-content: center;
-                                                                        padding: 1rem;
-                                                                    }
-                                                                    .modern-logo {
-                                                                        max-width: 100%;
-                                                                        max-height: 100%;
-                                                                        width: auto;
-                                                                        height: auto;
-                                                                        object-fit: contain;
-                                                                        display: block;
-                                                                    }
+                    .logo-container {
+                        width: 340px;
+                        height: 340px;
+                        max-width: 90vw;
+                        max-height: 40vh;
+                        margin-bottom: 0.7rem;
+                        border-radius: 0.8rem;
+                        box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.08), 0 1px 8px 0 rgba(59,130,246,0.04);
+                        background: rgba(255,255,255,0.08);
+                        border: 1px solid rgba(255,255,255,0.08);
+                        -webkit-backdrop-filter: blur(8px) saturate(1.05);
+                        backdrop-filter: blur(8px) saturate(1.05);
+                        transition: border-radius 0.3s cubic-bezier(0.4,2,0.6,1), box-shadow 0.2s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 1rem;
+                    }
+                    .modern-logo {
+                        max-width: 100%;
+                        max-height: 100%;
+                        width: auto;
+                        height: auto;
+                        object-fit: contain;
+                        display: block;
+                    }
                     .modern-title {
                         font-size: 2.3rem;
                         font-family: 'Playfair Display', serif;
@@ -380,12 +386,12 @@
                     .modern-featured {
                         padding: 2.2rem 0.5rem 1.5rem 0.5rem;
                         background: rgba(255,255,255,0.18);
-                        border-radius: 3rem 3rem 4rem 4rem/2.5rem 2.5rem 5rem 5rem;
+                        border-radius: 3rem;
                         margin-top: -1.5rem;
                         text-align: center;
                         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
-                    -webkit-backdrop-filter: blur(14px) saturate(1.2);
-                    backdrop-filter: blur(14px) saturate(1.2);
+                        -webkit-backdrop-filter: blur(14px) saturate(1.2);
+                        backdrop-filter: blur(14px) saturate(1.2);
                         border: 2.5px solid rgba(255,255,255,0.22);
                     }
                     .modern-section-title {
@@ -404,7 +410,7 @@
                     }
                     .modern-featured-card {
                         background: rgba(255,255,255,0.22);
-                        border-radius: 999px 999px 2.5rem 2.5rem/2rem 2rem 3rem 3rem;
+                        border-radius: 2.5rem;
                         box-shadow: 0 2px 16px rgba(59,130,246,0.10);
                         padding: 1.2rem 1rem;
                         display: flex;
@@ -416,8 +422,8 @@
                         font-weight: 500;
                         transition: box-shadow 0.18s, transform 0.18s;
                         border: 2px solid rgba(255,255,255,0.18);
-                    -webkit-backdrop-filter: blur(10px) saturate(1.2);
-                    backdrop-filter: blur(10px) saturate(1.2);
+                        -webkit-backdrop-filter: blur(10px) saturate(1.2);
+                        backdrop-filter: blur(10px) saturate(1.2);
                     }
                     .modern-featured-card:hover, .modern-featured-card:focus {
                         box-shadow: 0 6px 24px rgba(59,130,246,0.16);
