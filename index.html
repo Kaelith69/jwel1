@@ -77,31 +77,36 @@
         background: linear-gradient(120deg, #f8fafc 60%, #e0e7ef 100%);
     }
     .hero-content {
-        background: rgba(255,255,255,0.92);
-        border-radius: 1.5rem;
-        box-shadow: 0 2px 16px rgba(59,130,246,0.08);
-        padding: 1.5rem 1rem 1.2rem 1rem;
-        margin: 0 auto;
-        max-width: 420px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-    }
-    .hero-content .logo img {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 0.5rem;
-    }
+                                                                            width: 340px;
+                                                                            height: 340px;
+                                                                            max-width: 90vw;
+                                                                            max-height: 40vh;
+                                                                            margin-bottom: 0.7rem;
+                                                                            border-radius: 1.5rem;
+                                                                            box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.08), 0 1px 8px 0 rgba(59,130,246,0.04);
+                                                                            background: rgba(255,255,255,0.08);
+                                                                            border: 1px solid rgba(255,255,255,0.08);
+                                                                            -webkit-backdrop-filter: blur(8px) saturate(1.05);
+                                                                            backdrop-filter: blur(8px) saturate(1.05);
+                                                                            transition: border-radius 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
+                                                                            display: flex;
+                                                                            align-items: center;
+                                                                            justify-content: center;
+                                                                            padding: 1rem;
+                                                                            overflow: hidden;
     .hero-subtitle {
-        font-size: 1.2rem;
-        color: #3B82F6;
-        font-weight: 600;
-        margin-bottom: 0.2em;
-    }
-    .hero-description {
-        font-size: 1rem;
-        color: #232323;
+    .modern-logo {
+                                                                            max-width: 100%;
+                                                                            max-height: 100%;
+                                                                            width: 100%;
+                                                                            height: 100%;
+                                                                            object-fit: cover;
+                                                                            display: block;
+                                                                            border-radius: 5%;
+                                                                            background: none;
+                                                                            box-shadow: none;
+                                                                            border: none;
+                                                                        }
         margin-bottom: 0.5em;
     }
     .hero-actions {
@@ -238,7 +243,9 @@
 
         <main class="modern-hero">
             <div class="modern-hero-content">
-                <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-logo">
+                <div class="logo-container">
+                    <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-logo">
+                </div>
             <!-- <h1 class="modern-title">Luxury Jewelleries</h1> -->
                 <p class="modern-tagline">Redefining elegance for the modern era</p>
                 <a href="/products.html" class="modern-cta">Shop Collection</a>
@@ -309,20 +316,30 @@
                         gap: 1.5rem;
                         margin-top: 2.5rem;
                     }
-                                                                    .modern-logo {
+                                                                    .logo-container {
                                                                         width: 340px;
                                                                         height: 340px;
                                                                         max-width: 90vw;
                                                                         max-height: 40vh;
                                                                         margin-bottom: 0.7rem;
-                                                                        border-radius: 2.5rem;
-                                                                        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10), 0 2px 12px 0 rgba(59,130,246,0.06);
-                                                                        background: rgba(255,255,255,0.12);
-                                                                        object-fit: contain;
-                                                                        border: 1.5px solid rgba(255,255,255,0.10);
-                                                                        -webkit-backdrop-filter: blur(12px) saturate(1.1);
-                                                                        backdrop-filter: blur(12px) saturate(1.1);
+                                                                        border-radius: 0.8rem;
+                                                                        box-shadow: 0 4px 20px 0 rgba(31, 38, 135, 0.08), 0 1px 8px 0 rgba(59,130,246,0.04);
+                                                                        background: rgba(255,255,255,0.08);
+                                                                        border: 1px solid rgba(255,255,255,0.08);
+                                                                        -webkit-backdrop-filter: blur(8px) saturate(1.05);
+                                                                        backdrop-filter: blur(8px) saturate(1.05);
                                                                         transition: border-radius 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
+                                                                        display: flex;
+                                                                        align-items: center;
+                                                                        justify-content: center;
+                                                                        padding: 1rem;
+                                                                    }
+                                                                    .modern-logo {
+                                                                        max-width: 100%;
+                                                                        max-height: 100%;
+                                                                        width: auto;
+                                                                        height: auto;
+                                                                        object-fit: contain;
                                                                         display: block;
                                                                     }
                     .modern-title {
