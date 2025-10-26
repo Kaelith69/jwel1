@@ -120,7 +120,7 @@ class CartManager {
         const { totalPrice } = this.getTotals();
         
         if (this.cartTotalPriceEl) {
-            this.cartTotalPriceEl.textContent = `₹${totalPrice.toLocaleString('en-IN')}`;
+            this.cartTotalPriceEl.textContent = `Rs. ${totalPrice.toLocaleString('en-IN')}`;
         }
 
         if (this.cart.length === 0) {
@@ -198,7 +198,7 @@ class CartManager {
     // Get cart data for checkout
     getCartForCheckout() {
     const { itemCount, totalPrice } = this.getTotals();
-    // Calculate shipping: Free shipping above ₹5000, otherwise ₹200
+    // Calculate shipping: Free shipping above Rs. 5000, otherwise Rs. 200
     const shipping = totalPrice >= 5000 ? 0 : 200;
         
         return {
