@@ -2345,6 +2345,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     margin-bottom: 2rem;
     font-weight: 500;
     box-shadow: 0 4px 12px rgba(197, 48, 48, 0.1);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     animation: slideInDown 0.4s ease;
 }
@@ -2430,6 +2431,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     padding: 2rem;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 16px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     margin: 1rem 0;
 }
@@ -2456,6 +2458,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     padding: 1.5rem;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 16px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     margin-top: 1rem;
 }
@@ -2467,6 +2470,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     padding: 2rem;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 16px;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 
@@ -2782,6 +2786,15 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
 
 .order-items::-webkit-scrollbar {
     width: 4px;
+}
+
+.order-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.order-items::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 2px;
 }
 
 .order-items::-webkit-scrollbar-track {
@@ -5958,3 +5971,4 @@ body::before {
         50% { width: 100%; }
         100% { width: 0%; }
     }
+}
