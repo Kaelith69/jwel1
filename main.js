@@ -1163,7 +1163,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- INITIAL LOAD ---
+    // Check URL parameters for initial filter values
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    if (categoryParam && filterCategorySelect) {
+        currentFilters.category = normalizeCategory(categoryParam);
+        // Don't set the select value yet, it will be set by populateCategoryFilter
+    }
+    
     populateCategoryFilter();
+    // Now set the category filter if it was specified in URL
+    if (categoryParam && filterCategorySelect) {
+        const normalizedCategory = normalizeCategory(categoryParam);
+        if (filterCategorySelect.querySelector(`option[value="${normalizedCategory}"]`)) {
+            filterCategorySelect.value = normalizedCategory;
+            currentFilters.category = normalizedCategory;
+        }
+    }
     showSkeletons(6);
     setTimeout(renderProducts, 250);
     renderCart();

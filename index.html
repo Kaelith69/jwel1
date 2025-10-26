@@ -19,195 +19,493 @@
     <link rel="stylesheet" href="liquid-button.css">
     <link rel="stylesheet" href="neumorphic.css">
     <link rel="stylesheet" href="loader.css">
+    <style>
+    /* --- Mobile-first Home Redesign --- */
+    body.home-page {
+        background: linear-gradient(120deg, #f8fafc 60%, #e0e7ef 100%);
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .main-header {
+        border-radius: 0 0 1.5rem 1.5rem;
+        box-shadow: 0 4px 24px rgba(59,130,246,0.08);
+        background: #fff;
+        padding: 0.5rem 1rem;
+    }
+    .navbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .navbar-links {
+        display: flex;
+        gap: 0.7em;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .navbar-link {
+        font-size: 1rem;
+        padding: 0.5em 1em;
+        border-radius: 999px;
+        background: none;
+        color: #3B82F6;
+        text-decoration: none;
+        transition: background 0.18s;
+    }
+    .navbar-link:active, .navbar-link:focus {
+        background: #e0e7ef;
+    }
+    .cart-button {
+        background: #3B82F6;
+        color: #fff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        border: none;
+        box-shadow: 0 2px 8px rgba(59,130,246,0.10);
+    }
+    .hero-section {
+        padding: 2.5rem 1rem 1.5rem 1rem;
+        text-align: center;
+        background: linear-gradient(120deg, #f8fafc 60%, #e0e7ef 100%);
+    }
+    .hero-content {
+        background: rgba(255,255,255,0.92);
+        border-radius: 1.5rem;
+        box-shadow: 0 2px 16px rgba(59,130,246,0.08);
+        padding: 1.5rem 1rem 1.2rem 1rem;
+        margin: 0 auto;
+        max-width: 420px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    .hero-content .logo img {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 0.5rem;
+    }
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: #3B82F6;
+        font-weight: 600;
+        margin-bottom: 0.2em;
+    }
+    .hero-description {
+        font-size: 1rem;
+        color: #232323;
+        margin-bottom: 0.5em;
+    }
+    .hero-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.7em;
+        width: 100%;
+        margin-top: 0.5em;
+    }
+    .cta-button {
+        font-size: 1.08rem;
+        padding: 0.9em 2.2em;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #3B82F6 60%, #2563EB 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 18px rgba(59,130,246,0.12);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5em;
+        transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+    }
+    .cta-button.secondary-cta {
+        background: #fff;
+        color: #3B82F6;
+        border: 1.5px solid #3B82F6;
+        box-shadow: none;
+    }
+    .cta-button:active, .cta-button:focus {
+        background: #2563EB;
+        color: #fff;
+    }
+    .scroll-indicator {
+        margin-top: 1.2em;
+        color: #3B82F6;
+        font-size: 0.95rem;
+    }
+    .featured-section {
+        padding: 2rem 0.5rem 1.5rem 0.5rem;
+        background: #fff;
+        border-radius: 2rem 2rem 0 0;
+        margin-top: -1.5rem;
+    }
+    .section-header {
+        text-align: center;
+        margin-bottom: 1.2rem;
+    }
+    .section-header h2 {
+        font-size: 1.3rem;
+        color: #3B82F6;
+        margin-bottom: 0.2em;
+    }
+    .section-header p {
+        font-size: 1rem;
+        color: #232323;
+    }
+    .featured-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.2rem;
+        max-width: 500px;
+        margin: 0 auto 1.5rem auto;
+    }
+    .featured-card {
+        background: #f8fafc;
+        border-radius: 1.2rem;
+        box-shadow: 0 2px 12px rgba(59,130,246,0.08);
+        padding: 1.2rem 1rem 1.2rem 1rem;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+    }
+    .card-image {
+        flex: 0 0 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .image-placeholder {
+        width: 48px;
+        height: 48px;
+        background: #e0e7ef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: #3B82F6;
+    }
+    .card-content h3 {
+        font-size: 1.08rem;
+        margin: 0 0 0.2em 0;
+        color: #232323;
+    }
+    .card-content p {
+        font-size: 0.98rem;
+        color: #6c757d;
+        margin: 0 0 0.3em 0;
+    }
+    .card-link {
+        font-size: 0.98rem;
+        color: #3B82F6;
+        text-decoration: underline;
+        margin-top: 0.2em;
+        display: inline-block;
+    }
+    .featured-cta {
+        text-align: center;
+        margin-top: 1.2em;
+    }
+    @media (min-width: 700px) {
+        .featured-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        .hero-content {
+            max-width: 600px;
+        }
+    }
+    @media (max-width: 480px) {
+        .hero-content {
+            padding: 1rem 0.2rem 1rem 0.2rem;
+        }
+        .featured-section {
+            padding: 1.2rem 0.2rem 1rem 0.2rem;
+        }
+    }
+    </style>
 </head>
 <body class="home-page">
 
-    <!-- Skip to main content link for accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-
-    <!-- Page loader overlay -->
-    <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading">
-        <div class="loader-gem" aria-hidden="true">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-
-    <div id="app-container">
-        <header class="main-header neumorphic-header">
-            <nav id="site-main-nav" class="main-nav neumorphic-navbar" aria-label="Main Navigation">
-                <div class="navbar-inner">
-                    <div class="logo">
-                        <a href="/index.html">
-                            <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" width="36" height="36" loading="eager" decoding="async">
-                        </a>
-                    </div>
-                    <ul class="navbar-links">
-                        <li><a href="/index.html" class="navbar-link">Home</a></li>
-                        <li><a href="/products.html" class="navbar-link">Collections</a></li>
-                        <li><a href="/contact.html" class="navbar-link">About &amp; Contact</a></li>
-                    </ul>
-                    <button id="cart-toggle" class="cart-button neumorphic-btn" aria-label="Open shopping cart">
-                        <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-                        <span id="cart-count" aria-live="polite" aria-atomic="true">0</span>
-                    </button>
-                </div>
-            </nav>
-        </header>
-
-        <main class="hero-section neumorphic-hero" id="main-content" role="main">
-            <!-- Animated background elements -->
-            <div class="hero-bg-elements">
-                <div class="floating-gem gem-1" aria-hidden="true"></div>
-                <div class="floating-gem gem-2" aria-hidden="true"></div>
-                <div class="floating-gem gem-3" aria-hidden="true"></div>
-                <div class="floating-gem gem-4" aria-hidden="true"></div>
-                <div class="floating-gem gem-5" aria-hidden="true"></div>
-            </div>
-
-            <div class="glass-panel neumorphic-panel hero-content">
-                <div class="logo">
-                    <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo">
-                </div>
-                <h1 class="visually-hidden">Luxury Jewelleries</h1>
-                <div class="hero-text">
-                    <p class="hero-subtitle">Experience the art of elegance</p>
-                    <p class="hero-description">Crafted for the discerning. Each piece tells a story of timeless beauty and exceptional craftsmanship.</p>
-                </div>
-                <div class="hero-actions">
-                    <a href="/products.html" class="cta-button neumorphic-btn primary-cta">
-                        <span>Explore Collection</span>
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
-                    <a href="#featured" class="cta-button neumorphic-btn secondary-cta">
-                        <span>Discover More</span>
-                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Scroll indicator -->
-            <div class="scroll-indicator" aria-hidden="true">
-                <div class="scroll-mouse">
-                    <div class="scroll-wheel"></div>
-                </div>
-                <p>Scroll to explore</p>
+        <main class="modern-hero">
+            <div class="modern-hero-content">
+                <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-logo">
+            <!-- <h1 class="modern-title">Luxury Jewelleries</h1> -->
+                <p class="modern-tagline">Redefining elegance for the modern era</p>
+                <a href="/products.html" class="modern-cta">Shop Collection</a>
             </div>
         </main>
-
-        <!-- Featured Collections Section -->
-        <section id="featured" class="featured-section" aria-labelledby="featured-title">
-            <div class="container">
-                <div class="section-header">
-                    <h2 id="featured-title">Featured Collections</h2>
-                    <p>Discover our most exquisite pieces, crafted with precision and passion</p>
-                </div>
-
-                <div class="featured-grid">
-                    <div class="featured-card neumorphic-panel">
-                        <div class="card-image">
-                            <div class="image-placeholder">
-                                <i class="fa-solid fa-gem" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3>Necklaces</h3>
-                            <p>Elegant designs that complement every occasion</p>
-                            <a href="/products.html?category=necklaces" class="card-link">Explore Necklaces</a>
-                        </div>
-                    </div>
-
-                    <div class="featured-card neumorphic-panel">
-                        <div class="card-image">
-                            <div class="image-placeholder">
-                                <i class="fa-solid fa-ring" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3>Rings</h3>
-                            <p>Timeless symbols of love and commitment</p>
-                            <a href="/products.html?category=rings" class="card-link">Explore Rings</a>
-                        </div>
-                    </div>
-
-                    <div class="featured-card neumorphic-panel">
-                        <div class="card-image">
-                            <div class="image-placeholder">
-                                <i class="fa-solid fa-circle" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3>Earrings</h3>
-                            <p>Delicate accents that complete your look</p>
-                            <a href="/products.html?category=earrings" class="card-link">Explore Earrings</a>
-                        </div>
-                    </div>
-
-                    <div class="featured-card neumorphic-panel">
-                        <div class="card-image">
-                            <div class="image-placeholder">
-                                <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <h3>Bracelets</h3>
-                            <p>Statement pieces that speak volumes</p>
-                            <a href="/products.html?category=bracelets" class="card-link">Explore Bracelets</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="featured-cta">
-                    <a href="/products.html" class="cta-button neumorphic-btn">
-                        <span>View All Collections</span>
-                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
-                    </a>
-                </div>
+        <section class="modern-featured">
+            <h2 class="modern-section-title">Featured Collections</h2>
+            <div class="modern-featured-grid">
+                <a href="/products.html?category=necklaces" class="modern-featured-card">
+                    <span class="modern-featured-icon"><i class="fa-solid fa-gem"></i></span>
+                    <span class="modern-featured-label">Necklaces</span>
+                </a>
+                <a href="/products.html?category=rings" class="modern-featured-card">
+                    <span class="modern-featured-icon"><i class="fa-solid fa-ring"></i></span>
+                    <span class="modern-featured-label">Rings</span>
+                </a>
+                <a href="/products.html?category=earrings" class="modern-featured-card">
+                    <span class="modern-featured-icon"><i class="fa-solid fa-circle"></i></span>
+                    <span class="modern-featured-label">Earrings</span>
+                </a>
+                <a href="/products.html?category=bracelets" class="modern-featured-card">
+                    <span class="modern-featured-icon"><i class="fa-solid fa-circle-half-stroke"></i></span>
+                    <span class="modern-featured-label">Bracelets</span>
+                </a>
             </div>
+            <a href="/products.html" class="modern-viewall">View All Collections</a>
         </section>
-
-        <aside id="cart-sidebar" class="cart-sidebar neumorphic-panel" aria-hidden="true" aria-label="Shopping cart" role="complementary">
-            <div class="cart-header">
-                <h2 id="cart-title">Your Bag</h2>
-                <button id="cart-close-btn" class="close-btn neumorphic-btn" aria-label="Close shopping cart" aria-describedby="cart-title">&times;</button>
-            </div>
-            <div id="cart-items" class="cart-items" role="region" aria-labelledby="cart-title" aria-live="polite" aria-atomic="false">
-                <p class="cart-empty" role="status" aria-live="polite">Your cart is empty</p>
-            </div>
-            <div class="cart-footer" role="region" aria-label="Cart summary">
-                <div class="cart-total">
-                    <span class="total-label">Total:</span>
-                    <span id="cart-total-price" aria-label="Cart total price">₹0</span>
+        <footer class="modern-footer">
+            <div class="modern-footer-inner">
+                <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo" class="modern-footer-logo">
+                <div class="modern-footer-brand">VastraVeda Jewelleries</div>
+                <div class="modern-footer-links">
+                    <a href="/products.html">Collections</a>
+                    <a href="/contact.html">About &amp; Contact</a>
                 </div>
-                <div class="cart-footer-actions" role="group" aria-label="Cart actions">
-                    <button id="checkout-btn" class="checkout-button neumorphic-btn" aria-describedby="checkout-description">Proceed to Checkout</button>
-                </div>
-                <div id="checkout-description" class="sr-only">Proceed to checkout with current cart items</div>
+                <div class="modern-footer-copy">&copy; 2025 VastraVeda Jewelleries. All rights reserved.</div>
             </div>
-        </aside>
-        <div id="sidebar-overlay" role="presentation" aria-hidden="true" aria-label="Cart overlay"></div>
-    </div>
-
-    <!-- Utilities for notifications and confirmAction -->
-        <script src="js/utils.js"></script>
-        <script src="js/liquid-button.js" defer></script>
-        <script src="js/nav-active.js" defer></script>
-        <script src="js/nav-loading.js" defer></script>
-        <script src="js/ui.js" defer></script>
-        <script src="js/cart.js" defer></script>
-        <script src="main.js" defer></script>
-        <script>
-            // Hide current page's nav link
-            var currentPath = window.location.pathname.replace(/\/+/g, '/');
-            if (currentPath === '/') currentPath = '/index.html';
-            document.querySelectorAll('.navbar-link').forEach(function(link) {
-                var linkPath = link.getAttribute('href');
-                if (linkPath === '/') linkPath = '/index.html';
-                if (linkPath === currentPath) {
-                    link.parentElement.style.display = 'none';
-                } else {
-                    link.parentElement.style.display = '';
+        </footer>
+        <style>
+                    body.home-page {
+                        background: linear-gradient(120deg, #e0e7ef 60%, #f8fafc 100%);
+                        font-family: 'Poppins', sans-serif;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    .modern-hero {
+                        min-height: 60vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: none;
+                        padding: 2.5rem 1rem 1.5rem 1rem;
+                    }
+                    .modern-hero-content {
+                        background: rgba(255,255,255,0.18);
+                        border-radius: 3rem 3rem 4rem 4rem/2.5rem 2.5rem 5rem 5rem;
+                        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+                    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+                    backdrop-filter: blur(18px) saturate(1.3);
+                        border: 2.5px solid rgba(255,255,255,0.22);
+                        padding: 2.5rem 1.2rem 2rem 1.2rem;
+                        max-width: 440px;
+                        width: 100%;
+                        text-align: center;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 1.5rem;
+                        margin-top: 2.5rem;
+                    }
+                                                                    .modern-logo {
+                                                                        width: 340px;
+                                                                        height: 340px;
+                                                                        max-width: 90vw;
+                                                                        max-height: 40vh;
+                                                                        margin-bottom: 0.7rem;
+                                                                        border-radius: 2.5rem;
+                                                                        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10), 0 2px 12px 0 rgba(59,130,246,0.06);
+                                                                        background: rgba(255,255,255,0.12);
+                                                                        object-fit: contain;
+                                                                        border: 1.5px solid rgba(255,255,255,0.10);
+                                                                        -webkit-backdrop-filter: blur(12px) saturate(1.1);
+                                                                        backdrop-filter: blur(12px) saturate(1.1);
+                                                                        transition: border-radius 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.2s;
+                                                                        display: block;
+                                                                    }
+                    .modern-title {
+                        font-size: 2.3rem;
+                        font-family: 'Playfair Display', serif;
+                        color: #232323;
+                        margin: 0 0 0.2em 0;
+                        letter-spacing: 0.01em;
+                        text-shadow: 0 2px 12px rgba(59,130,246,0.08);
+                    }
+                    .modern-tagline {
+                        font-size: 1.18rem;
+                        color: #3B82F6;
+                        font-weight: 600;
+                        margin-bottom: 0.2em;
+                        text-shadow: 0 1px 8px rgba(59,130,246,0.08);
+                    }
+                    .modern-cta {
+                        font-size: 1.12rem;
+                        padding: 1.1em 2.8em;
+                        border-radius: 999px;
+                        background: linear-gradient(120deg, #3B82F6 60%, #2563EB 100%);
+                        color: #fff;
+                        border: none;
+                        box-shadow: 0 8px 32px rgba(59,130,246,0.13);
+                        margin: 0 auto;
+                        display: inline-block;
+                        text-decoration: none;
+                        font-weight: 700;
+                        letter-spacing: 0.01em;
+                        transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+                        filter: drop-shadow(0 2px 12px rgba(59,130,246,0.10));
+                    }
+                    .modern-cta:active, .modern-cta:focus {
+                        background: #2563EB;
+                        color: #fff;
+                    }
+                    .modern-featured {
+                        padding: 2.2rem 0.5rem 1.5rem 0.5rem;
+                        background: rgba(255,255,255,0.18);
+                        border-radius: 3rem 3rem 4rem 4rem/2.5rem 2.5rem 5rem 5rem;
+                        margin-top: -1.5rem;
+                        text-align: center;
+                        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.10);
+                    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+                    backdrop-filter: blur(14px) saturate(1.2);
+                        border: 2.5px solid rgba(255,255,255,0.22);
+                    }
+                    .modern-section-title {
+                        font-size: 1.35rem;
+                        color: #3B82F6;
+                        margin-bottom: 1.2rem;
+                        letter-spacing: 0.01em;
+                        text-shadow: 0 2px 12px rgba(59,130,246,0.08);
+                    }
+                    .modern-featured-grid {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 1.2rem;
+                        max-width: 500px;
+                        margin: 0 auto 1.5rem auto;
+                    }
+                    .modern-featured-card {
+                        background: rgba(255,255,255,0.22);
+                        border-radius: 999px 999px 2.5rem 2.5rem/2rem 2rem 3rem 3rem;
+                        box-shadow: 0 2px 16px rgba(59,130,246,0.10);
+                        padding: 1.2rem 1rem;
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        gap: 1.2rem;
+                        text-decoration: none;
+                        color: #232323;
+                        font-weight: 500;
+                        transition: box-shadow 0.18s, transform 0.18s;
+                        border: 2px solid rgba(255,255,255,0.18);
+                    -webkit-backdrop-filter: blur(10px) saturate(1.2);
+                    backdrop-filter: blur(10px) saturate(1.2);
+                    }
+                    .modern-featured-card:hover, .modern-featured-card:focus {
+                        box-shadow: 0 6px 24px rgba(59,130,246,0.16);
+                        transform: translateY(-2px) scale(1.03);
+                        color: #3B82F6;
+                        background: rgba(255,255,255,0.32);
+                    }
+                    .modern-featured-icon {
+                        width: 56px;
+                        height: 56px;
+                        background: rgba(59,130,246,0.10);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 2rem;
+                        color: #3B82F6;
+                        box-shadow: 0 2px 12px rgba(59,130,246,0.10);
+                        border: 2px solid rgba(255,255,255,0.18);
+                        margin-right: 0.5rem;
+                    }
+                    .modern-featured-label {
+                        font-size: 1.13rem;
+                        color: #232323;
+                        font-weight: 600;
+                        letter-spacing: 0.01em;
+                    }
+                    .modern-viewall {
+                        display: inline-block;
+                        margin-top: 1.2em;
+                        font-size: 1.13rem;
+                        padding: 0.9em 2.5em;
+                        border-radius: 999px;
+                        background: linear-gradient(120deg, #3B82F6 60%, #2563EB 100%);
+                        color: #fff;
+                        text-decoration: none;
+                        font-weight: 700;
+                        box-shadow: 0 4px 18px rgba(59,130,246,0.13);
+                        letter-spacing: 0.01em;
+                        transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+                        filter: drop-shadow(0 2px 12px rgba(59,130,246,0.10));
+                    }
+                    .modern-viewall:active, .modern-viewall:focus {
+                        background: #2563EB;
+                        color: #fff;
+                    }
+            .modern-footer {
+                background: #f8fafc;
+                padding: 2rem 0 1rem 0;
+                border-radius: 2rem 2rem 0 0;
+                text-align: center;
+                margin-top: 2rem;
+            }
+            .modern-footer-inner {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.7em;
+            }
+            .modern-footer-logo {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 0.2em;
+            }
+            .modern-footer-brand {
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #3B82F6;
+            }
+            .modern-footer-links {
+                display: flex;
+                gap: 1.2em;
+                margin: 0.5em 0;
+            }
+            .modern-footer-links a {
+                color: #232323;
+                text-decoration: none;
+                font-size: 1rem;
+                transition: color 0.18s;
+            }
+            .modern-footer-links a:hover, .modern-footer-links a:focus {
+                color: #3B82F6;
+            }
+            .modern-footer-copy {
+                font-size: 0.95rem;
+                color: #6c757d;
+                margin-top: 0.5em;
+            }
+            @media (min-width: 700px) {
+                .modern-featured-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 1.5rem;
                 }
-            });
-        </script>
+                .modern-hero-content {
+                    max-width: 600px;
+                }
+            }
+            @media (max-width: 480px) {
+                .modern-hero-content {
+                    padding: 1rem 0.2rem 1rem 0.2rem;
+                }
+                .modern-featured {
+                    padding: 1.2rem 0.2rem 1rem 0.2rem;
+                }
+            }
+        </style>
 </body>
 </html>
