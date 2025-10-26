@@ -13,7 +13,7 @@
     <meta property="og:type" content="website">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="liquid-button.css">
@@ -55,15 +55,115 @@
         </header>
 
         <main class="hero-section neumorphic-hero" id="main-content" role="main">
-            <div class="glass-panel neumorphic-panel">
+            <!-- Animated background elements -->
+            <div class="hero-bg-elements">
+                <div class="floating-gem gem-1" aria-hidden="true"></div>
+                <div class="floating-gem gem-2" aria-hidden="true"></div>
+                <div class="floating-gem gem-3" aria-hidden="true"></div>
+                <div class="floating-gem gem-4" aria-hidden="true"></div>
+                <div class="floating-gem gem-5" aria-hidden="true"></div>
+            </div>
+
+            <div class="glass-panel neumorphic-panel hero-content">
                 <div class="logo">
                     <img src="/logo/logo.png" alt="VastraVeda Jewelleries logo">
                 </div>
                 <h1 class="visually-hidden">Luxury Jewelleries</h1>
-                <p>Experience the art of elegance. Crafted for the discerning.</p>
-                <a href="/products.html" class="cta-button neumorphic-btn">Explore Collection</a>
+                <div class="hero-text">
+                    <p class="hero-subtitle">Experience the art of elegance</p>
+                    <p class="hero-description">Crafted for the discerning. Each piece tells a story of timeless beauty and exceptional craftsmanship.</p>
+                </div>
+                <div class="hero-actions">
+                    <a href="/products.html" class="cta-button neumorphic-btn primary-cta">
+                        <span>Explore Collection</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    <a href="#featured" class="cta-button neumorphic-btn secondary-cta">
+                        <span>Discover More</span>
+                        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="scroll-indicator" aria-hidden="true">
+                <div class="scroll-mouse">
+                    <div class="scroll-wheel"></div>
+                </div>
+                <p>Scroll to explore</p>
             </div>
         </main>
+
+        <!-- Featured Collections Section -->
+        <section id="featured" class="featured-section" aria-labelledby="featured-title">
+            <div class="container">
+                <div class="section-header">
+                    <h2 id="featured-title">Featured Collections</h2>
+                    <p>Discover our most exquisite pieces, crafted with precision and passion</p>
+                </div>
+
+                <div class="featured-grid">
+                    <div class="featured-card neumorphic-panel">
+                        <div class="card-image">
+                            <div class="image-placeholder">
+                                <i class="fa-solid fa-gem" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Necklaces</h3>
+                            <p>Elegant designs that complement every occasion</p>
+                            <a href="/products.html?category=necklaces" class="card-link">Explore Necklaces</a>
+                        </div>
+                    </div>
+
+                    <div class="featured-card neumorphic-panel">
+                        <div class="card-image">
+                            <div class="image-placeholder">
+                                <i class="fa-solid fa-ring" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Rings</h3>
+                            <p>Timeless symbols of love and commitment</p>
+                            <a href="/products.html?category=rings" class="card-link">Explore Rings</a>
+                        </div>
+                    </div>
+
+                    <div class="featured-card neumorphic-panel">
+                        <div class="card-image">
+                            <div class="image-placeholder">
+                                <i class="fa-solid fa-circle" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Earrings</h3>
+                            <p>Delicate accents that complete your look</p>
+                            <a href="/products.html?category=earrings" class="card-link">Explore Earrings</a>
+                        </div>
+                    </div>
+
+                    <div class="featured-card neumorphic-panel">
+                        <div class="card-image">
+                            <div class="image-placeholder">
+                                <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3>Bracelets</h3>
+                            <p>Statement pieces that speak volumes</p>
+                            <a href="/products.html?category=bracelets" class="card-link">Explore Bracelets</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="featured-cta">
+                    <a href="/products.html" class="cta-button neumorphic-btn">
+                        <span>View All Collections</span>
+                        <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
 
         <aside id="cart-sidebar" class="cart-sidebar neumorphic-panel" aria-hidden="true" aria-label="Shopping cart" role="complementary">
             <div class="cart-header">
@@ -81,8 +181,6 @@
                 <div class="cart-footer-actions" role="group" aria-label="Cart actions">
                     <button id="checkout-btn" class="checkout-button neumorphic-btn" aria-describedby="checkout-description">Proceed to Checkout</button>
                 </div>
-                <!-- Hidden spacer for mobile bottom margin -->
-                <div class="cart-mobile-spacer" aria-hidden="true"></div>
                 <div id="checkout-description" class="sr-only">Proceed to checkout with current cart items</div>
             </div>
         </aside>

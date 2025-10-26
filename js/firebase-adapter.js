@@ -28,29 +28,6 @@ let _state = {
   onAuthStateChanged: null
 };
 
-function cacheOrderLocally(orderRecord) {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    const raw = localStorage.getItem('proJetOrders');
-    const parsed = raw ? JSON.parse(raw) : [];
-    const existing = Array.isArray(parsed) ? parsed : [];
-    const filtered = existing.filter((entry) => {
-      const sameOrderId = orderRecord.orderId && entry.orderId && String(entry.orderId) === String(orderRecord.orderId);
-      const sameDocId = orderRecord._docId && entry._docId && String(entry._docId) === String(orderRecord._docId);
-      return !(sameOrderId || sameDocId);
-    });
-    filtered.push(orderRecord);
-    filtered.sort((a, b) => {
-      const aDate = new Date(a.date || a.createdAt || a.updatedAt || 0).getTime();
-      const bDate = new Date(b.date || b.createdAt || b.updatedAt || 0).getTime();
-      return bDate - aDate;
-    });
-    localStorage.setItem('proJetOrders', JSON.stringify(filtered));
-  } catch (err) {
-    console.warn('Order cache update skipped:', err);
-  }
-}
-
 async function init() {
   if (_state.initialized) return _state;
   _state.initialized = true;
@@ -285,7 +262,7 @@ async function updateOrder(docIdOrOrderId, updates) {
   }
   if (typeof localStorage !== 'undefined') {
     try {
-      const raw = localStorage.getItem('proJetOrders');
+      const raw = bufferedStorage.getItem('proJetOrders');
       const parsed = raw ? JSON.parse(raw) : [];
       if (Array.isArray(parsed)) {
         const idx = parsed.findIndex(entry =>
@@ -298,7 +275,7 @@ async function updateOrder(docIdOrOrderId, updates) {
           const merged = { ...parsed[idx], ...updates };
           if (!merged._docId) merged._docId = targetId;
           parsed[idx] = merged;
-          localStorage.setItem('proJetOrders', JSON.stringify(parsed));
+          bufferedStorage.setItem('proJetOrders', JSON.stringify(parsed));
         }
       }
     } catch (err) {
@@ -334,7 +311,7 @@ async function deleteOrder(docIdOrOrderId) {
   }
   if (typeof localStorage !== 'undefined') {
     try {
-      const raw = localStorage.getItem('proJetOrders');
+      const raw = bufferedStorage.getItem('proJetOrders');
       const parsed = raw ? JSON.parse(raw) : [];
       if (Array.isArray(parsed)) {
         const filtered = parsed.filter(entry =>
@@ -343,7 +320,7 @@ async function deleteOrder(docIdOrOrderId) {
           String(entry._docId) !== initialId &&
           String(entry._docId) !== targetId
         );
-        localStorage.setItem('proJetOrders', JSON.stringify(filtered));
+        bufferedStorage.setItem('proJetOrders', JSON.stringify(filtered));
       }
     } catch (err) {
       console.warn('Order cache update skipped after delete:', err);
@@ -367,7 +344,7 @@ async function clearOrders() {
   }
   if (typeof localStorage !== 'undefined') {
     try {
-      localStorage.removeItem('proJetOrders');
+      bufferedStorage.removeItem('proJetOrders');
     } catch (err) {
       console.warn('Order cache clear skipped:', err);
     }
@@ -375,11 +352,169 @@ async function clearOrders() {
   return deletions.length;
 }
 
-// Auth helpers
-async function signIn(email, password){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signInWithEmailAndPassword(_state.auth, email, password); }
-async function signOut(){ await init(); if(!_state.auth) throw new Error('Auth not configured'); return _state.signOut(_state.auth); }
-function onAuthStateChanged(callback){ if(!_state.onAuthStateChanged) return ()=>{}; return _state.onAuthStateChanged(_state.auth, callback); }
-async function getCurrentUser(){ await init(); return _state.auth ? _state.auth.currentUser : null; }
+// Batch operations for improved performance
+async function batchUpdateProducts(updates) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot batch update products.');
+  }
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return [];
+  }
+
+  // Firebase has a limit of 500 operations per batch
+  const BATCH_SIZE = 500;
+  const results = [];
+
+  for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+    const batch = updates.slice(i, i + BATCH_SIZE);
+    const batchResults = await processProductBatch(batch);
+    results.push(...batchResults);
+  }
+
+  return results;
+}
+
+async function processProductBatch(updates) {
+  // Use Firebase batch write if available, otherwise process sequentially
+  if (_state.writeBatch && _state.commitBatch) {
+    const batch = _state.writeBatch(_state.db);
+
+    updates.forEach(({ docId, product }) => {
+      const docRef = _state.doc(_state.db, 'products', docId);
+      const payload = { ...product };
+      if (_state.serverTimestamp) {
+        payload.updatedAt = _state.serverTimestamp();
+      }
+      batch.update(docRef, payload);
+    });
+
+    await batch.commit();
+    console.log(`[Firebase] Batch updated ${updates.length} products`);
+    return updates.map(({ docId }) => ({ success: true, docId }));
+  } else {
+    // Fallback to individual updates with Promise.all for concurrency
+    const promises = updates.map(async ({ docId, product }) => {
+      try {
+        await updateProduct(docId, product);
+        return { success: true, docId };
+      } catch (err) {
+        console.error(`Failed to update product ${docId}:`, err);
+        return { success: false, docId, error: err.message };
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+}
+
+async function batchDeleteProducts(docIds) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot batch delete products.');
+  }
+
+  if (!Array.isArray(docIds) || docIds.length === 0) {
+    return [];
+  }
+
+  // Firebase batch limit
+  const BATCH_SIZE = 500;
+  const results = [];
+
+  for (let i = 0; i < docIds.length; i += BATCH_SIZE) {
+    const batch = docIds.slice(i, i + BATCH_SIZE);
+    const batchResults = await processDeleteBatch(batch, 'products');
+    results.push(...batchResults);
+  }
+
+  return results;
+}
+
+async function batchUpdateOrders(updates) {
+  await init();
+  if (!_state.useFirestore) {
+    throw new Error('Firebase is not initialized. Cannot batch update orders.');
+  }
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return [];
+  }
+
+  const BATCH_SIZE = 500;
+  const results = [];
+
+  for (let i = 0; i < updates.length; i += BATCH_SIZE) {
+    const batch = updates.slice(i, i + BATCH_SIZE);
+    const batchResults = await processOrderBatch(batch);
+    results.push(...batchResults);
+  }
+
+  return results;
+}
+
+async function processOrderBatch(updates) {
+  if (_state.writeBatch && _state.commitBatch) {
+    const batch = _state.writeBatch(_state.db);
+
+    updates.forEach(({ docId, updates: orderUpdates }) => {
+      const docRef = _state.doc(_state.db, 'orders', docId);
+      const payload = { ...orderUpdates };
+      if (_state.serverTimestamp) {
+        payload.updatedAt = _state.serverTimestamp();
+      }
+      batch.update(docRef, payload);
+    });
+
+    await batch.commit();
+    console.log(`[Firebase] Batch updated ${updates.length} orders`);
+    return updates.map(({ docId }) => ({ success: true, docId }));
+  } else {
+    const promises = updates.map(async ({ docId, updates: orderUpdates }) => {
+      try {
+        await updateOrder(docId, orderUpdates);
+        return { success: true, docId };
+      } catch (err) {
+        console.error(`Failed to update order ${docId}:`, err);
+        return { success: false, docId, error: err.message };
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+}
+
+async function processDeleteBatch(docIds, collection) {
+  if (_state.writeBatch && _state.commitBatch) {
+    const batch = _state.writeBatch(_state.db);
+
+    docIds.forEach(docId => {
+      const docRef = _state.doc(_state.db, collection, docId);
+      batch.delete(docRef);
+    });
+
+    await batch.commit();
+    console.log(`[Firebase] Batch deleted ${docIds.length} ${collection}`);
+    return docIds.map(docId => ({ success: true, docId }));
+  } else {
+    const promises = docIds.map(async (docId) => {
+      try {
+        if (collection === 'products') {
+          await deleteProduct(docId);
+        } else if (collection === 'orders') {
+          await deleteOrder(docId);
+        }
+        return { success: true, docId };
+      } catch (err) {
+        console.error(`Failed to delete ${collection} ${docId}:`, err);
+        return { success: false, docId, error: err.message };
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+}
 
 async function updateProduct(docIdOrLocalId, product) {
   await init();
@@ -524,6 +659,10 @@ export default {
   addProduct,
   updateProduct,
   deleteProduct,
+  // Batch operations
+  batchUpdateProducts,
+  batchDeleteProducts,
+  batchUpdateOrders,
   uploadImage,
   // orders
   getOrders,
@@ -546,7 +685,7 @@ export default {
     }
     // fallback: emit whatever is in localStorage so UI stays usable offline
     try {
-      const local = JSON.parse(localStorage.getItem('products') || '[]');
+      const local = JSON.parse(bufferedStorage.getItem('products') || '[]');
       callback(Array.isArray(local) ? local : []);
     } catch (err) {
       console.warn('Local products read failed', err);
@@ -564,7 +703,7 @@ export default {
       });
     }
     try {
-      const local = JSON.parse(localStorage.getItem('proJetOrders') || '[]');
+      const local = JSON.parse(bufferedStorage.getItem('proJetOrders') || '[]');
       callback(Array.isArray(local) ? local : []);
     } catch (err) {
       console.warn('Local orders read failed', err);
@@ -573,8 +712,146 @@ export default {
     return ()=>{};
   },
   // auth
-  signIn,
-  signOut,
-  onAuthStateChanged,
-  getCurrentUser
+  signIn: _state.signInWithEmailAndPassword,
+  signOut: _state.signOut,
+  onAuthStateChanged: _state.onAuthStateChanged
 };
+
+// Buffered localStorage operations for better performance and error handling
+class BufferedLocalStorage {
+  constructor() {
+    this.buffer = new Map();
+    this.flushInterval = 5000; // Flush every 5 seconds
+    this.maxBufferSize = 50; // Max operations before forced flush
+    this.isFlushing = false;
+
+    // Auto-flush buffer periodically
+    if (typeof window !== 'undefined') {
+      setInterval(() => this.flush(), this.flushInterval);
+      // Flush on page unload
+      window.addEventListener('beforeunload', () => this.flush());
+    }
+  }
+
+  // Buffered set operation
+  setItem(key, value) {
+    this.buffer.set(key, { type: 'set', value });
+
+    if (this.buffer.size >= this.maxBufferSize) {
+      this.flush();
+    }
+  }
+
+  // Buffered remove operation
+  removeItem(key) {
+    this.buffer.set(key, { type: 'remove' });
+
+    if (this.buffer.size >= this.maxBufferSize) {
+      this.flush();
+    }
+  }
+
+  // Get item (immediate, not buffered)
+  getItem(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (err) {
+      console.warn('localStorage getItem failed:', err);
+      return null;
+    }
+  }
+
+  // Flush all buffered operations
+  flush() {
+    if (this.isFlushing || this.buffer.size === 0 || typeof localStorage === 'undefined') {
+      return;
+    }
+
+    this.isFlushing = true;
+
+    try {
+      for (const [key, operation] of this.buffer) {
+        if (operation.type === 'set') {
+          localStorage.setItem(key, operation.value);
+        } else if (operation.type === 'remove') {
+          localStorage.removeItem(key);
+        }
+      }
+
+      this.buffer.clear();
+      console.log(`[BufferedLocalStorage] Flushed ${this.buffer.size} operations`);
+    } catch (err) {
+      console.error('Buffered localStorage flush failed:', err);
+
+      // On quota exceeded, try to clear some space
+      if (err.name === 'QuotaExceededError') {
+        this.handleQuotaExceeded();
+      }
+    } finally {
+      this.isFlushing = false;
+    }
+  }
+
+  // Handle storage quota exceeded
+  handleQuotaExceeded() {
+    try {
+      // Try to remove old cached data
+      const keysToRemove = ['proJetOrders', 'products'];
+      keysToRemove.forEach(key => {
+        try {
+          localStorage.removeItem(key);
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      });
+
+      // Try to flush again with reduced buffer
+      if (this.buffer.size > 0) {
+        const essentialOps = new Map();
+        // Keep only essential operations
+        for (const [key, op] of this.buffer) {
+          if (key.includes('cart') || key.includes('settings')) {
+            essentialOps.set(key, op);
+          }
+        }
+        this.buffer = essentialOps;
+        this.flush();
+      }
+    } catch (err) {
+      console.error('Failed to handle quota exceeded:', err);
+    }
+  }
+
+  // Force immediate flush
+  forceFlush() {
+    this.flush();
+  }
+}
+
+// Create global buffered localStorage instance
+const bufferedStorage = new BufferedLocalStorage();
+
+// Update cache functions to use buffered storage
+function cacheOrderLocally(orderRecord) {
+  if (typeof localStorage === 'undefined') return;
+
+  try {
+    const raw = bufferedStorage.getItem('proJetOrders');
+    const parsed = raw ? JSON.parse(raw) : [];
+    const existing = Array.isArray(parsed) ? parsed : [];
+    const filtered = existing.filter((entry) => {
+      const sameOrderId = orderRecord.orderId && entry.orderId && String(entry.orderId) === String(orderRecord.orderId);
+      const sameDocId = orderRecord._docId && entry._docId && String(entry._docId) === String(orderRecord._docId);
+      return !(sameOrderId || sameDocId);
+    });
+    filtered.push(orderRecord);
+    filtered.sort((a, b) => {
+      const aDate = new Date(a.date || a.createdAt || a.updatedAt || 0).getTime();
+      const bDate = new Date(b.date || b.createdAt || b.updatedAt || 0).getTime();
+      return bDate - aDate;
+    });
+    bufferedStorage.setItem('proJetOrders', JSON.stringify(filtered));
+  } catch (err) {
+    console.warn('Order cache update skipped:', err);
+  }
+}

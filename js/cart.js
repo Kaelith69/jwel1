@@ -140,11 +140,10 @@ class CartManager {
                     <div class="cart-item-actions">
                         <div class="cart-item-quantity" role="group" aria-label="Quantity controls for ${item.name}">
                             <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="decrease" 
-                                aria-label="Decrease quantity of ${item.name} to ${Math.max(1, item.quantity - 1)}" 
-                                ${item.quantity <= 1 ? 'disabled aria-disabled="true"' : ''}>-</button>
+                                aria-label="Decrease quantity of ${item.name}">−</button>
                             <span class="quantity-display" aria-label="${item.quantity} items" role="status" aria-live="polite">${item.quantity}</span>
                             <button class="quantity-btn liquidize" data-id="${String(item.id)}" data-action="increase" 
-                                aria-label="Increase quantity of ${item.name} to ${item.quantity + 1}">+</button>
+                                aria-label="Increase quantity of ${item.name}">+</button>
                         </div>
                         <button class="remove-item-btn liquidize" data-id="${String(item.id)}" 
                             aria-label="Remove ${item.name} from cart" aria-describedby="remove-item-${item.id}">&times;</button>
@@ -199,7 +198,8 @@ class CartManager {
     // Get cart data for checkout
     getCartForCheckout() {
     const { itemCount, totalPrice } = this.getTotals();
-    const shipping = 0;
+    // Calculate shipping: Free shipping above ₹5000, otherwise ₹200
+    const shipping = totalPrice >= 5000 ? 0 : 200;
         
         return {
             items: [...this.cart],

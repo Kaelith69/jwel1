@@ -9,15 +9,13 @@
     <meta name="description" content="Browse our exquisite collection of luxury jewelry.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="liquid-button.css">
     <link rel="stylesheet" href="neumorphic.css">
     <link rel="stylesheet" href="loader.css">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="components/product-card.css">
-
-    <!-- Page-specific CSS (2-columns grid + view-more rules) -->
     <link rel="stylesheet" href="products.css">
         <style>
             #product-detail-modal { display: none; }
@@ -28,7 +26,7 @@
         <div class="modal-content">
             <button id="modal-close-btn" class="modal-close-btn" aria-label="Close product details">&times;</button>
             <div class="modal-product-image-wrap">
-                <img id="modal-product-image" class="modal-product-image" src="" alt="" loading="lazy" decoding="async">
+                <img id="modal-product-image" class="modal-product-image" src="" alt="Product image" loading="lazy" decoding="async">
             </div>
             <div class="modal-product-info">
                 <h2 id="modal-product-name" class="modal-product-name"></h2>
@@ -47,6 +45,7 @@
     </div>
 
     <div id="app-container">
+        <a href="#main-content" class="skip-link">Skip to main content</a>
         <header class="main-header neumorphic-header">
             <nav id="site-main-nav" class="main-nav neumorphic-navbar" aria-label="Main Navigation">
                 <div class="navbar-inner">
@@ -108,40 +107,7 @@
 
             <!-- Product grid: EXACTLY 2 columns everywhere. Cards are populated by main.js -->
             <div id="product-grid" class="product-grid" aria-live="polite">
-                <!-- Example / fallback static product cards (you can remove or keep for SSR) -->
-                <!-- Use the product-card.html component as the markup for each card -->
-                <!-- Example cards (2 shown): -->
-                <article class="product-card" tabindex="0" data-product='{"name":"Evil eye chain","price":"₹300.00","image":"https://picsum.photos/seed/1/800/600","category":"Necklace","description":"A chain featuring the evil eye."}'>
-                    <div class="product-image-container">
-                        <img class="product-image" src="https://picsum.photos/seed/1/800/600" alt="Evil eye chain">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-name">Evil eye chain</div>
-                        <div class="product-price">₹300</div>
-                        <div class="product-category">Necklace</div>
-                        <div class="product-actions">
-                            <button class="add-to-cart-btn" type="button">Add to cart</button>
-                            <button class="view-details-btn" type="button" aria-label="View details">View</button>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="product-card" tabindex="0" data-product='{"name":"Palakka necklace","price":"₹499.00","image":"https://picsum.photos/seed/2/800/600","category":"Necklace","description":"Traditional Palakka necklace."}'>
-                    <div class="product-image-container">
-                        <img class="product-image" src="https://picsum.photos/seed/2/800/600" alt="Palakka necklace">
-                    </div>
-                    <div class="product-info">
-                        <div class="product-name">Palakka necklace</div>
-                        <div class="product-price">₹499</div>
-                        <div class="product-category">Necklace</div>
-                        <div class="product-actions">
-                            <button class="add-to-cart-btn" type="button">Add to cart</button>
-                            <button class="view-details-btn" type="button" aria-label="View details">View</button>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- main.js can inject more cards here; View More button toggles after-first-4 behavior -->
+                <!-- Products will be loaded dynamically by main.js -->
             </div>
 
             <!-- View More button removed: all products are always visible -->
@@ -175,38 +141,66 @@
         <footer class="site-footer">
             <div class="footer-inner">
                 <div class="footer-brand">
+                    <div class="footer-logo">
+                        <img src="logo/logo.png" alt="VastraVeda Jewelleries logo" width="48" height="48">
+                    </div>
                     <p class="footer-tagline">Luxury you can feel. Elegance that endures.</p>
+                    <p class="footer-description">Handcrafted jewelry that tells your story, blending tradition with modern sophistication.</p>
                 </div>
                 <div class="footer-links">
-                    <h3>Quick Links</h3>
+                    <h3>Explore</h3>
                     <ul>
-                        <li><a href="products.html">Shop</a></li>
+                        <li><a href="products.html">Our Collection</a></li>
                         <li><a href="index.html">Home</a></li>
-                        <li><a href="contact.html">About &amp; Contact</a></li>
+                        <li><a href="contact.html">About & Contact</a></li>
+                        <li><a href="checkout.html">Checkout</a></li>
                     </ul>
                 </div>
                 <div class="footer-care">
                     <h3>Customer Care</h3>
                     <ul>
-                        <li><a href="mailto:vastraveda2@gmail.com">vastraveda2@gmail.com</a></li>
-                        <li><a href="tel:+919961165503">+91 99611 65503</a></li>
-                        <li><a href="https://wa.me/919961165503">WhatsApp</a></li>
+                        <li><a href="mailto:vastraveda2@gmail.com"><i class="fas fa-envelope"></i> vastraveda2@gmail.com</a></li>
+                        <li><a href="tel:+919961165503"><i class="fas fa-phone"></i> +91 99611 65503</a></li>
+                        <li><a href="https://wa.me/919961165503"><i class="fab fa-whatsapp"></i> WhatsApp</a></li>
                     </ul>
+                </div>
+                <div class="footer-newsletter">
+                    <h3>Stay Connected</h3>
+                    <p>Subscribe to receive updates on new collections and exclusive offers.</p>
+                    <form class="newsletter-form" role="form" aria-labelledby="newsletter-heading">
+                        <label for="newsletter-email" class="visually-hidden">Email address</label>
+                        <input type="email" id="newsletter-email" placeholder="Your email address" required aria-describedby="newsletter-description">
+                        <button type="submit" class="newsletter-btn" aria-describedby="newsletter-description">Subscribe</button>
+                        <div id="newsletter-description" class="visually-hidden">Subscribe to our newsletter for updates on new jewelry collections and exclusive offers</div>
+                    </form>
                     <div class="footer-social">
-                        <a href="https://instagram.com/vastravedabyharinee" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener">
-                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
-                            <span class="visually-hidden">Instagram</span>
+                        <a href="https://instagram.com/vastravedabyharinee" aria-label="Instagram" title="Follow us on Instagram" target="_blank" rel="noopener">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://wa.me/919961165503" aria-label="WhatsApp" title="Contact us on WhatsApp" target="_blank" rel="noopener">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="mailto:vastraveda2@gmail.com" aria-label="Email" title="Send us an email">
+                            <i class="fas fa-envelope"></i>
                         </a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© <span id="year"></span> VastraVeda Jewelleries. All rights reserved.</p>
+                <div class="footer-bottom-content">
+                    <p>© <span id="year"></span> VastraVeda Jewelleries. All rights reserved.</p>
+                    <div class="footer-bottom-links">
+                        <a href="#">Privacy Policy</a>
+                        <a href="#">Terms of Service</a>
+                        <a href="#">Shipping Info</a>
+                    </div>
+                </div>
             </div>
         </footer>
     </div>
 
     <script src="js/utils.js"></script>
+    <script src="js/ui.js" defer></script>
     <script src="js/cart.js" defer></script>
     <script src="main.js" defer></script>
     <script src="js/liquid-button.js" defer></script>
@@ -221,6 +215,45 @@
 
     <script>
         (function(){ const y = document.getElementById('year'); if(y) y.textContent = new Date().getFullYear(); })();
+
+        // Newsletter form handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsletterForm = document.querySelector('.newsletter-form');
+            if (newsletterForm) {
+                const submitBtn = newsletterForm.querySelector('.newsletter-btn');
+                const emailInput = newsletterForm.querySelector('input[type="email"]');
+
+                newsletterForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = emailInput.value.trim();
+
+                    if (!email) {
+                        alert('Please enter your email address.');
+                        emailInput.focus();
+                        return;
+                    }
+
+                    if (!emailInput.checkValidity()) {
+                        alert('Please enter a valid email address.');
+                        emailInput.focus();
+                        return;
+                    }
+
+                    // Here you would typically send to your backend
+                    submitBtn.textContent = 'Subscribing...';
+                    submitBtn.disabled = true;
+
+                    // Simulate API call
+                    setTimeout(() => {
+                        alert('Thank you for subscribing! We\'ll keep you updated with our latest collections.');
+                        newsletterForm.reset();
+                        submitBtn.textContent = 'Subscribe';
+                        submitBtn.disabled = false;
+                        emailInput.focus();
+                    }, 1000);
+                });
+            }
+        });
     </script>
 </body>
 </html>

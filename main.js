@@ -1,8 +1,173 @@
+// Reusable loading animation markup
+const getLoadingMarkup = (label = 'Loading...') => `
+    <div class="loading-state" role="status" aria-live="polite" aria-label="${label}">
+        <span class="loading-gem" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+        </span>
+    </div>
+`;
+// Utility functions for buffering and debouncing
+function debounce(func, wait, immediate) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            timeout = null;
+            if (!immediate) func(...args);
+        };
+        const callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) func(...args);
+    };
+}
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+// Declare cartManager globally
+let cartManager;
+let floatingCartBtn;
+let cartSidebar;
+let checkoutSummaryContainer;
+let checkoutSummaryContainerMobile;
+
+// Buffered UI updates to prevent excessive re-renders
+const bufferedUIUpdates = {
+    cartSummary: null,
+    checkoutSummary: null,
+    cartRender: null,
+
+    init() {
+        // Debounce cart summary updates (prevent excessive floating button updates)
+        this.cartSummary = debounce(() => {
+            const { itemCount } = cartManager.getTotals();
+            if (floatingCartBtn) {
+                const cartSidebarOpen = cartSidebar && cartSidebar.classList.contains('open');
+                if (itemCount > 0 && !cartSidebarOpen) {
+                    floatingCartBtn.removeAttribute('hidden');
+                } else {
+                    floatingCartBtn.setAttribute('hidden', '');
+                }
+            }
+        }, 100);
+
+        // Throttle checkout summary updates (limit to once per 200ms)
+        this.checkoutSummary = throttle(() => {
+
+
+            const updateSummary = (container, progressId, subtotalId, shippingId, grandTotalId, itemCountId) => {
+                if (!container) return;
+                // Always reload cart from localStorage before rendering summary
+                let cartRaw = [];
+                try {
+                    cartRaw = (JSON.parse(localStorage.getItem('cart')) || []).map(item => {
+                        const normalizedId = item.id != null ? String(item.id) : (item._docId != null ? String(item._docId) : null);
+                        return normalizedId ? { ...item, id: normalizedId } : null;
+                    }).filter(Boolean);
+                } catch (e) { cartRaw = []; }
+
+                // Use latest product details for each cart item
+                const cartWithLatest = cartRaw.map(item => {
+                    const latest = (typeof products !== 'undefined' && Array.isArray(products)) ? products.find(p => String(p.id) === String(item.id)) : null;
+                    return latest ? { ...item, name: latest.name, price: latest.price } : item;
+                });
+
+                const progress = document.getElementById(progressId);
+                if (progress) {
+                    progress.innerHTML = getLoadingMarkup('Loading...');
+                    progress.style.display = 'block';
+                    progress.setAttribute('aria-hidden','false');
+                }
+
+                if (cartWithLatest.length === 0) {
+                    container.innerHTML = '<div class="cart-empty" style="padding:1em;color:#b91c1c;text-align:center;">Your cart is empty. <a href="products.html">Add products</a> to continue.</div>';
+                    // Set all bill values to zero
+                    const billSubtotal = document.getElementById(subtotalId);
+                    const billShipping = document.getElementById(shippingId);
+                    const billGrandTotal = document.getElementById(grandTotalId);
+                    const itemCount = document.getElementById(itemCountId);
+                    if (billSubtotal) billSubtotal.textContent = '₹0';
+                    if (billShipping) billShipping.textContent = '₹0';
+                    if (billGrandTotal) billGrandTotal.textContent = '₹0';
+                    if (itemCount) itemCount.textContent = '0 items';
+                    // Disable order button if present
+                    const orderBtn = document.getElementById('whatsapp-order-btn');
+                    if (orderBtn) orderBtn.disabled = true;
+                    if (progress) { setTimeout(() => { progress.innerHTML = ''; progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
+                    return;
+                } else {
+                    // Enable order button if present
+                    const orderBtn = document.getElementById('whatsapp-order-btn');
+                    if (orderBtn) orderBtn.disabled = false;
+                }
+
+                container.innerHTML = cartWithLatest.map(item => `
+                    <div class="order-item">
+                        <div class="order-item-name">${item.name} <small>(x${item.quantity})</small></div>
+                        <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                    </div>
+                `).join('');
+
+                const subtotal = cartWithLatest.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                // Calculate shipping: Free shipping above ₹5000, otherwise ₹200
+                const shipping = 0;
+                const grandTotal = subtotal + shipping;
+
+                const billSubtotal = document.getElementById(subtotalId);
+                const billShipping = document.getElementById(shippingId);
+                const billGrandTotal = document.getElementById(grandTotalId);
+                const itemCount = document.getElementById(itemCountId);
+
+                if (billSubtotal) billSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+                if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
+                if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+                if (itemCount) itemCount.textContent = `${cartWithLatest.length} item${cartWithLatest.length !== 1 ? 's' : ''}`;
+
+                if (progress) { setTimeout(() => { progress.innerHTML = ''; progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
+            };
+
+            // Update mobile summary (only if mobile container exists)
+            if (checkoutSummaryContainerMobile) {
+                updateSummary(checkoutSummaryContainerMobile, 'checkout-progress-mobile', 'bill-subtotal-mobile', 'bill-shipping-mobile', 'bill-grand-total-mobile', 'item-count-mobile');
+            }
+
+            // Update desktop summary
+            updateSummary(checkoutSummaryContainer, 'checkout-progress', 'bill-subtotal', 'bill-shipping', 'bill-grand-total', 'item-count');
+        }, 200);
+
+        // Throttle cart rendering (limit to once per 100ms)
+        this.cartRender = throttle(() => {
+            cartManager.render();
+        }, 100);
+    }
+};
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize UI manager for accessibility, skip links, and cart sidebar behavior
     if (window.UIManager) {
-        try { new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
+        try { window.ui = new window.UIManager(); } catch (e) { console.warn('UIManager init failed', e); }
     }
+
+    // Declare UI elements
+    const cartToggle = window.ui?.cartToggle;
+    const cartCloseBtn = window.ui?.cartCloseBtn;
+    cartSidebar = window.ui?.cartSidebar;
+    const sidebarOverlay = window.ui?.sidebarOverlay;
+    floatingCartBtn = document.getElementById('floating-cart-btn');
+
+    // --- FORCE CHECKOUT SUMMARY RENDER ON CHECKOUT PAGE ---
+    // (Moved to end of handler after all async/data init)
 
     const yearEl = document.getElementById('year');
     if (yearEl) {
@@ -11,35 +176,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // --- FIREBASE INTEGRATION ---
     // Show loading indicator
-    const ensureLoadingStyles = () => {
-        if (document.getElementById('loading-gem-styles')) return;
-        const style = document.createElement('style');
-        style.id = 'loading-gem-styles';
-        style.textContent = `
-            .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; color: #666; text-align: center; font-size: 1rem; }
-            .loading-state .loading-gem { display: inline-flex; align-items: center; justify-content: center; gap: 12px; transform: translateZ(0); perspective: 500px; }
-            .loading-state .loading-gem span { display: inline-block; width: clamp(24px, 3vw, 32px); height: clamp(24px, 3vw, 32px); background: linear-gradient(135deg, #4f46e5 0%, #60a5fa 50%, #facc15 100%); border-radius: 18% 18% 42% 42%; transform: rotate(45deg) scale(0.88); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.28); animation: gemPulse 1.2s ease-in-out infinite; opacity: 0.95; position: relative; overflow: hidden; will-change: transform, box-shadow, filter; }
-            .loading-state .loading-gem span::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.7), transparent 55%); opacity: 0.75; }
-            .loading-state .loading-gem span:nth-child(2) { animation-delay: 0.18s; }
-            .loading-state .loading-gem span:nth-child(3) { animation-delay: 0.36s; }
-            @keyframes gemPulse { 0%, 100% { transform: rotate(45deg) scale(0.82) translateY(0); box-shadow: 0 6px 14px rgba(79, 70, 229, 0.18); filter: brightness(0.92); } 45% { transform: rotate(45deg) scale(1.08) translateY(-8px); box-shadow: 0 18px 30px rgba(250, 204, 21, 0.4); filter: brightness(1.12); } 55% { transform: rotate(45deg) scale(1.05) translateY(-5px); box-shadow: 0 12px 26px rgba(96, 165, 250, 0.35); filter: brightness(1.05); } }
-        `;
-        document.head.appendChild(style);
-    };
-
     const showLoading = () => {
         const grid = document.getElementById('product-grid');
         if (!grid) return;
-        ensureLoadingStyles();
-        grid.innerHTML = `
-            <div class="loading-state" role="status" aria-live="polite" aria-label="Loading products">
-                <span class="loading-gem" aria-hidden="true">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </span>
-            </div>
-        `.trim();
+        grid.innerHTML = getLoadingMarkup('Loading products');
     };
     
     const showError = (message) => {
@@ -113,24 +253,54 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     // Use CartManager for all cart operations
-    const cartManager = new window.CartManager();
+    cartManager = new window.CartManager();
 
-    // --- DOM Elements ---
-    const productGrid = document.getElementById('product-grid');
-    const cartToggle = document.getElementById('cart-toggle');
-    const cartSidebar = document.getElementById('cart-sidebar');
-    const cartCloseBtn = document.getElementById('cart-close-btn');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-    const checkoutBtn = document.getElementById('checkout-btn');
-    const checkoutSummaryContainer = document.getElementById('bill-items');
-    const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
-    const whatsappQrWrapper = document.getElementById('whatsapp-qr-wrapper');
-    const whatsappQrProgress = document.getElementById('whatsapp-qr-progress');
-    const customerDetailsForm = document.getElementById('customer-details-form');
-    const checkoutError = document.getElementById('checkout-error');
-    // New floating cart button
-    const floatingCartBtn = document.getElementById('floating-cart-btn');
+    // --- RENDER FUNCTIONS (must be after cartManager/products are initialized) ---
+    const getFilteredProducts = () => {
+        const q = (currentFilters && currentFilters.search || '').toLowerCase().trim();
+        return (products || []).filter(p => {
+            const okCategory = !currentFilters || !currentFilters.category || p.category === currentFilters.category;
+            const okSearch = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
+            return okCategory && okSearch;
+        });
+    };
+
+    const renderCart = () => {
+        bufferedUIUpdates.cartRender();
+    };
+
+    const updateCartSummary = () => {
+        bufferedUIUpdates.cartSummary();
+    };
+
+    const renderCheckoutSummary = () => {
+        bufferedUIUpdates.checkoutSummary();
+    };
+
+    // Define checkout summary containers for bufferedUIUpdates
+    checkoutSummaryContainer = document.getElementById('bill-items');
+    checkoutSummaryContainerMobile = document.getElementById('bill-items-mobile');
+
+    // Initialize buffered UI updates (after render functions are defined)
+    bufferedUIUpdates.init();
+    
+    // Wire UIManager controls (if UIManager is available and instance stored on window.ui)
+    if (window.ui) {
+        try {
+            const cartCloseBtn = window.ui.cartCloseBtn;
+            const sidebarOverlay = window.ui.sidebarOverlay;
+            if (cartCloseBtn) cartCloseBtn.addEventListener('click', () => window.ui.closeCart());
+            if (sidebarOverlay) sidebarOverlay.addEventListener('click', () => window.ui.closeCart());
+            // Close cart on Escape
+            document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') window.ui.closeCart(); });
+        } catch (e) {
+            console.warn('Failed to wire UIManager controls', e);
+        }
+    }
+    // New floating cart button (declared earlier)
     // Floating cart count badge removed
+    // Product grid (only present on products page)
+    const productGrid = document.getElementById('product-grid');
     // Product filter UI (only present on products page)
     const filterCategorySelect = document.getElementById('filter-category');
     const filterClearBtn = document.getElementById('filter-clear');
@@ -145,20 +315,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const modalProductPrice = document.getElementById('modal-product-price');
     const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
 
+    // WhatsApp order button (only present on checkout page)
+    const whatsappOrderBtn = document.getElementById('whatsapp-order-btn');
+    const whatsappQrWrapper = document.getElementById('whatsapp-qr-wrapper');
+    const whatsappQrProgress = document.getElementById('whatsapp-qr-progress');
+    const checkoutError = document.getElementById('checkout-error');
+    const customerDetailsForm = document.getElementById('customer-details-form');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
     let currentFilters = { category: '', search: '' };
-    const SHIPPING_CHARGE = 0;
-
-    // --- RENDER FUNCTIONS ---
-
-    // Render products on the products page
-    const getFilteredProducts = () => {
-        const q = (currentFilters.search || '').toLowerCase().trim();
-        return products.filter(p => {
-            const okCategory = !currentFilters.category || p.category === currentFilters.category;
-            const okSearch = !q || p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q);
-            return okCategory && okSearch;
-        });
-    };
+    const SHIPPING_CHARGE = 200;
 
     const populateCategoryFilter = () => {
         if (!filterCategorySelect) return;
@@ -221,50 +387,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `).join('');
         productGrid.innerHTML = `<div class="skeleton-grid">${skeletons}</div>`;
-    };
-
-    // Use CartManager's render for cart sidebar
-    const renderCart = () => {
-        cartManager.render();
-    };
-
-    // Update floating cart button count using CartManager
-    const updateCartSummary = () => {
-        const { itemCount } = cartManager.getTotals();
-        if (floatingCartBtn) {
-            const cartSidebarOpen = cartSidebar && cartSidebar.classList.contains('open');
-            if (itemCount > 0 && !cartSidebarOpen) {
-                floatingCartBtn.removeAttribute('hidden');
-            } else {
-                floatingCartBtn.setAttribute('hidden', '');
-            }
-        }
-    };
-
-    // Render checkout page summary
-    const renderCheckoutSummary = () => {
-        if (!checkoutSummaryContainer) return;
-        const progress = document.getElementById('checkout-progress');
-        if (progress) { progress.style.display = 'block'; progress.setAttribute('aria-hidden','false'); }
-
-        checkoutSummaryContainer.innerHTML = cart.map(item => `
-            <div class="bill-item">
-                <span>${item.name} (x${item.quantity})</span>
-                <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
-            </div>
-        `).join('');
-
-        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const shipping = SHIPPING_CHARGE;
-    const grandTotal = subtotal + shipping;
-        
-        const billSubtotal = document.getElementById('bill-subtotal');
-        const billShipping = document.getElementById('bill-shipping');
-        const billGrandTotal = document.getElementById('bill-grand-total');
-        if (billSubtotal) billSubtotal.textContent = `₹${subtotal.toLocaleString('en-IN')}`;
-        if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
-        if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
-        if (progress) { setTimeout(() => { progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
     };
 
     // --- EVENT HANDLERS ---
@@ -418,10 +540,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             cartManager.updateQuantity(productId, newQuantity);
             announceToScreenReader(`Quantity of ${item.name} increased to ${newQuantity}`);
         } else if (action === 'decrease') {
-            if (oldQuantity > 1) {
-                newQuantity = oldQuantity - 1;
-                cartManager.updateQuantity(productId, newQuantity);
+            newQuantity = oldQuantity - 1;
+            cartManager.updateQuantity(productId, newQuantity);
+            if (newQuantity > 0) {
                 announceToScreenReader(`Quantity of ${item.name} decreased to ${newQuantity}`);
+            } else {
+                announceToScreenReader(`${item.name} removed from cart`);
             }
         }
         updateCartSummary();
@@ -508,7 +632,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     function closeProductModal() {
-        if (!productDetailModal) return;
+        console.log('toggleCart called');
+        if (!cartSidebar) return;
         productDetailModal.classList.remove('active');
         setTimeout(() => {
             productDetailModal.style.display = 'none';
@@ -615,7 +740,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (whatsappQrProgress) { whatsappQrProgress.style.display='none'; whatsappQrProgress.setAttribute('aria-hidden','true'); }
         
-        if (!cart || cart.length === 0) {
+        if (!cartManager.cart || cartManager.cart.length === 0) {
             if (checkoutError) {
                 checkoutError.textContent = 'Your cart is empty. Please add some items before checkout.';
                 checkoutError.style.display = 'block';
@@ -711,6 +836,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         if (!isMobileDevice() && whatsappQrProgress) { whatsappQrProgress.style.display='block'; whatsappQrProgress.setAttribute('aria-hidden','false'); }
+        if (!isMobileDevice() && whatsappQrProgress) {
+            whatsappQrProgress.innerHTML = getLoadingMarkup('Generating QR...');
+            whatsappQrProgress.style.display='block';
+            whatsappQrProgress.setAttribute('aria-hidden','false');
+        }
         
         try {
             const whatsappNumber = await getWhatsAppNumber();
@@ -724,15 +854,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Prepare order summary
-            const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const shipping = SHIPPING_CHARGE;
+            // Prepare order summary (use cartManager.cart)
+            const subtotal = cartManager.cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            // Calculate shipping: Free shipping above ₹5000, otherwise ₹200
+            const shipping = 0;
             const grandTotal = subtotal + shipping;
-            const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const itemCount = cartManager.cart.reduce((sum, item) => sum + item.quantity, 0);
             const placedAt = new Date();
             const orderReference = `ORD-${placedAt.getTime()}`;
             const orderTimestampIso = placedAt.toISOString();
-            const orderSummary = cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
+            const orderSummary = cartManager.cart.map(item => `- ${item.name} (Qty: ${item.quantity}) - ₹${(item.price * item.quantity).toLocaleString('en-IN')}`).join('\n');
 
             const message =
 `Hello! I would like to place the following order from VastraVeda Jewelleries:\n\n*Order ID:* ${orderReference}\n\n*Customer Details:*\nName: ${name}\nMobile: ${mobile}\nEmail: ${email || 'Not provided'}\nAddress: ${address}\nPIN Code: ${pincode}\n\n*Order Summary:*\n${orderSummary}\n\n*Total Price: ₹${grandTotal.toLocaleString('en-IN')}*\n\nPlease confirm the order and delivery details.`;
@@ -758,7 +889,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     address,
                     pincode
                 },
-                items: cart.map(item => ({
+                items: cartManager.cart.map(item => ({
                     id: item.id || item._docId,
                     name: item.name,
                     price: item.price,
@@ -810,8 +941,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');
             }
 
-            cart = [];
-            saveCart();
+            cartManager.cart = [];
+            cartManager.saveCart();
             updateCartSummary();
             renderCheckoutSummary();
         } catch (error) {
@@ -875,10 +1006,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('click', (e) => {
             if (mainNav.classList.contains('open') && 
                 !mainNav.contains(e.target) && 
-                !navToggle.contains(e.target)) {
+                (!navToggle || !navToggle.contains(e.target))) {
                 mainNav.classList.remove('open');
-                navToggle.setAttribute('aria-expanded', 'false');
-                setNavIcon(false);
+                if (navToggle) {
+                    navToggle.setAttribute('aria-expanded', 'false');
+                    setNavIcon(false);
+                }
                 document.body.style.overflow = '';
             }
         });
@@ -887,8 +1020,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && mainNav.classList.contains('open')) {
                 mainNav.classList.remove('open');
-                navToggle.setAttribute('aria-expanded', 'false');
-                setNavIcon(false);
+                if (navToggle) {
+                    navToggle.setAttribute('aria-expanded', 'false');
+                    setNavIcon(false);
+                }
                 document.body.style.overflow = '';
             }
         });
@@ -913,13 +1048,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Floating cart button click opens cart sidebar
     if (floatingCartBtn) {
-        floatingCartBtn.addEventListener('click', function() {
-            if (cartSidebar && !cartSidebar.classList.contains('open')) {
-                cartSidebar.classList.add('open');
-                cartSidebar.setAttribute('aria-hidden', 'false');
-                updateCartSummary();
-            }
-        });
+        floatingCartBtn.addEventListener('click', toggleCart);
     }
     
     // Product detail modal event listeners
@@ -987,7 +1116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', () => {
-            if (cart.length > 0) {
+            if (cartManager.cart.length > 0) {
                 window.location.href = 'checkout.html';
             } else {
                 notify('Your bag is empty.', 'error');
@@ -1040,6 +1169,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderCart();
     renderCheckoutSummary();
 
+    // Ensure checkout summary is updated after everything loads
+    setTimeout(() => {
+        renderCheckoutSummary();
+    }, 500);
+
     // Initial ARIA state for cart
     if (cartSidebar) {
         cartSidebar.setAttribute('role', 'dialog');
@@ -1054,6 +1188,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Hide 'Proceed to Checkout' button on checkout page
     if (checkoutBtn && window.location.pathname.endsWith('checkout.html')) {
         checkoutBtn.style.display = 'none';
+        // Ensure checkout summary is updated on checkout page
+        setTimeout(() => {
+            renderCheckoutSummary();
+        }, 100);
+        // Additional delay to ensure everything is loaded
+        setTimeout(() => {
+            renderCheckoutSummary();
+        }, 500);
     }
 
     // Make functions globally accessible for onclick handlers
@@ -1061,4 +1203,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.removeFromCart = removeFromCart;
     window.updateQuantity = updateQuantity;
     window.openProductDetail = openProductModal; // Map to the correct function name
+
+    // --- FORCE CHECKOUT SUMMARY RENDER ON CHECKOUT PAGE ---
+    if (window.location.pathname.endsWith('checkout.html')) {
+        // Render after all data is loaded and initialized
+        renderCheckoutSummary();
+        setTimeout(renderCheckoutSummary, 200);
+        setTimeout(renderCheckoutSummary, 600);
+    }
 });
