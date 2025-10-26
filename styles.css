@@ -2780,8 +2780,6 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     margin-bottom: 2.5rem;
     max-height: 300px;
     overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(16, 185, 129, 0.3) transparent;
 }
 
 .order-items::-webkit-scrollbar {
