@@ -2267,7 +2267,8 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     line-height: 1.6;
 }
 
-/* Input Icons */
+/* Input Icons - REMOVED */
+/*
 .form-group::before {
     content: '';
     position: absolute;
@@ -2283,8 +2284,10 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     transition: all 0.3s ease;
     z-index: 2;
 }
+*/
 
-/* Specific icons for different inputs */
+/* Specific icons for different inputs - REMOVED */
+/*
 .form-group:has(input[id="customer-name"])::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'%3E%3C/path%3E%3C/svg%3E");
 }
@@ -2310,6 +2313,7 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
     opacity: 1;
     transform: translateY(-50%) scale(1.1);
 }
+*/
 
 /* Field Hints */
 .hint {

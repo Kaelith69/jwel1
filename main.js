@@ -90,7 +90,12 @@ const bufferedUIUpdates = {
                 }
 
                 if (cartWithLatest.length === 0) {
-                    container.innerHTML = '<div class="cart-empty" style="padding:1em;color:#b91c1c;text-align:center;">Your cart is empty. <a href="products.html">Add products</a> to continue.</div>';
+                    // On checkout page, don't show empty cart message - just show empty summary
+                    if (!window.location.pathname.endsWith('checkout.html')) {
+                        container.innerHTML = '<div class="cart-empty" style="padding:1em;color:#b91c1c;text-align:center;">Your cart is empty. <a href="products.html">Add products</a> to continue.</div>';
+                    } else {
+                        container.innerHTML = '';
+                    }
                     // Set all bill values to zero
                     const billSubtotal = document.getElementById(subtotalId);
                     const billShipping = document.getElementById(shippingId);
@@ -132,6 +137,18 @@ const bufferedUIUpdates = {
                 if (billShipping) billShipping.textContent = `₹${shipping.toLocaleString('en-IN')}`;
                 if (billGrandTotal) billGrandTotal.textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
                 if (itemCount) itemCount.textContent = `${cartWithLatest.length} item${cartWithLatest.length !== 1 ? 's' : ''}`;
+
+                // Hide checkout summary loaders
+                const checkoutLoader = document.getElementById('checkout-summary-loader');
+                const checkoutMobileLoader = document.getElementById('checkout-summary-mobile-loader');
+                if (checkoutLoader) { 
+                    checkoutLoader.style.display = 'none'; 
+                    checkoutLoader.setAttribute('aria-hidden', 'true'); 
+                }
+                if (checkoutMobileLoader) { 
+                    checkoutMobileLoader.style.display = 'none'; 
+                    checkoutMobileLoader.setAttribute('aria-hidden', 'true'); 
+                }
 
                 if (progress) { setTimeout(() => { progress.innerHTML = ''; progress.style.display = 'none'; progress.setAttribute('aria-hidden','true'); }, 300); }
             };

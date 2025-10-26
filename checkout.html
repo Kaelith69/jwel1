@@ -54,8 +54,14 @@
                 <h1>Checkout</h1>
                 <div id="checkout-summary" class="checkout-summary">
                     <h2>Order Summary</h2>
-                    <!-- Inline progress loader for summary (Uiverse.io by satyamchaudharydev) -->
-                    <!-- Removed bottom loading animation -->
+                    <!-- Loading animation for order summary -->
+                    <div id="checkout-summary-loader" class="loading-state" role="status" aria-live="polite" aria-label="Loading order summary">
+                        <span class="loading-gem" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </span>
+                    </div>
                     <div id="bill-items"></div>
                     <div class="bill-total">
                         <p>Subtotal: <span id="bill-subtotal">₹0</span></p>
@@ -67,7 +73,14 @@
                 <div class="checkout-summary-mobile">
                     <div class="checkout-summary-card">
                         <h2>Order Summary</h2>
-                        <!-- Removed bottom loading animation -->
+                        <!-- Loading animation for mobile order summary -->
+                        <div id="checkout-summary-mobile-loader" class="loading-state" role="status" aria-live="polite" aria-label="Loading order summary">
+                            <span class="loading-gem" aria-hidden="true">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </span>
+                        </div>
                         <div id="bill-items-mobile"></div>
                         <div class="bill-total">
                             <p>Subtotal: <span id="bill-subtotal-mobile">₹0</span></p>
