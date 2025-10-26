@@ -226,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Use CartManager's render for cart sidebar
     const renderCart = () => {
         cartManager.render();
+        updateCartSummary();
     };
 
     // Update floating cart button count using CartManager
@@ -240,6 +241,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     };
+
+    // Observe sidebar open/close to update floating cart button
+    if (cartSidebar) {
+        const observer = new MutationObserver(() => {
+            updateCartSummary();
+        });
+        observer.observe(cartSidebar, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    // Hide floating cart button if cart is empty on load
+    updateCartSummary();
 
     // Render checkout page summary
     const renderCheckoutSummary = () => {
@@ -311,7 +323,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (sidebarOverlay) sidebarOverlay.style.display = 'none';
             document.removeEventListener('keydown', handleCartKeydown);
             cartToggle?.focus();
-            if (floatingCartBtn) floatingCartBtn.removeAttribute('hidden');
         } else {
             cartSidebar.classList.add('open');
             cartSidebar.setAttribute('aria-hidden', 'false');
@@ -320,8 +331,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (sidebarOverlay) sidebarOverlay.style.display = 'block';
             document.addEventListener('keydown', handleCartKeydown);
             setTimeout(() => { cartCloseBtn?.focus(); }, 60);
-            if (floatingCartBtn) floatingCartBtn.setAttribute('hidden', '');
         }
+        updateCartSummary();
     };
 
     // Overlay click closes cart (moved to after DOMContentLoaded)
@@ -827,6 +838,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (cartSidebar && !cartSidebar.classList.contains('open')) {
                 cartSidebar.classList.add('open');
                 cartSidebar.setAttribute('aria-hidden', 'false');
+                updateCartSummary();
             }
         });
     }
