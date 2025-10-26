@@ -226,7 +226,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Use CartManager's render for cart sidebar
     const renderCart = () => {
         cartManager.render();
-        updateCartSummary();
     };
 
     // Update floating cart button count using CartManager
@@ -241,17 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     };
-
-    // Observe sidebar open/close to update floating cart button
-    if (cartSidebar) {
-        const observer = new MutationObserver(() => {
-            updateCartSummary();
-        });
-        observer.observe(cartSidebar, { attributes: true, attributeFilter: ['class'] });
-    }
-
-    // Hide floating cart button if cart is empty on load
-    updateCartSummary();
 
     // Render checkout page summary
     const renderCheckoutSummary = () => {
