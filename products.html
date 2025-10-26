@@ -24,18 +24,29 @@
 <body>
     <div id="product-detail-modal" class="product-detail-modal" role="dialog" aria-modal="true" aria-labelledby="modal-product-name">
         <div class="modal-content">
-            <button id="modal-close-btn" class="modal-close-btn" aria-label="Close product details">&times;</button>
-            <div class="modal-product-image-wrap">
-                <img id="modal-product-image" class="modal-product-image" src="" alt="Product image" loading="lazy" decoding="async">
+            <div class="modal-main-row">
+                <div class="modal-product-image-wrap">
+                    <img id="modal-product-image" class="modal-product-image" src="" alt="Product image" loading="lazy" decoding="async">
+                </div>
             </div>
-            <div class="modal-product-info">
-                <h2 id="modal-product-name" class="modal-product-name"></h2>
-                <div id="modal-product-category" class="modal-product-category"></div>
-                <div id="modal-product-price" class="modal-product-price"></div>
-                <div id="modal-product-description" class="modal-product-description"></div>
-                <button id="modal-add-to-cart" class="add-to-cart-btn" type="button">
+            <div class="modal-btn-row-better">
+                <button id="modal-add-to-cart" class="add-to-cart-btn modal-btn-better" type="button" aria-label="Add to cart">
                     <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                    <span class="btn-label">Add to Cart</span>
                 </button>
+                <button id="modal-close-btn" class="modal-btn-better" aria-label="Close product details">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    <span class="btn-label">Close</span>
+                </button>
+            </div>
+            <div class="modal-product-info compact better-align">
+                <div class="modal-name-price-row">
+                    <h2 id="modal-product-name" class="modal-product-name"></h2>
+                    <div id="modal-product-price" class="modal-product-price"></div>
+                </div>
+                <div id="modal-product-category" class="modal-product-category"></div>
+                <div id="modal-product-description" class="modal-product-description"></div>
+            </div>
             </div>
         </div>
     </div>
