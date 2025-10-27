@@ -1610,6 +1610,13 @@ a:focus-visible, .cta-button:focus-visible, .admin-button:focus-visible, .close-
         color: #232323;
 }
 
+.cart-items {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem;
+}
+
 .close-btn {
     background: var(--accent-color);
     border: none;
