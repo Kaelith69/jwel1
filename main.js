@@ -920,17 +920,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 notes: 'Order initiated via checkout form and shared over WhatsApp.'
             };
 
+            let orderSavedLocally = false;
             try {
                 const firestoreDocId = await FirebaseAdapter.addOrder(order);
                 console.log('\u2705 Order saved to Firebase:', firestoreDocId);
             } catch (err) {
                 console.error('Failed to save order to Firebase:', err);
-                if (checkoutError) {
-                    checkoutError.textContent = 'Failed to save order: ' + err.message;
-                    checkoutError.style.display = 'block';
-                    checkoutError.style.color = '#dc3545';
+                // Check if this is a local fallback (allow proceeding with WhatsApp)
+                if (err.message && (err.message.includes('saved locally') || err.message.includes('connectivity issues'))) {
+                    orderSavedLocally = true;
+                    console.warn('Order saved locally due to connectivity issues, proceeding with WhatsApp');
+                    if (checkoutError) {
+                        checkoutError.textContent = 'Order saved locally. Proceeding with WhatsApp...';
+                        checkoutError.style.display = 'block';
+                        checkoutError.style.color = '#ff9800'; // Orange warning color
+                    }
+                } else {
+                    if (checkoutError) {
+                        checkoutError.textContent = 'Failed to save order: ' + err.message;
+                        checkoutError.style.display = 'block';
+                        checkoutError.style.color = '#dc3545';
+                    }
+                    return; // Don't proceed if order can't be saved at all
                 }
-                return; // Don't proceed if order can't be saved
             }
 
             // Show confirmation message briefly before redirecting
@@ -940,9 +952,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isMobileDevice()) {
                 if (checkoutError) {
-                    checkoutError.textContent = 'Order placed! Redirecting you to WhatsApp...';
+                    const successMessage = orderSavedLocally 
+                        ? 'Order saved locally! Redirecting you to WhatsApp...' 
+                        : 'Order placed! Redirecting you to WhatsApp...';
+                    checkoutError.textContent = successMessage;
                     checkoutError.style.display = 'block';
-                    checkoutError.style.color = '#080';
+                    checkoutError.style.color = orderSavedLocally ? '#ff9800' : '#080';
                 }
                 const newWindow = window.open(whatsappMobileUrl, '_blank', 'noopener');
                 if (!newWindow) {
@@ -950,9 +965,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             } else {
                 if (checkoutError) {
-                    checkoutError.textContent = 'Order placed! Scan the QR code below with your phone to continue on WhatsApp.';
+                    const successMessage = orderSavedLocally 
+                        ? 'Order saved locally! Scan the QR code below with your phone to continue on WhatsApp.' 
+                        : 'Order placed! Scan the QR code below with your phone to continue on WhatsApp.';
+                    checkoutError.textContent = successMessage;
                     checkoutError.style.display = 'block';
-                    checkoutError.style.color = '#080';
+                    checkoutError.style.color = orderSavedLocally ? '#ff9800' : '#080';
                 }
                 renderWhatsAppQr(whatsappMobileUrl, whatsappWebUrl);
                 setWhatsAppButtonText('Regenerate WhatsApp QR', 'Regenerate WhatsApp QR for WhatsApp order');

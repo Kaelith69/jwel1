@@ -56,14 +56,22 @@ async function init() {
   _state.initialized = true;
   try {
     // dynamic import so the file doesn't throw when firebase-config is not set up
+    console.log('[firebase-adapter] Attempting to load firebase-config.js...');
     let cfg = await import('./firebase-config.js');
+    console.log('[firebase-adapter] Successfully loaded firebase-config.js');
     // If firebase-config provides an init helper, call it so SDKs load and exported
     // references (db/auth/storage) become available.
     if (cfg && typeof cfg.initFirebaseIfNeeded === 'function') {
       try {
+        console.log('[firebase-adapter] Initializing Firebase...');
         await cfg.initFirebaseIfNeeded();
+        console.log('[firebase-adapter] Firebase initialized successfully');
       } catch (e) {
-        console.warn('firebase-config init failed', e && e.message ? e.message : e);
+        console.warn('[firebase-adapter] firebase-config init failed:', e && e.message ? e.message : e);
+        // Check if this might be a mobile network issue
+        if (e.message && e.message.includes('network') || e.message.includes('CORS') || e.message.includes('SDK loading failed')) {
+          console.warn('[firebase-adapter] This appears to be a network/connectivity issue, possibly on mobile');
+        }
       }
     }
     // If firebase-config.js exported db/storage then use Firestore/Storage
@@ -91,10 +99,16 @@ async function init() {
       _state.signInWithEmailAndPassword = cfg.signInWithEmailAndPassword || null;
       _state.signOut = cfg.signOut || null;
       _state.onAuthStateChanged = cfg.onAuthStateChanged || null;
+    } else {
+      console.warn('[firebase-adapter] Firebase config loaded but db not available');
     }
   } catch (err) {
-    console.warn('Firebase not available or not configured:', err && err.message ? err.message : err);
+    console.warn('[firebase-adapter] Firebase not available or not configured:', err && err.message ? err.message : err);
     _state.useFirestore = false;
+    // Provide more specific error for mobile devices
+    if (typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      console.warn('[firebase-adapter] Mobile device detected - Firebase loading may be blocked by network restrictions');
+    }
   }
   return _state;
 }
@@ -227,10 +241,30 @@ async function addOrder(order){
       return docId;
     }catch(err){
       console.error('Failed to add order to Firestore', err);
-      throw new Error('Firebase is required. Order could not be saved.');
+      // Provide more specific error message for mobile devices
+      const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        // On mobile, fall back to local storage and inform user
+        console.warn('[firebase-adapter] Falling back to local storage for mobile device');
+        const savedOrder = { ...payload, _localOnly: true, _syncError: err.message };
+        cacheOrderLocally(savedOrder);
+        throw new Error('Order saved locally due to connectivity issues. Please try again later or use a desktop browser to ensure your order is processed.');
+      } else {
+        throw new Error('Firebase is required. Order could not be saved.');
+      }
     }
   } else {
-    throw new Error('Firebase is not initialized. Cannot save order.');
+    // Firebase not available - fall back to local storage
+    console.warn('[firebase-adapter] Firebase not available, using local storage fallback');
+    const savedOrder = { ...payload, _localOnly: true, _syncError: 'Firebase not initialized' };
+    cacheOrderLocally(savedOrder);
+    
+    const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+      throw new Error('Order saved locally. Please check your internet connection and try again, or use a desktop browser.');
+    } else {
+      throw new Error('Firebase is not initialized. Order saved locally only.');
+    }
   }
 }
 
