@@ -2,14 +2,14 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Products: public read-only from client
+    // Products: public read, admin-only write
+    // Only authenticated users (like sayanth.tm9090@gmail.com) can modify products
     match /products/{id} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
     }
 
-    // Orders: Loosen rules to allow CREATE from unauthenticated clients
-    // while keeping read/update/delete restricted to authenticated users.
+    // Orders: Allow unauthenticated CREATE for checkout, authenticated read/update/delete
     match /orders/{orderId} {
       allow create: if isValidOrder();
       allow read, update, delete: if request.auth != null;
@@ -25,6 +25,12 @@ service cloud.firestore {
         && request.resource.data.customer is map
         && request.resource.data.customer.name is string
         && request.resource.data.customer.mobile is string;
+    }
+
+    // Settings: public read, admin-only write
+    match /settings/{document} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
     // Default deny for everything else

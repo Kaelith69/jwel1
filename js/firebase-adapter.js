@@ -210,7 +210,7 @@ async function addProduct(product) {
       console.error('Product data:', product);
       // Detect permission errors and provide a helpful message to the admin UI
       if (err && (err.code === 'permission-denied' || (err.code && String(err.code).toLowerCase().includes('permission')))) {
-        throw new Error('Permission denied: you must be an admin to add products. Grant admin via scripts/grant-admin-claim.mjs or add a document in /admins/{uid}.');
+        throw new Error('Permission denied: you must sign in as admin to add products.');
       }
       throw new Error(`Failed to add product: ${err.message || err}`);
     }
@@ -269,15 +269,6 @@ async function addOrder(order){
 
   if(_state.useFirestore){
     try{
-      // Ensure we have an authenticated user if rules require it
-      try {
-        if (_state.auth && !_state.auth.currentUser && _state.signInAnonymously) {
-          await _state.signInAnonymously(_state.auth);
-          console.log('[firebase-adapter] Signed in anonymously for write permissions');
-        }
-      } catch (authErr) {
-        console.warn('[firebase-adapter] Anonymous sign-in failed or not enabled:', authErr && authErr.message ? authErr.message : authErr);
-      }
       console.log('[firebase-adapter] Attempting to save order to Firestore...');
       const collectionRef = _state.collection(_state.db,'orders');
       let docId = null;
@@ -521,6 +512,9 @@ async function updateProduct(docIdOrLocalId, product) {
       return true;
     } catch (err) {
       console.error('Failed to update product in Firestore:', err);
+      if (err && err.code === 'permission-denied') {
+        throw new Error('Permission denied: you must sign in as admin to update products.');
+      }
       throw new Error('Firebase is required. Product could not be updated.');
     }
   } else {
@@ -537,6 +531,9 @@ async function deleteProduct(docIdOrLocalId) {
       return true;
     } catch (err) {
       console.error('Failed to delete product from Firestore:', err);
+      if (err && err.code === 'permission-denied') {
+        throw new Error('Permission denied: you must sign in as admin to delete products.');
+      }
       throw new Error('Firebase is required. Product could not be deleted.');
     }
   } else {
