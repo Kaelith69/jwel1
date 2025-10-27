@@ -435,10 +435,15 @@ html {
         margin: 0;
         width: 100vw;
         max-width: 100vw;
-        padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+        /* Slightly reduce bottom padding for less blank space */
+        padding-bottom: calc(2.7rem + env(safe-area-inset-bottom, 0px));
     }
     .cart-items {
-        margin-bottom: 120px !important;
+        margin-bottom: 90px !important;
+        max-height: 45vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
 }
 /* New Floating Cart Button Styles */
