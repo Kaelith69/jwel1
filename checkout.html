@@ -25,42 +25,42 @@
         <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading">
                 <div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
-    
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <div id="app-container">
-        <header class="main-header">
-            <div class="logo">
-                <a href="index.html"><img src="logo/logo.png" alt="Store logo" class="logo"></a>
-            </div>
-            <button id="nav-toggle" class="nav-toggle" aria-label="Open menu" aria-controls="site-main-nav" aria-expanded="false">
-                <i class="fa-solid fa-bars" aria-hidden="true"></i>
-            </button>
-            <nav id="site-main-nav" class="main-nav" aria-label="Main Navigation">
-                <ul>
-                    <li><a href="products.html" class="liquid-button"><i class="fa-solid fa-arrow-left"></i> Continue Shopping</a></li>
-                    <li><a href="index.html" class="liquid-button">Home</a></li>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <button id="cart-toggle" class="cart-button" aria-label="Open shopping cart">
-                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
-                    <span id="cart-count">0</span>
-                </button>
-            </div>
-        </header>
 
-        <main class="checkout-main" id="main-content" role="main">
-            <div class="glass-panel checkout-panel">
-                <h1>Checkout</h1>
-                <div id="checkout-summary" class="checkout-summary">
-                    <h2>Order Summary</h2>
-                    <!-- Loading animation for order summary -->
-                    <div id="checkout-summary-loader" class="loading-state" role="status" aria-live="polite" aria-label="Loading order summary">
-                        <span class="loading-gem" aria-hidden="true">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </span>
+        <main class="checkout-main" id="main-content">
+            <div class="checkout-container">
+                <div class="checkout-form-container">
+                    <div class="checkout-header">
+                        <a href="products.html" class="back-to-collections">
+                            <i class="fas fa-arrow-left"></i>
+                            Continue Shopping
+                        </a>
+                        <h1 class="checkout-title">Shipping Information</h1>
+                    </div>
+                    <form id="customer-details-form" class="customer-details-form" novalidate>
+                        <div class="form-group">
+                            <label for="customer-name">Full Name</label>
+                            <input type="text" id="customer-name" name="customer-name" required autocomplete="name" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-mobile">Mobile Number</label>
+                            <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-address">Shipping Address</label>
+                            <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="123 Luxury Lane, Jewel City" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-pincode">PIN Code</label>
+                            <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="6-digit PIN code">
+                        </div>
+                        <div id="checkout-error" class="checkout-error" role="alert" aria-live="assertive"></div>
+                        <button id="whatsapp-order-btn" class="cta-button" type="submit">Place Order via WhatsApp</button>
+                    </form>
+                </div>
+                <div class="order-summary-container">
+                    <h2 class="summary-title">Order Summary</h2>
+                    <div id="checkout-summary-loader" class="loading-state">
+                        <div class="loader-gem"><span></span><span></span><span></span></div>
                     </div>
                     <div id="bill-items"></div>
                     <div class="bill-total">
@@ -68,62 +68,9 @@
                         <p>Shipping: <span id="bill-shipping">₹0</span></p>
                         <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
                     </div>
+                     <div id="whatsapp-qr-progress" class="qr-progress" aria-hidden="true"></div>
+                     <div id="whatsapp-qr-wrapper" class="whatsapp-qr-wrapper" aria-live="polite" hidden></div>
                 </div>
-                <!-- Mobile Order Summary -->
-                <div class="checkout-summary-mobile">
-                    <div class="checkout-summary-card">
-                        <h2>Order Summary</h2>
-                        <!-- Loading animation for mobile order summary -->
-                        <div id="checkout-summary-mobile-loader" class="loading-state" role="status" aria-live="polite" aria-label="Loading order summary">
-                            <span class="loading-gem" aria-hidden="true">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </span>
-                        </div>
-                        <div id="bill-items-mobile"></div>
-                        <div class="bill-total">
-                            <p>Subtotal: <span id="bill-subtotal-mobile">₹0</span></p>
-                            <p>Shipping: <span id="bill-shipping-mobile">₹0</span></p>
-                            <p class="grand-total">Total: <span id="bill-grand-total-mobile">₹0</span></p>
-                        </div>
-                        <p id="item-count-mobile" class="item-count"></p>
-                    </div>
-                </div>
-                <form id="customer-details-form" class="customer-details-form" novalidate>
-                    <h2>Customer Details</h2>
-                    <div class="form-group">
-                        <label for="customer-name">Full Name *</label>
-                        <input type="text" id="customer-name" name="customer-name" required autocomplete="name" spellcheck="false">
-                        <p id="hint-name" class="hint">As per delivery address</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="customer-mobile">Mobile Number *</label>
-                        <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile number" aria-describedby="hint-mobile">
-                        <p id="hint-mobile" class="hint">India numbers only, no spaces or dashes</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="customer-email">Email (Optional)</label>
-                        <input type="email" id="customer-email" name="customer-email" autocomplete="email" placeholder="your.email@example.com" spellcheck="false">
-                    </div>
-                    <div class="form-group">
-                        <label for="customer-address">Shipping Address *</label>
-                        <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="Complete address including landmark" rows="3" aria-describedby="hint-address"></textarea>
-                        <p id="hint-address" class="hint">Include house/flat no., area, city, and landmark</p>
-                    </div>
-                    <div class="form-group">
-                        <label for="customer-pincode">PIN Code *</label>
-                        <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="6-digit PIN code" aria-describedby="hint-pincode">
-                        <p id="hint-pincode" class="hint">For example: 560001</p>
-                    </div>
-                    <div id="checkout-error" class="checkout-error" role="alert" aria-live="assertive"></div>
-                    <button id="whatsapp-order-btn" class="cta-button liquidize" type="submit" aria-label="Place order on WhatsApp">Place Order on WhatsApp</button>
-                    <!-- Slim loader shown while (re)generating WhatsApp QR -->
-                    <div id="whatsapp-qr-progress" class="qr-progress" aria-hidden="true">
-                        <!-- WhatsApp QR loader will be injected dynamically by JS when needed -->
-                    </div>
-                    <div id="whatsapp-qr-wrapper" class="whatsapp-qr-wrapper" aria-live="polite" hidden></div>
-                </form>
             </div>
         </main>
         

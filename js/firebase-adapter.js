@@ -24,6 +24,7 @@ let _state = {
   orderBy: null,
   serverTimestamp: null,
   signInWithEmailAndPassword: null,
+  signInAnonymously: null,
   signOut: null,
   onAuthStateChanged: null
 };
@@ -51,9 +52,41 @@ function cacheOrderLocally(orderRecord) {
   }
 }
 
+// Remove undefined values recursively and normalize primitives for Firestore
+function sanitizeForFirestore(value) {
+  if (value === undefined) return undefined; // caller will drop
+  if (value === null) return null;
+  if (Array.isArray(value)) {
+    const arr = value
+      .map((v) => sanitizeForFirestore(v))
+      .filter((v) => v !== undefined);
+    return arr;
+  }
+  if (typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      const sv = sanitizeForFirestore(v);
+      if (sv !== undefined) out[k] = sv;
+    }
+    return out;
+  }
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === 'string') {
+    return value; // keep as-is; upstream may want empty strings
+  }
+  if (typeof value === 'boolean') return value;
+  return undefined;
+}
+
 async function init() {
-  if (_state.initialized) return _state;
+  if (_state.initialized) {
+    console.log('[firebase-adapter] Already initialized, returning cached state');
+    return _state;
+  }
   _state.initialized = true;
+  console.log('[firebase-adapter] Starting Firebase initialization...');
   try {
     // dynamic import so the file doesn't throw when firebase-config is not set up
     console.log('[firebase-adapter] Attempting to load firebase-config.js...');
@@ -63,11 +96,12 @@ async function init() {
     // references (db/auth/storage) become available.
     if (cfg && typeof cfg.initFirebaseIfNeeded === 'function') {
       try {
-        console.log('[firebase-adapter] Initializing Firebase...');
+        console.log('[firebase-adapter] Initializing Firebase SDK...');
         await cfg.initFirebaseIfNeeded();
-        console.log('[firebase-adapter] Firebase initialized successfully');
+        console.log('[firebase-adapter] Firebase SDK initialized successfully');
       } catch (e) {
         console.warn('[firebase-adapter] firebase-config init failed:', e && e.message ? e.message : e);
+        console.warn('[firebase-adapter] Full error:', e);
         // Check if this might be a mobile network issue
         if (e.message && e.message.includes('network') || e.message.includes('CORS') || e.message.includes('SDK loading failed')) {
           console.warn('[firebase-adapter] This appears to be a network/connectivity issue, possibly on mobile');
@@ -76,6 +110,7 @@ async function init() {
     }
     // If firebase-config.js exported db/storage then use Firestore/Storage
     if (cfg && cfg.db) {
+      console.log('[firebase-adapter] Firebase config loaded successfully, enabling Firestore');
       _state.useFirestore = true;
       _state.db = cfg.db;
       _state.auth = cfg.auth || null;
@@ -94,10 +129,11 @@ async function init() {
   _state.orderBy = cfg.orderBy;
   _state.serverTimestamp = cfg.serverTimestamp || null;
       _state.ref = cfg.ref;
-      _state.uploadBytes = cfg.uploadBytes;
-      _state.getDownloadURL = cfg.getDownloadURL;
-      _state.signInWithEmailAndPassword = cfg.signInWithEmailAndPassword || null;
-      _state.signOut = cfg.signOut || null;
+  _state.uploadBytes = cfg.uploadBytes;
+  _state.getDownloadURL = cfg.getDownloadURL;
+  _state.signInWithEmailAndPassword = cfg.signInWithEmailAndPassword || null;
+  _state.signInAnonymously = cfg.signInAnonymously || null;
+  _state.signOut = cfg.signOut || null;
       _state.onAuthStateChanged = cfg.onAuthStateChanged || null;
     } else {
       console.warn('[firebase-adapter] Firebase config loaded but db not available');
@@ -203,7 +239,20 @@ async function getOrders(){
 }
 
 async function addOrder(order){
+  console.log('[firebase-adapter] addOrder called with:', order);
+  console.log('[firebase-adapter] User agent:', navigator.userAgent);
+  console.log('[firebase-adapter] Is mobile device:', /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase()));
   await init();
+  console.log('[firebase-adapter] Firebase state after init:', {
+    initialized: _state.initialized,
+    useFirestore: _state.useFirestore,
+    hasDb: !!_state.db,
+    hasCollection: !!_state.collection,
+    hasAddDoc: !!_state.addDoc,
+    hasSetDoc: !!_state.setDoc,
+    hasDoc: !!_state.doc
+  });
+
   const payload = { ...order };
   if (!payload.orderId) {
     payload.orderId = `ORD-${Date.now()}`;
@@ -220,9 +269,39 @@ async function addOrder(order){
 
   if(_state.useFirestore){
     try{
+      // Ensure we have an authenticated user if rules require it
+      try {
+        if (_state.auth && !_state.auth.currentUser && _state.signInAnonymously) {
+          await _state.signInAnonymously(_state.auth);
+          console.log('[firebase-adapter] Signed in anonymously for write permissions');
+        }
+      } catch (authErr) {
+        console.warn('[firebase-adapter] Anonymous sign-in failed or not enabled:', authErr && authErr.message ? authErr.message : authErr);
+      }
+      console.log('[firebase-adapter] Attempting to save order to Firestore...');
       const collectionRef = _state.collection(_state.db,'orders');
       let docId = null;
-      const payloadTs = { ...payload };
+      // Ensure items are well-formed for Firestore
+      if (Array.isArray(payload.items)) {
+        payload.items = payload.items.map((it, idx) => {
+          const id = it?.id ?? it?._docId ?? String(it?.sku ?? it?.name ?? idx);
+          const qty = Number(it?.quantity) || 1;
+          const price = Number(it?.price) || 0;
+          const lineTotal = Number.isFinite(it?.lineTotal) ? Number(it.lineTotal) : price * qty;
+          return {
+            id: String(id),
+            name: it?.name || `item-${idx}`,
+            price,
+            quantity: qty,
+            lineTotal,
+            // keep any other fields, but drop undefineds later
+            ...it
+          };
+        });
+      }
+
+      // Drop undefineds recursively (Firestore rejects undefined anywhere)
+      let payloadTs = sanitizeForFirestore({ ...payload });
       if (_state.serverTimestamp) {
         payloadTs.createdAt = _state.serverTimestamp();
         payloadTs.updatedAt = _state.serverTimestamp();
@@ -235,36 +314,49 @@ async function addOrder(order){
         const ref = await _state.addDoc(collectionRef, payloadTs);
         docId = ref.id;
       }
-      console.log('[Firebase] Order added with ID:', docId);
+      console.log('[firebase-adapter] Order saved successfully with ID:', docId);
       const savedOrder = { ...payload, _docId: docId, id: docId };
       cacheOrderLocally(savedOrder);
       return docId;
     }catch(err){
-      console.error('Failed to add order to Firestore', err);
-      // Provide more specific error message for mobile devices
-      const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
-        // On mobile, fall back to local storage and inform user
-        console.warn('[firebase-adapter] Falling back to local storage for mobile device');
-        const savedOrder = { ...payload, _localOnly: true, _syncError: err.message };
-        cacheOrderLocally(savedOrder);
-        throw new Error('Order saved locally due to connectivity issues. Please try again later or use a desktop browser to ensure your order is processed.');
-      } else {
-        throw new Error('Firebase is required. Order could not be saved.');
+      console.error('[firebase-adapter] Failed to add order to Firestore:', err);
+      console.error('[firebase-adapter] Error details:', {
+        message: err.message,
+        code: err.code,
+        stack: err.stack
+      });
+
+      // Decide if we should fall back to local storage
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase());
+      const offline = typeof navigator !== 'undefined' && navigator && navigator.onLine === false;
+      const networkCodes = new Set(['unavailable','network-request-failed','deadline-exceeded']);
+      const permissionCodes = new Set(['permission-denied']);
+      const invalidArg = (err && typeof err.message === 'string' && err.message.toLowerCase().includes('unsupported field value: undefined'))
+        || (err && err.code === 'invalid-argument');
+
+      if (invalidArg) {
+        // Surface a helpful message to fix undefined fields
+        throw new Error('Invalid order data: Found undefined field(s). Please ensure all item fields (id, name, price, quantity) are defined.');
       }
+
+      if ((isMobile && (offline || networkCodes.has(err?.code))) || (offline)) {
+        console.warn('[firebase-adapter] Falling back to local storage (offline/network issue)');
+        const savedOrder = { ...payload, _localOnly: true, _syncError: err?.message || String(err) };
+        cacheOrderLocally(savedOrder);
+        throw new Error('Order saved locally due to connectivity issue. Please check your internet connection.');
+      }
+
+      if (permissionCodes.has(err?.code)) {
+        throw new Error('Permission denied saving order. Check your Firestore rules.');
+      }
+
+      // Default: bubble up original error message for transparency
+      throw new Error(`Failed to save order to Firebase: ${err?.message || String(err)}`);
     }
   } else {
-    // Firebase not available - fall back to local storage
-    console.warn('[firebase-adapter] Firebase not available, using local storage fallback');
-    const savedOrder = { ...payload, _localOnly: true, _syncError: 'Firebase not initialized' };
-    cacheOrderLocally(savedOrder);
-    
-    const isMobile = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) {
-      throw new Error('Order saved locally. Please check your internet connection and try again, or use a desktop browser.');
-    } else {
-      throw new Error('Firebase is not initialized. Order saved locally only.');
-    }
+    console.error('[firebase-adapter] Firebase not available - cannot save order');
+    console.error('[firebase-adapter] State:', _state);
+    throw new Error('Firebase is not available. Please check your internet connection and try again.');
   }
 }
 
@@ -551,7 +643,7 @@ async function saveSettings(settings) {
   }
 }
 
-export default {
+const firebaseAdapter = {
   init,
   getProducts,
   getProductById,
@@ -612,3 +704,18 @@ export default {
   onAuthStateChanged,
   getCurrentUser
 };
+
+// Export for both ES modules and global scope
+if (typeof module !== 'undefined' && module.exports) {
+  // CommonJS
+  module.exports = firebaseAdapter;
+} else if (typeof define === 'function' && define.amd) {
+  // AMD
+  define([], function() { return firebaseAdapter; });
+} else if (typeof window !== 'undefined') {
+  // Browser global
+  window.FirebaseAdapter = firebaseAdapter;
+}
+
+// ES module export
+export default firebaseAdapter;

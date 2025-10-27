@@ -1,97 +1,33 @@
 rules_version = '2';
 service cloud.firestore {
-  // Strategy: Only authenticated users with custom claim admin == true OR listed in /admins collection can write.
-  // Public reads allowed for products; orders readable only to admins.
   match /databases/{database}/documents {
 
-    // Helper functions
-    function isSignedIn() { return request.auth != null; }
-    function isAdminClaim() { return isSignedIn() && request.auth.token.admin == true; }
-    function isAdminListed() {
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
-    }
-    function isAdmin() { return isAdminClaim() || isAdminListed(); }
-
-    // Products collection
-    match /products/{productId} {
-      allow read: if true; // public product catalog
-  allow create: if isAdmin() && validateNewProduct();
-      allow update: if isAdmin() && validateUpdatedProduct();
-      allow delete: if isAdmin();
-
-      function validateNewProduct() {
-        return validateCommonProductFields()
-          && validateTimestamps(true)
-          && 'name' in request.resource.data;
-      }
-
-      function validateUpdatedProduct() {
-        return validateCommonProductFields()
-          && validateTimestamps(false);
-      }
-
-      function validateCommonProductFields() {
-        return request.resource.data.keys().hasAll(['name','price','description','category','imageUrl'])
-          && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 120
-          && request.resource.data.description is string && request.resource.data.description.size() >= 5 && request.resource.data.description.size() <= 5000
-          && request.resource.data.category is string && request.resource.data.category.size() > 0 && request.resource.data.category.size() <= 60
-          && request.resource.data.imageUrl is string && request.resource.data.imageUrl.size() <= 2000
-          && request.resource.data.price is number && request.resource.data.price >= 0 && request.resource.data.price <= 100000000;
-      }
-
-      function validateTimestamps(isCreate) {
-        // Accept either string timestamps or Firestore Timestamp objects (timestamp)
-        return (!('createdAt' in request.resource.data) || request.resource.data.createdAt is string || request.resource.data.createdAt is timestamp)
-          && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is string || request.resource.data.updatedAt is timestamp)
-          && (isCreate ? true : ('updatedAt' in request.resource.data));
-      }
+    // Products: public read-only from client
+    match /products/{id} {
+      allow read: if true;
+      allow write: if false;
     }
 
-    // Orders collection
+    // Orders: Loosen rules to allow CREATE from unauthenticated clients
+    // while keeping read/update/delete restricted to authenticated users.
     match /orders/{orderId} {
-      // UPDATED: Allow unauthenticated users to CREATE orders (checkout flow)
-      // Admins can read/update/delete all orders
-      allow read: if isAdmin();
-      allow create: if validateOrder();  // ✅ Anyone can create orders
-      allow update: if isAdmin() && validateOrder();
-      allow delete: if isAdmin();
-
-      function validateOrder() {
-        return request.resource.data.keys().hasAll(['orderId','customer','items','total','date'])
-          && request.resource.data.orderId is string && request.resource.data.orderId.size() <= 80
-          && request.resource.data.customer is map
-          && request.resource.data.customer.keys().hasAll(['name','mobile'])
-          && request.resource.data.customer.name is string && request.resource.data.customer.name.size() >= 2 && request.resource.data.customer.name.size() <= 140
-          && request.resource.data.customer.mobile is string && request.resource.data.customer.mobile.size() >= 8 && request.resource.data.customer.mobile.size() <= 20
-          && ('email' in request.resource.data.customer ? (request.resource.data.customer.email is string && request.resource.data.customer.email.size() <= 320) : true)
-          && ('pincode' in request.resource.data.customer ? (request.resource.data.customer.pincode is string && request.resource.data.customer.pincode.size() <= 20) : true)
-          && request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() <= 500
-          && request.resource.data.items[0] is map // coarse check — Firestore rules lack full loop constructs
-          && request.resource.data.total is number && request.resource.data.total >= 0 && request.resource.data.total <= 100000000
-          && request.resource.data.date is string && request.resource.data.date.size() >= 10 && request.resource.data.date.size() <= 40;
-      }
+      allow create: if isValidOrder();
+      allow read, update, delete: if request.auth != null;
     }
 
-    // Admins collection (allows listing of admin UIDs by a super-admin only)
-    match /admins/{adminUid} {
-      allow read: if isAdmin();
-      allow create, update, delete: if isAdminClaim(); // only users with admin custom claim can modify admin list
+    function isValidOrder() {
+      return request.resource.data.orderId is string
+        && request.resource.data.status is string
+        && request.resource.data.total is number
+        && request.resource.data.itemCount is number
+        && request.resource.data.items is list
+        && request.resource.data.items.size() > 0
+        && request.resource.data.customer is map
+        && request.resource.data.customer.name is string
+        && request.resource.data.customer.mobile is string;
     }
 
-    // Settings collection
-    match /settings/{settingId} {
-      allow read: if true; // Public read for WhatsApp number (used in checkout)
-      allow write: if isAdmin(); // Only admins can update settings
-    }
-
-    // Health checks: allow signed-in users to write for health checks
-    match /health_checks/{checkId} {
-      allow create: if request.auth != null;
-      // Deny reads so non-admins can't see others' checks
-      allow read: if false;
-    }
-
-    // Fallback: deny everything else explicitly
+    // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;
     }

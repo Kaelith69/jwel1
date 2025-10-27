@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Test</title>
+</head>
+<body>
+    <h1>Firebase Connection Test</h1>
+    <div id="status">Testing Firebase connection...</div>
+    <div id="details"></div>
+    <div id="logs"></div>
+
+    <script type="module">
+        const statusDiv = document.getElementById('status');
+        const detailsDiv = document.getElementById('details');
+        const logsDiv = document.getElementById('logs');
+
+        function log(message) {
+            console.log(message);
+            logsDiv.innerHTML += '<div>' + message + '</div>';
+        }
+
+        try {
+            log('Starting Firebase test...');
+            log('User Agent: ' + navigator.userAgent);
+            log('Is Mobile: ' + /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test(navigator.userAgent));
+
+            // Import Firebase config
+            log('Importing firebase-config.js...');
+            const { initFirebaseIfNeeded } = await import('./js/firebase-config.js');
+            log('Successfully imported firebase-config.js');
+
+            statusDiv.textContent = 'Initializing Firebase...';
+            log('Calling initFirebaseIfNeeded()...');
+
+            await initFirebaseIfNeeded();
+            log('Firebase initialization completed');
+
+            // Try to access Firestore
+            log('Importing Firebase adapter...');
+            const { default: FirebaseAdapter } = await import('./js/firebase-adapter.js');
+            log('Firebase adapter imported');
+
+            log('Testing order save...');
+            const testOrder = {
+                orderId: 'TEST-' + Date.now(),
+                customer: { name: 'Test User', mobile: '9999999999' },
+                items: [{ name: 'Test Item', price: 100, quantity: 1 }],
+                total: 100,
+                date: new Date().toISOString()
+            };
+
+            const result = await FirebaseAdapter.addOrder(testOrder);
+            log('Order saved successfully: ' + result);
+
+            statusDiv.textContent = 'Firebase working! Order saved: ' + result;
+            statusDiv.style.color = 'green';
+            detailsDiv.textContent = 'Firebase is functioning correctly.';
+
+        } catch (error) {
+            log('Error: ' + error.message);
+            log('Error stack: ' + error.stack);
+            statusDiv.textContent = 'Firebase test failed!';
+            statusDiv.style.color = 'red';
+            detailsDiv.textContent = `Error: ${error.message}`;
+            console.error('Firebase test error:', error);
+        }
+    </script>
+</body>
+</html>

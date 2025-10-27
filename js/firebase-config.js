@@ -35,6 +35,7 @@ let uploadBytesRef = null;
 let getDownloadURLRef = null;
 
 let signInWithEmailAndPasswordRef = null;
+let signInAnonymouslyRef = null;
 let signOutRef = null;
 let onAuthStateChangedRef = null;
 let getAnalyticsRef = null;
@@ -58,23 +59,38 @@ async function importFirebase(version) {
 
 async function ensureInitialized() {
 	if (app) {
+		console.log('[firebase-config] Firebase already initialized');
 		return { app, auth, db, storage, analytics };
 	}
 
+	console.log('[firebase-config] Initializing Firebase...');
 	if (!initPromise) {
 		initPromise = (async () => {
 			let mods;
 			try {
-				mods = await importFirebase('11.0.1');
+				console.log('[firebase-config] Trying Firebase v9.22.0...');
+				mods = await importFirebase('9.22.0');
 			} catch (err) {
-				mods = await importFirebase('10.12.5');
+				console.warn('[firebase-config] Failed to load v9.22.0:', err.message);
+				try {
+					console.log('[firebase-config] Trying Firebase v10.12.5...');
+					mods = await importFirebase('10.12.5');
+				} catch (err2) {
+					console.warn('[firebase-config] Failed to load v10.12.5:', err2.message);
+					console.log('[firebase-config] Trying Firebase v11.0.1...');
+					mods = await importFirebase('11.0.1');
+				}
 			}
 
+			console.log('[firebase-config] Firebase modules loaded, creating app...');
 			const { appMod, authMod, fsMod, storageMod, analyticsMod } = mods;
 			app = appMod.initializeApp(firebaseConfig);
+			console.log('[firebase-config] Firebase app created');
+			
 			auth = authMod.getAuth(app);
 			db = fsMod.getFirestore(app);
 			storage = storageMod.getStorage(app);
+			console.log('[firebase-config] Firebase services initialized');
 
 			collection = fsMod.collection;
 			getDocs = fsMod.getDocs;
@@ -94,6 +110,7 @@ async function ensureInitialized() {
 			getDownloadURLRef = storageMod.getDownloadURL;
 
 			signInWithEmailAndPasswordRef = authMod.signInWithEmailAndPassword || null;
+			signInAnonymouslyRef = authMod.signInAnonymously || null;
 			signOutRef = authMod.signOut || null;
 			onAuthStateChangedRef = authMod.onAuthStateChanged || null;
 
@@ -109,6 +126,7 @@ async function ensureInitialized() {
 				}
 			}
 
+			console.log('[firebase-config] Firebase initialization complete');
 			return { app, auth, db, storage, analytics };
 		})();
 	}
@@ -148,6 +166,7 @@ export {
 	uploadBytesRef as uploadBytes,
 	getDownloadURLRef as getDownloadURL,
 	signInWithEmailAndPasswordRef as signInWithEmailAndPassword,
+	signInAnonymouslyRef as signInAnonymously,
 	signOutRef as signOut,
 	onAuthStateChangedRef as onAuthStateChanged,
 	getAnalyticsRef as getAnalytics,

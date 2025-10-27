@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream/promises');
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 const root = __dirname;
 
 // Buffer size for streaming (64KB chunks)

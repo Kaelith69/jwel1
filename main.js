@@ -920,18 +920,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 notes: 'Order initiated via checkout form and shared over WhatsApp.'
             };
 
-            let orderSavedLocally = false;
             try {
-                const firestoreDocId = await FirebaseAdapter.addOrder(order);
+                console.log('[checkout] Attempting to save order to Firebase...');
+                // Add timeout for mobile devices
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase());
+                const timeoutMs = isMobile ? 15000 : 5000; // 15 seconds for mobile, 5 for desktop
+                
+                const savePromise = FirebaseAdapter.addOrder(order);
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Firebase save timeout')), timeoutMs)
+                );
+                
+                const firestoreDocId = await Promise.race([savePromise, timeoutPromise]);
                 console.log('\u2705 Order saved to Firebase:', firestoreDocId);
             } catch (err) {
-                console.error('Failed to save order to Firebase:', err);
-                // Check if this is a local fallback (allow proceeding with WhatsApp)
-                if (err.message && (err.message.includes('saved locally') || err.message.includes('connectivity issues'))) {
-                    orderSavedLocally = true;
-                    console.warn('Order saved locally due to connectivity issues, proceeding with WhatsApp');
+                console.error('❌ Failed to save order to Firebase:', err);
+                console.error('Error details:', err.message, err.code, err.stack);
+                
+                // Handle mobile fallback
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Windows Phone|Opera Mini/i.test((navigator.userAgent || '').toLowerCase());
+                if (isMobile && err.message && err.message.includes('saved locally')) {
+                    console.warn('Order saved locally on mobile device');
                     if (checkoutError) {
-                        checkoutError.textContent = 'Order saved locally. Proceeding with WhatsApp...';
+                        checkoutError.textContent = 'Order saved locally due to connection issue. You can still proceed to WhatsApp.';
                         checkoutError.style.display = 'block';
                         checkoutError.style.color = '#ff9800'; // Orange warning color
                     }
@@ -950,23 +961,56 @@ document.addEventListener('DOMContentLoaded', async () => {
             const whatsappMobileUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'mobile' });
             const whatsappWebUrl = buildWhatsAppUrl(whatsappNumber, encodedMsg, { target: 'web' });
 
+            // Check if order was saved locally (temporary debugging mode)
+            const orderSavedLocally = checkoutError && checkoutError.textContent.includes('saved locally');
+
             if (isMobileDevice()) {
                 if (checkoutError) {
-                    const successMessage = orderSavedLocally 
-                        ? 'Order saved locally! Redirecting you to WhatsApp...' 
-                        : 'Order placed! Redirecting you to WhatsApp...';
+                    const successMessage = orderSavedLocally
+                        ? 'Order saved locally! Opening WhatsApp...'
+                        : 'Order placed! Opening WhatsApp...';
                     checkoutError.textContent = successMessage;
                     checkoutError.style.display = 'block';
                     checkoutError.style.color = orderSavedLocally ? '#ff9800' : '#080';
                 }
-                const newWindow = window.open(whatsappMobileUrl, '_blank', 'noopener');
-                if (!newWindow) {
-                    window.location.href = whatsappMobileUrl;
+
+                // Try to open WhatsApp with multiple fallback strategies
+                let whatsappOpened = false;
+
+                try {
+                    // Method 1: Try opening in new window/tab
+                    const newWindow = window.open(whatsappMobileUrl, '_blank', 'noopener,noreferrer');
+                    if (newWindow && !newWindow.closed) {
+                        whatsappOpened = true;
+                        newWindow.focus();
+                    }
+                } catch (e) {
+                    console.warn('Failed to open WhatsApp in new window:', e);
+                }
+
+                if (!whatsappOpened) {
+                    try {
+                        // Method 2: Direct navigation as last resort
+                        window.location.href = whatsappMobileUrl;
+                        whatsappOpened = true;
+                    } catch (e) {
+                        console.warn('Failed to navigate to WhatsApp:', e);
+                    }
+                }
+
+                if (!whatsappOpened) {
+                    // Method 3: Show manual instructions
+                    if (checkoutError) {
+                        checkoutError.textContent = 'Please tap this link to open WhatsApp: ' +
+                            '<a href="' + whatsappMobileUrl + '" target="_blank" rel="noopener" style="color:#25d366;text-decoration:underline;">Open WhatsApp</a>';
+                        checkoutError.style.display = 'block';
+                        checkoutError.style.color = '#ff9800';
+                    }
                 }
             } else {
                 if (checkoutError) {
-                    const successMessage = orderSavedLocally 
-                        ? 'Order saved locally! Scan the QR code below with your phone to continue on WhatsApp.' 
+                    const successMessage = orderSavedLocally
+                        ? 'Order saved locally! Scan the QR code below with your phone to continue on WhatsApp.'
                         : 'Order placed! Scan the QR code below with your phone to continue on WhatsApp.';
                     checkoutError.textContent = successMessage;
                     checkoutError.style.display = 'block';
