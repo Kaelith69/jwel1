@@ -58,3 +58,24 @@
 [debug] [2025-10-31T11:09:37.416Z] Checked if tokens are valid: true, expires at: 1761911100325
 [debug] [2025-10-31T11:09:37.416Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions [none]
 [debug] [2025-10-31T11:09:37.416Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2025-10-31T11:09:40.090Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions 200
+[debug] [2025-10-31T11:09:40.090Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions {"name":"projects/483619642721/sites/jwel369/versions/ba80747d55e43ce3","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2025-10-31T11:09:40.091Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:40.091Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:40.091Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases pageSize=10&pageToken=
+[debug] [2025-10-31T11:09:41.641Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases 200
+[debug] [2025-10-31T11:09:41.641Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases {"releases":[{"name":"projects/jwel369/releases/cloud.firestore","rulesetName":"projects/jwel369/rulesets/b9b86cd0-e707-4098-9329-a65d75547d3d","createTime":"2025-10-15T00:17:40.265033Z","updateTime":"2025-10-31T10:45:32.002363Z"},{"name":"projects/jwel369/releases/firebase.storage/jwel369.firebasestorage.app","rulesetName":"projects/jwel369/rulesets/b432ee9f-5bda-4a3c-94c0-1084028bf758","createTime":"2025-10-14T20:05:23.630654Z","updateTime":"2025-10-31T10:45:30.591177Z"}]}
+[debug] [2025-10-31T11:09:41.654Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:41.654Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:41.654Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/jwel369/rulesets/b432ee9f-5bda-4a3c-94c0-1084028bf758 [none]
+[debug] [2025-10-31T11:09:42.132Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/jwel369/rulesets/b432ee9f-5bda-4a3c-94c0-1084028bf758 200
+[debug] [2025-10-31T11:09:42.132Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/jwel369/rulesets/b432ee9f-5bda-4a3c-94c0-1084028bf758 [omitted]
+[info] i  storage: latest version of storage.rules already up to date, skipping upload... 
+[debug] [2025-10-31T11:09:42.134Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:42.134Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:42.135Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases pageSize=10&pageToken=
+[debug] [2025-10-31T11:09:43.696Z] <<< [apiv2][status] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases 200
+[debug] [2025-10-31T11:09:43.696Z] <<< [apiv2][body] GET https://firebaserules.googleapis.com/v1/projects/jwel369/releases {"releases":[{"name":"projects/jwel369/releases/cloud.firestore","rulesetName":"projects/jwel369/rulesets/b9b86cd0-e707-4098-9329-a65d75547d3d","createTime":"2025-10-15T00:17:40.265033Z","updateTime":"2025-10-31T10:45:32.002363Z"},{"name":"projects/jwel369/releases/firebase.storage/jwel369.firebasestorage.app","rulesetName":"projects/jwel369/rulesets/b432ee9f-5bda-4a3c-94c0-1084028bf758","createTime":"2025-10-14T20:05:23.630654Z","updateTime":"2025-10-31T10:45:30.591177Z"}]}
+[debug] [2025-10-31T11:09:43.697Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:43.697Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:43.697Z] >>> [apiv2][query] GET https://firebaserules.googleapis.com/v1/projects/jwel369/rulesets/b9b86cd0-e707-4098-9329-a65d75547d3d [none]
