@@ -1,25 +1,136 @@
-<!-- product-card.html
-     Drop this snippet where you render individual product cards.
-     It contains component-scoped CSS and an example markup.
-     Ensure classes match your JS (data-product, .add-to-cart-btn, etc.)
--->
+<!-- Optimized Product Card Snippet -->
+<style>
+    /* --- Product Card Styles (Component-Scoped) --- */
+    .product-card {
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        cursor: pointer;
+    }
 
-</style>
-<!-- Styles moved to components/product-card.css. Ensure this file is included in your HTML. -->
+    .product-card:hover,
+    .product-card:focus-within {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(59, 130, 246, 0.15);
+    }
+
+    .product-image-container {
+        width: 100%;
+        padding-top: 100%; /* Creates a 1:1 aspect ratio */
+        position: relative;
+        background-color: #f8fafc;
+    }
+
+    .product-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-info {
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    .product-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .product-price {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #3B82F6; /* Accent color */
+        margin-bottom: 0.5rem;
+    }
+    
+    .product-category {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .product-actions {
+        margin-top: auto; /* Pushes buttons to the bottom */
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .product-actions button {
+        padding: 0.7rem 1rem;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .add-to-cart-btn {
+        background-color: #3B82F6;
+        color: #fff;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #2563EB;
+        transform: scale(1.05);
+    }
+    
+    .view-details-btn {
+        background-color: #e5e7eb;
+        color: #1f2937;
+    }
+    
+    .view-details-btn:hover {
+        background-color: #d1d5db;
+    }
+
+    /* --- Responsive Adjustments --- */
+    @media (max-width: 600px) {
+        .product-info {
+            padding: 0.75rem 1rem;
+        }
+        .product-name {
+            font-size: 1.1rem;
+        }
+        .product-price {
+            font-size: 1rem;
+        }
+        .product-actions {
+            grid-template-columns: 1fr; /* Stack buttons on very small screens */
+        }
+    }
 </style>
 
-<!-- Example card markup (matches the classes your main.js / cart code expect) -->
-<article class="product-card" tabindex="0" data-product='{"name":"Example Pendant","price":"₹650.00","image":"https://picsum.photos/seed/example/800/600","category":"Necklace","description":"A beautiful pendant for everyday elegance."}'>
+<!-- Example Card Markup -->
+<article class="product-card" tabindex="0" data-product='{"id": "p1", "name":"Ethereal Diamond Pendant","price":"₹12,500","image":"https://images.unsplash.com/photo-1611652022417-a551155e9b1d?q=80&w=2574&auto=format&fit=crop", "category":"Necklace","description":"An exquisite diamond pendant that captures the essence of light. Perfect for special occasions."}'>
     <div class="product-image-container" aria-hidden="true">
-        <img class="product-image" src="https://picsum.photos/seed/example/800/600" alt="Example Pendant">
+        <img class="product-image" src="https://images.unsplash.com/photo-1611652022417-a551155e9b1d?q=80&w=2574&auto=format&fit=crop" alt="Ethereal Diamond Pendant">
     </div>
     <div class="product-info">
-        <div class="product-name">Example Pendant</div>
-        <div class="product-price">₹650</div>
+        <div class="product-name">Ethereal Diamond Pendant</div>
+        <div class="product-price">₹12,500</div>
         <div class="product-category">Necklace</div>
         <div class="product-actions">
-            <button class="add-to-cart-btn" type="button">Add to cart</button>
-            <button class="view-details-btn" type="button" aria-label="View details">View</button>
+            <button class="add-to-cart-btn" type="button" aria-label="Add Ethereal Diamond Pendant to cart">Add to Cart</button>
+            <button class="view-details-btn" type="button" aria-label="View details for Ethereal Diamond Pendant">View Details</button>
         </div>
     </div>
 </article>

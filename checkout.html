@@ -1,151 +1,104 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Checkout - Luxury Jewelleries</title><meta name="description" content="Checkout securely and complete your luxury jewelry purchase."><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin><link rel="icon" href="logo/logo.png" sizes="any"><meta property="og:title" content="Checkout - Luxury Jewelleries"><meta property="og:description" content="Secure checkout for your order."><meta property="og:image" content="logo/logo.png"><meta property="og:type" content="website"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="loader.css"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="liquid-button.css"><link rel="stylesheet" href="neumorphic.css"><style>
-/* Compact minimal checkout — mobile-first */
-:root{--accent:#3B82F6;--muted:#6c757d;--bg:#fff}
-*{box-sizing:border-box}
-body.checkout-page{font-family:'Poppins',sans-serif;background:linear-gradient(120deg,#f8fafc 60%,#e0e7ef 100%);margin:0;color:#232323}
-#page-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(255,255,255,.6)}
-.checkout-main{padding:1rem;min-height:100vh;display:flex;align-items:flex-start;justify-content:center}
-.checkout-container{width:100%;max-width:1100px;display:grid;grid-template-columns:1fr;gap:1rem;align-items:start}
-/* form */
-.checkout-form-container{background:var(--bg);border-radius:12px;padding:14px;box-shadow:0 6px 22px rgba(31,38,135,.06)}
-.checkout-header{display:flex;flex-direction:row;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.back-to-collections{font-size:.95rem;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:.5rem}
-.checkout-title{font-size:1.2rem;margin:0;font-weight:700}
-.customer-details-form{display:flex;flex-direction:column;gap:.6rem}
-.form-group{display:flex;flex-direction:column;gap:.35rem}
-.form-group label{font-size:.92rem;color:var(--muted)}
-.form-group input,.form-group textarea{padding:.6rem .75rem;border:1px solid rgba(0,0,0,.08);border-radius:8px;font-size:.98rem;outline:none;background:#fff}
-.form-group input:focus,.form-group textarea:focus{box-shadow:0 6px 18px rgba(59,130,246,.06);border-color:rgba(59,130,246,.18)}
-#checkout-error{color:#b00020;font-size:.95rem;min-height:1.2em}
-#whatsapp-order-btn.cta-button{margin-top:.6rem;padding:.85rem 1rem;border-radius:10px;background:linear-gradient(90deg,var(--accent) 60%,#2563EB 100%);color:#fff;border:none;cursor:pointer;box-shadow:0 8px 28px rgba(59,130,246,.08)}
-/* order summary (collapsible on mobile) */
-.order-summary-container{background:var(--bg);border-radius:12px;padding:12px;box-shadow:0 6px 22px rgba(31,38,135,.06);display:flex;flex-direction:column;gap:.6rem}
-.summary-header{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
-.summary-title{font-size:1.05rem;margin:0;font-weight:700}
-.summary-toggle{background:none;border:1px solid rgba(0,0,0,.06);padding:.45rem .6rem;border-radius:8px;font-size:.95rem;cursor:pointer;color:var(--muted)}
-.order-summary{overflow:hidden;transition:max-height .28s ease;padding-top:.4rem}
-.order-summary.closed{max-height:0;padding-top:0}
-.order-summary.open{max-height:1200px}
-/* summary internals */
-.loading-state{display:flex;align-items:center;justify-content:center;padding:.6rem 0}
-.bill-total{border-top:1px dashed rgba(0,0,0,.06);padding-top:.6rem;display:flex;flex-direction:column;gap:.25rem}
-.bill-total p{margin:0;font-size:.98rem}
-.bill-total .grand-total{font-weight:700;margin-top:.2rem}
-.qr-progress,.whatsapp-qr-wrapper{min-height:48px}
-/* cart sidebar (kept but compact) */
-.cart-sidebar{position:fixed;right:0;top:0;height:100vh;width:360px;max-width:90vw;background:var(--bg);box-shadow:-8px 0 32px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .28s;z-index:1100}
-.cart-sidebar[aria-hidden="false"]{transform:translateX(0)}
-.cart-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;border-bottom:1px solid rgba(0,0,0,.04)}
-.cart-items{padding:.75rem 1rem;min-height:120px}
-.cart-footer{padding:.8rem 1rem;border-top:1px solid rgba(0,0,0,.04);display:flex;flex-direction:column;gap:.5rem}
-.cart-footer-actions{display:flex;gap:.6rem;justify-content:flex-end}
-.clear-cart-btn{background:#fff;border:1px solid rgba(0,0,0,.06);padding:.5rem .8rem;border-radius:8px;cursor:pointer}
-.checkout-button{background:linear-gradient(90deg,var(--accent) 60%,#2563EB 100%);color:#fff;border:none;padding:.6rem .9rem;border-radius:8px;cursor:pointer}
-/* responsive layout */
-@media(min-width:700px){.checkout-container{grid-template-columns:1fr 380px;gap:1rem}.order-summary{max-height:none!important;padding-top:.4rem}.summary-toggle{display:none}}
-@media(max-width:699px){.checkout-main{padding:.8rem}.checkout-container{grid-template-columns:1fr;gap:.6rem} .order-summary.open{max-height:1200px} .order-summary.closed{max-height:0}}
-/* reduce global vertical spacing to keep it compact */
-h1,h2,h3,p{margin:0;padding:0}
-</style></head><body class="checkout-page">
-<!-- Page loader overlay -->
-<div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading"><div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div></div>
-
-<main class="checkout-main" id="main-content">
-  <div class="checkout-container">
-    <div class="checkout-form-container">
-      <div class="checkout-header">
-        <a href="products.html" class="back-to-collections"><i class="fas fa-arrow-left"></i> Continue Shopping</a>
-        <h1 class="checkout-title">Shipping Information</h1>
-      </div>
-
-      <form id="customer-details-form" class="customer-details-form" novalidate>
-        <div class="form-group">
-          <label for="customer-name">Full Name</label>
-          <input type="text" id="customer-name" name="customer-name" required autocomplete="name" placeholder="John Doe">
-        </div>
-        <div class="form-group">
-          <label for="customer-mobile">Mobile Number</label>
-          <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile number">
-        </div>
-        <div class="form-group">
-          <label for="customer-address">Shipping Address</label>
-          <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="123 Luxury Lane, Jewel City" rows="3"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="customer-pincode">PIN Code</label>
-          <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="6-digit PIN code">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Luxury Jewelleries</title>
+    <meta name="description" content="Checkout securely and complete your luxury jewelry purchase.">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="icon" href="logo/logo.png" sizes="any">
+    <meta property="og:title" content="Checkout - Luxury Jewelleries">
+    <meta property="og:description" content="Secure checkout for your order.">
+    <meta property="og:image" content="logo/logo.png">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&family=Lora:wght@400;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="loader.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="liquid-button.css">
+    <link rel="stylesheet" href="neumorphic.css">
+</head>
+<body class="checkout-page">
+        <!-- Page loader overlay -->
+        <div id="page-loader" class="page-loader hidden" aria-hidden="true" aria-live="polite" aria-label="Loading">
+                <div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div>
         </div>
 
-        <div id="checkout-error" class="checkout-error" role="alert" aria-live="assertive"></div>
-        <button id="whatsapp-order-btn" class="cta-button" type="submit">Place Order via WhatsApp</button>
-      </form>
+        <main class="checkout-main" id="main-content">
+            <div class="checkout-container">
+                <div class="checkout-form-container">
+                    <div class="checkout-header">
+                        <a href="products.html" class="back-to-collections">
+                            <i class="fas fa-arrow-left"></i>
+                            Continue Shopping
+                        </a>
+                        <h1 class="checkout-title">Shipping Information</h1>
+                    </div>
+                    <form id="customer-details-form" class="customer-details-form" novalidate>
+                        <div class="form-group">
+                            <label for="customer-name">Full Name</label>
+                            <input type="text" id="customer-name" name="customer-name" required autocomplete="name" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-mobile">Mobile Number</label>
+                            <input type="tel" id="customer-mobile" name="customer-mobile" required autocomplete="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-address">Shipping Address</label>
+                            <textarea id="customer-address" name="customer-address" required autocomplete="street-address" placeholder="123 Luxury Lane, Jewel City" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-pincode">PIN Code</label>
+                            <input type="text" id="customer-pincode" name="customer-pincode" required autocomplete="postal-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="6-digit PIN code">
+                        </div>
+                        <div id="checkout-error" class="checkout-error" role="alert" aria-live="assertive"></div>
+                        <button id="whatsapp-order-btn" class="cta-button" type="submit">Place Order via WhatsApp</button>
+                    </form>
+                </div>
+                <div class="order-summary-container">
+                    <h2 class="summary-title">Order Summary</h2>
+                    <div id="checkout-summary-loader" class="loading-state">
+                        <div class="loader-gem"><span></span><span></span><span></span></div>
+                    </div>
+                    <div id="bill-items"></div>
+                    <div class="bill-total">
+                        <p>Subtotal: <span id="bill-subtotal">₹0</span></p>
+                        <p>Shipping: <span id="bill-shipping">₹0</span></p>
+                        <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
+                    </div>
+                     <div id="whatsapp-qr-progress" class="qr-progress" aria-hidden="true"></div>
+                     <div id="whatsapp-qr-wrapper" class="whatsapp-qr-wrapper" aria-live="polite" hidden></div>
+                </div>
+            </div>
+        </main>
+        
+    <aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
+            <div class="cart-header">
+                <h2>Your Bag</h2>
+                <button id="cart-close-btn" class="close-btn liquidize" type="button" aria-label="Close cart">&times;</button>
+            </div>
+            <div id="cart-items" class="cart-items"></div>
+            <div class="cart-footer">
+                <div class="cart-total">
+                    <span>Total:</span>
+                    <span id="cart-total-price">₹0</span>
+                </div>
+                <div class="cart-footer-actions">
+                    <button id="clear-cart-btn" class="checkout-button clear-cart-btn liquidize" type="button">Clear</button>
+                    <button id="checkout-btn" class="checkout-button liquidize" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
+                </div>
+            </div>
+        </aside>
+        <div id="sidebar-overlay" role="presentation"></div>
     </div>
-
-    <div class="order-summary-container" aria-live="polite">
-      <div class="summary-header">
-        <h2 class="summary-title">Order Summary</h2>
-        <button class="summary-toggle" id="summary-toggle" aria-expanded="false" aria-controls="order-summary">Show Order Summary</button>
-      </div>
-
-      <div id="order-summary" class="order-summary closed" role="region">
-        <div id="checkout-summary-loader" class="loading-state"><div class="loader-gem" aria-hidden="true"><span></span><span></span><span></span></div></div>
-        <div id="bill-items"></div>
-        <div class="bill-total">
-          <p>Subtotal: <span id="bill-subtotal">₹0</span></p>
-          <p>Shipping: <span id="bill-shipping">₹0</span></p>
-          <p class="grand-total">Total: <span id="bill-grand-total">₹0</span></p>
-        </div>
-        <div id="whatsapp-qr-progress" class="qr-progress" aria-hidden="true"></div>
-        <div id="whatsapp-qr-wrapper" class="whatsapp-qr-wrapper" aria-live="polite" hidden></div>
-      </div>
-    </div>
-  </div>
-</main>
-
-<aside id="cart-sidebar" class="cart-sidebar" aria-hidden="true" aria-label="Shopping cart">
-  <div class="cart-header">
-    <h2>Your Bag</h2>
-    <button id="cart-close-btn" class="close-btn liquidize" type="button" aria-label="Close cart">&times;</button>
-  </div>
-  <div id="cart-items" class="cart-items"></div>
-  <div class="cart-footer">
-    <div class="cart-total">
-      <span>Total:</span>
-      <span id="cart-total-price">₹0</span>
-    </div>
-    <div class="cart-footer-actions">
-      <button id="clear-cart-btn" class="checkout-button clear-cart-btn liquidize" type="button">Clear</button>
-      <button id="checkout-btn" class="checkout-button liquidize" type="button" aria-label="Proceed to checkout">Proceed to Checkout</button>
-    </div>
-  </div>
-</aside>
-<div id="sidebar-overlay" role="presentation"></div>
-
-<script>
-/* Summary toggle behavior: collapsed on small screens, open on desktop */
-(function(){
-  var btn=document.getElementById('summary-toggle'), panel=document.getElementById('order-summary');
-  if(!btn||!panel) return;
-  function setState(open){
-    if(open){panel.classList.remove('closed');panel.classList.add('open');btn.setAttribute('aria-expanded','true');btn.textContent='Hide Order Summary'}
-    else{panel.classList.remove('open');panel.classList.add('closed');btn.setAttribute('aria-expanded','false');btn.textContent='Show Order Summary'}
-  }
-  // media query: desktop open by default
-  var mq=window.matchMedia('(min-width:700px)');
-  function mqHandler(e){setState(e.matches)}
-  mq.addListener(mqHandler);
-  mqHandler(mq);
-  btn.addEventListener('click',function(){setState(panel.classList.contains('closed'))});
-  // keyboard accessibility
-  btn.addEventListener('keydown',function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();btn.click();}});
-})();
-</script>
-
-<script src="js/utils.js" defer></script>
-<script src="js/ui.js" defer></script>
-<script src="js/cart.js" defer></script>
-<script src="main.js" defer></script>
-<script src="js/liquid-button.js" defer></script>
-<script src="js/nav-active.js" defer></script>
-<script src="js/nav-loading.js" defer></script>
-</body></html>
+    <script src="js/utils.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/cart.js" defer></script>
+    <script src="main.js" defer></script>
+    <script src="js/liquid-button.js" defer></script>
+    <script src="js/nav-active.js" defer></script>
+    <script src="js/nav-loading.js" defer></script>
+</body>
+</html>
