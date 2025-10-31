@@ -41,17 +41,28 @@
                     </div>
                     <div class="form-group">
                         <label for="category">Category</label>
-                        <select id="category" required>
-                            <option value="Necklace">Necklace</option>
-                            <option value="Ring">Ring</option>
-                            <option value="Earrings">Earrings</option>
-                            <option value="Bracelet">Bracelet</option>
-                            <option value="Bangles">Bangles</option>
-                            <option value="Pendant">Pendant</option>
-                            <option value="Brooch">Brooch</option>
-                            <option value="Set">Set</option>
-                            <option value="Studs">Studs</option>
-                        </select>
+                        <div class="category-row" style="display:flex;gap:.5rem;align-items:center;">
+                            <select id="category" required style="flex:1;min-width:0;">
+                                <option value="Necklace">Necklace</option>
+                                <option value="Ring">Ring</option>
+                                <option value="Earrings">Earrings</option>
+                                <option value="Bracelet">Bracelet</option>
+                                <option value="Bangles">Bangles</option>
+                                <option value="Pendant">Pendant</option>
+                                <option value="Brooch">Brooch</option>
+                                <option value="Set">Set</option>
+                                <option value="Studs">Studs</option>
+                            </select>
+                            <button type="button" id="add-category-btn" aria-expanded="false" class="admin-button secondary" title="Add new category">＋</button>
+                        </div>
+                        <div id="new-category-group" style="display:none;margin-top:.5rem;" aria-hidden="true">
+                            <label for="new-category" class="visually-hidden">New category name</label>
+                            <div style="display:flex;gap:.5rem;">
+                                <input id="new-category" type="text" placeholder="New category name" style="flex:1;min-width:0;">
+                                <button type="button" id="confirm-add-category" class="admin-button">Add</button>
+                                <button type="button" id="cancel-add-category" class="admin-button secondary">Cancel</button>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="price">Price (Rs)</label>

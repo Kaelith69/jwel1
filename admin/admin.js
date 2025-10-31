@@ -187,7 +187,20 @@ const path=window.location.pathname;
         products = __dedupeProducts(__parseLocalProducts());
     }
     const saveProducts=()=>{products=__dedupeProducts(products);__persistProducts(products);};
-    const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Daily Wear','Studs'];
+    // Default category set (keeps in-sync with the static options in add-product.html)
+    const DEFAULT_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Daily Wear','Studs'];
+
+    // Load persisted categories (if any) and merge with defaults to produce BASE_CATEGORIES
+    let BASE_CATEGORIES = (()=>{
+        try{
+            const stored = JSON.parse(localStorage.getItem('productCategories')||'[]');
+            const unique = new Set([ ...DEFAULT_CATEGORIES, ...Array.isArray(stored)?stored:[] ]);
+            return [...unique];
+        }catch(err){
+            return [...DEFAULT_CATEGORIES];
+        }
+    })();
+
     const refreshCategoryOptions=()=>{
         const unique=new Set(BASE_CATEGORIES);
         products.forEach(p=>{ if(p.category) unique.add(p.category); });
@@ -202,7 +215,7 @@ const path=window.location.pathname;
         // Form selects (could be multiple on different pages)
         document.querySelectorAll('select#category').forEach(sel=>{
             const current=sel.value;
-            sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+            sel.innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('') + '<option value="__add__">+ Add category…</option>';
             if(current && cats.includes(current)) sel.value=current;
         });
     };
@@ -221,6 +234,13 @@ const path=window.location.pathname;
     const cancelBtn=document.getElementById('cancel-btn');
     const productFormWrapper=document.getElementById('product-form-wrapper');
     const toggleFormBtn=document.getElementById('toggle-form-btn');
+
+    // Add-category inline controls (optional in add-product.html)
+    const addCategoryBtn = document.getElementById('add-category-btn');
+    const newCategoryGroup = document.getElementById('new-category-group');
+    const newCategoryInput = document.getElementById('new-category');
+    const confirmAddCategoryBtn = document.getElementById('confirm-add-category');
+    const cancelAddCategoryBtn = document.getElementById('cancel-add-category');
 
     const filterProducts=()=>{const term=(productSearch?.value||'').toLowerCase(); const cat=categoryFilter?.value||''; return products.filter(p=>{const t=!term||p.name.toLowerCase().includes(term)||p.description.toLowerCase().includes(term); const c=!cat||p.category===cat; return t&&c;});};
     const renderCards=()=>{ if(!productList) return; const f=filterProducts(); if(productCountEl) productCountEl.textContent=`${f.length} / ${products.length} products`; if(liveStatus) liveStatus.textContent=`Showing ${f.length} of ${products.length} products`; if(!f.length){productList.innerHTML='<p style="opacity:.7;margin:0;">No products match your filters.</p>';return;} productList.innerHTML=f.map(p=>{const src=__normalizeAssetUrl(p.imageUrl); const img=src?`<img src="${src}" alt="${p.name}" class="pl-img">`:'<div class="pl-img placeholder">🖼️</div>'; const editHref = `add-product.html?docId=${p._docId||p.id}`; const docAttr = p._docId? `data-docid="${p._docId}"` : ''; const statusLabel = (!p._docId && __useFirestore) ? `<span class="muted" style="font-size:.7rem;margin-left:6px;">Unsynced</span>` : ''; const syncBtn = (!p._docId && __useFirestore) ? `<button class="admin-button secondary sync-btn" data-id="${p.id}">Sync</button>` : '';
@@ -378,11 +398,99 @@ const path=window.location.pathname;
                 if(categoryFilter.value !== '__add__') return;
                 const name = (prompt('Enter new category name:')||'').trim();
                 if(!name){ categoryFilter.value=''; return; }
-                if(!BASE_CATEGORIES.includes(name)) BASE_CATEGORIES.push(name);
+                if(!BASE_CATEGORIES.includes(name)){
+                    BASE_CATEGORIES.push(name);
+                    // persist user-added categories so they survive reloads
+                    try{ localStorage.setItem('productCategories', JSON.stringify(BASE_CATEGORIES)); }catch(_){/* ignore */}
+                }
                 refreshCategoryOptions();
                 categoryFilter.value = name;
                 if(liveStatus) liveStatus.textContent = `Added category: ${name}`;
             }catch(err){ console.warn('Add category cancelled or failed', err); categoryFilter.value=''; }
+        });
+    }
+
+    // Allow adding categories directly from the product form select(s) (add-product page)
+    // Supports an inline input (preferred) or falls back to prompt().
+    const _addCategory = (name, sel)=>{
+        const n=(name||'').trim();
+        if(!n) return false;
+        if(!BASE_CATEGORIES.includes(n)){
+            BASE_CATEGORIES.push(n);
+            try{ localStorage.setItem('productCategories', JSON.stringify(BASE_CATEGORIES)); }catch(_){/* ignore */}
+        }
+        refreshCategoryOptions();
+        if(sel) sel.value = n;
+        if(liveStatus) liveStatus.textContent = `Added category: ${n}`;
+        return true;
+    };
+
+    document.addEventListener('change', (e)=>{
+        const sel = e.target;
+        if(!sel || !sel.matches || !sel.matches('select#category')) return;
+        try{
+            if(sel.value !== '__add__') return;
+            // If page provides the inline input controls, show them and focus.
+            if(newCategoryGroup && newCategoryInput){
+                newCategoryGroup.style.display = 'block';
+                newCategoryGroup.setAttribute('aria-hidden','false');
+                addCategoryBtn?.setAttribute('aria-expanded','true');
+                // remember target select for confirm
+                newCategoryGroup._targetSelect = sel;
+                // clear any previous value
+                newCategoryInput.value = '';
+                newCategoryInput.focus();
+                return;
+            }
+            // Fallback: prompt
+            const name = (prompt('Enter new category name:')||'').trim();
+            if(!name){ sel.value=''; return; }
+            _addCategory(name, sel);
+        }catch(err){ console.warn('Add category cancelled or failed', err); sel.value=''; }
+    });
+
+    // Wire inline add/cancel buttons when available
+    if(addCategoryBtn){
+        addCategoryBtn.addEventListener('click', ()=>{
+            if(newCategoryGroup && newCategoryInput){
+                const isShown = newCategoryGroup.style.display !== 'none' && newCategoryGroup.style.display !== '';
+                if(isShown){
+                    newCategoryGroup.style.display = 'none';
+                    newCategoryGroup.setAttribute('aria-hidden','true');
+                    addCategoryBtn.setAttribute('aria-expanded','false');
+                } else {
+                    newCategoryGroup.style.display = 'block';
+                    newCategoryGroup.setAttribute('aria-hidden','false');
+                    addCategoryBtn.setAttribute('aria-expanded','true');
+                    newCategoryInput.value='';
+                    newCategoryInput.focus();
+                    // remember select if only one select present
+                    const sel = document.querySelector('select#category');
+                    if(sel) newCategoryGroup._targetSelect = sel;
+                }
+            } else {
+                // If inline controls not present for some reason, fall back to prompt
+                const sel = document.querySelector('select#category');
+                const name = (prompt('Enter new category name:')||'').trim();
+                if(!name) return;
+                _addCategory(name, sel);
+            }
+        });
+    }
+
+    if(confirmAddCategoryBtn){
+        confirmAddCategoryBtn.addEventListener('click', ()=>{
+            const name = newCategoryInput?.value?.trim();
+            const sel = newCategoryGroup && newCategoryGroup._targetSelect ? newCategoryGroup._targetSelect : document.querySelector('select#category');
+            if(!name){ try{ if(typeof notify === 'function') notify('Enter a category name','warn'); }catch(_){ } return; }
+            const ok = _addCategory(name, sel);
+            if(ok && newCategoryGroup){ newCategoryGroup.style.display='none'; newCategoryGroup.setAttribute('aria-hidden','true'); addCategoryBtn?.setAttribute('aria-expanded','false'); }
+        });
+    }
+
+    if(cancelAddCategoryBtn){
+        cancelAddCategoryBtn.addEventListener('click', ()=>{
+            if(newCategoryGroup){ newCategoryGroup.style.display='none'; newCategoryGroup.setAttribute('aria-hidden','true'); addCategoryBtn?.setAttribute('aria-expanded','false'); const sel = newCategoryGroup._targetSelect || document.querySelector('select#category'); if(sel) sel.value=''; }
         });
     }
     // Manual "Sync from Firestore" button: replace local products with remote list
