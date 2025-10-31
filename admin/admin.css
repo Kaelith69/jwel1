@@ -4,6 +4,9 @@ body {
     color: #fff;
     margin: 0;
 }
+/* Reserve vertical scrollbar to avoid layout shifts when content height changes
+   (prevents header/nav from jumping when filters are cleared and content resizes) */
+html { overflow-y: scroll; }
 .admin-auth-overlay {
     position: fixed;
     inset: 0;
@@ -103,6 +106,27 @@ summary:focus-visible {
 }
 .admin-button.secondary:hover {
     background: rgba(255,255,255,0.4);
+}
+
+/* Make the small "Reset" / clear filters button more compact without
+   affecting other admin buttons. Uses a specific ID selector so it
+   overrides general .admin-button size constraints. */
+#clear-filters.admin-button,
+#clear-filters.admin-button.secondary {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    min-width: 32px;
+    min-height: 32px;
+    line-height: 1;
+}
+
+/* On very small screens some rules force .admin-button.secondary to 100% width;
+   keep the clear button compact by restoring auto width for this specific button. */
+@media (max-width: 400px) {
+    #clear-filters.admin-button.secondary {
+        width: auto;
+        margin-top: 0.25rem; /* maintain a small separation but avoid full-width */
+    }
 }
 .admin-button.danger {
     background: #e53935;
