@@ -14,3 +14,47 @@
 [debug] [2025-10-31T11:09:27.768Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/jwel369:testIamPermissions [none]
 [debug] [2025-10-31T11:09:27.768Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/jwel369:testIamPermissions x-goog-quota-user=projects/jwel369
 [debug] [2025-10-31T11:09:27.769Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jwel369:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2025-10-31T11:09:29.447Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/jwel369:testIamPermissions 200
+[debug] [2025-10-31T11:09:29.447Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/jwel369:testIamPermissions {"permissions":["datastore.indexes.create","datastore.indexes.delete","datastore.indexes.list","datastore.indexes.update","firebase.projects.get","firebasehosting.sites.update","firebaserules.releases.create","firebaserules.releases.update","firebaserules.rulesets.create"]}
+[debug] [2025-10-31T11:09:29.449Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:29.449Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:29.450Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/jwel369 [none]
+[debug] [2025-10-31T11:09:31.378Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/jwel369 200
+[debug] [2025-10-31T11:09:31.378Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/jwel369 {"projectId":"jwel369","projectNumber":"483619642721","displayName":"jwel369","name":"projects/jwel369","resources":{"hostingSite":"jwel369"},"state":"ACTIVE","etag":"1_e812175c-1f1f-4375-8692-f53157fd08ba"}
+[info] 
+[info] === Deploying to 'jwel369'...
+[info] 
+[info] i  deploying storage, firestore, hosting 
+[info] i  storage: ensuring required API firebasestorage.googleapis.com is enabled... 
+[debug] [2025-10-31T11:09:31.433Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:31.433Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:31.433Z] >>> [apiv2][query] GET https://firebasestorage.googleapis.com/v1alpha/projects/jwel369/defaultBucket [none]
+[debug] [2025-10-31T11:09:32.558Z] <<< [apiv2][status] GET https://firebasestorage.googleapis.com/v1alpha/projects/jwel369/defaultBucket 200
+[debug] [2025-10-31T11:09:32.558Z] <<< [apiv2][body] GET https://firebasestorage.googleapis.com/v1alpha/projects/jwel369/defaultBucket {"name":"projects/jwel369/defaultBucket","location":"ASIA-SOUTH1","bucket":{"name":"projects/jwel369/buckets/jwel369.firebasestorage.app"},"storageClass":"COLDLINE"}
+[info] i  firebase.storage: checking storage.rules for compilation errors... 
+[debug] [2025-10-31T11:09:32.561Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:32.562Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:32.562Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test [none]
+[debug] [2025-10-31T11:09:32.562Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test [omitted]
+[debug] [2025-10-31T11:09:34.180Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test 200
+[debug] [2025-10-31T11:09:34.180Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test {}
+[info] +  firebase.storage: rules file storage.rules compiled successfully 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[info] i  firestore: ensuring required API firestore.googleapis.com is enabled... 
+[debug] [2025-10-31T11:09:34.186Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:34.186Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:34.186Z] >>> [apiv2][query] GET https://firestore.googleapis.com/v1/projects/jwel369/databases/(default) [none]
+[debug] [2025-10-31T11:09:36.055Z] <<< [apiv2][status] GET https://firestore.googleapis.com/v1/projects/jwel369/databases/(default) 200
+[debug] [2025-10-31T11:09:36.055Z] <<< [apiv2][body] GET https://firestore.googleapis.com/v1/projects/jwel369/databases/(default) {"name":"projects/jwel369/databases/(default)","uid":"14bfce13-950e-445d-8a3e-f96ae8e06cec","createTime":"2025-10-15T00:17:32.443682Z","updateTime":"2025-10-15T00:17:32.443682Z","locationId":"nam5","type":"FIRESTORE_NATIVE","concurrencyMode":"PESSIMISTIC","versionRetentionPeriod":"3600s","earliestVersionTime":"2025-10-31T10:09:35.622707Z","appEngineIntegrationMode":"DISABLED","keyPrefix":"s","pointInTimeRecoveryEnablement":"POINT_IN_TIME_RECOVERY_DISABLED","deleteProtectionState":"DELETE_PROTECTION_DISABLED","databaseEdition":"STANDARD","freeTier":true,"realtimeUpdatesMode":"REALTIME_UPDATES_MODE_ENABLED","etag":"IJiv+bSmzpADMLKDv/n2pJAD"}
+[info] i  cloud.firestore: checking firestore.rules for compilation errors... 
+[debug] [2025-10-31T11:09:36.058Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:36.058Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:36.058Z] >>> [apiv2][query] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test [none]
+[debug] [2025-10-31T11:09:36.058Z] >>> [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test [omitted]
+[debug] [2025-10-31T11:09:37.414Z] <<< [apiv2][status] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test 200
+[debug] [2025-10-31T11:09:37.414Z] <<< [apiv2][body] POST https://firebaserules.googleapis.com/v1/projects/jwel369:test {}
+[info] +  cloud.firestore: rules file firestore.rules compiled successfully 
+[debug] [2025-10-31T11:09:37.416Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:37.416Z] Checked if tokens are valid: true, expires at: 1761911100325
+[debug] [2025-10-31T11:09:37.416Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions [none]
+[debug] [2025-10-31T11:09:37.416Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/jwel369/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
