@@ -187,7 +187,7 @@ const path=window.location.pathname;
         products = __dedupeProducts(__parseLocalProducts());
     }
     const saveProducts=()=>{products=__dedupeProducts(products);__persistProducts(products);};
-    const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Set','Studs'];
+    const BASE_CATEGORIES=['Necklace','Ring','Earrings','Bracelet','Bangles','Pendant','Brooch','Daily Wear','Studs'];
     const refreshCategoryOptions=()=>{
         const unique=new Set(BASE_CATEGORIES);
         products.forEach(p=>{ if(p.category) unique.add(p.category); });
@@ -196,7 +196,7 @@ const path=window.location.pathname;
         const filterSel=document.getElementById('category-filter');
         if(filterSel){
             const current=filterSel.value;
-            filterSel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+            filterSel.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('') + '<option value="__add__">+ Add category…</option>';
             if(cats.includes(current)) filterSel.value=current; else filterSel.value='';
         }
         // Form selects (could be multiple on different pages)
@@ -368,6 +368,23 @@ const path=window.location.pathname;
     if(cancelBtn) cancelBtn.addEventListener('click',resetForm);
     if(toggleFormBtn && productFormWrapper) toggleFormBtn.addEventListener('click',()=>{const c=productFormWrapper.classList.toggle('collapsed'); toggleFormBtn.textContent=c?'➕ Add Product':'✖ Close Form'; toggleFormBtn.setAttribute('aria-expanded',c?'false':'true'); if(!c) document.getElementById('name')?.focus();});
     if(clearFiltersBtn) clearFiltersBtn.addEventListener('click',()=>{ if(productSearch) productSearch.value=''; if(categoryFilter) categoryFilter.value=''; renderCards(); renderTable(); if(liveStatus) liveStatus.textContent='Filters cleared'; });
+
+    // Allow adding a new category via the filter select. When user chooses the special
+    // "__add__" option, prompt for a category name, add it to BASE_CATEGORIES
+    // (so refreshCategoryOptions will include it), and then select it.
+    if(categoryFilter){
+        categoryFilter.addEventListener('change', (e)=>{
+            try{
+                if(categoryFilter.value !== '__add__') return;
+                const name = (prompt('Enter new category name:')||'').trim();
+                if(!name){ categoryFilter.value=''; return; }
+                if(!BASE_CATEGORIES.includes(name)) BASE_CATEGORIES.push(name);
+                refreshCategoryOptions();
+                categoryFilter.value = name;
+                if(liveStatus) liveStatus.textContent = `Added category: ${name}`;
+            }catch(err){ console.warn('Add category cancelled or failed', err); categoryFilter.value=''; }
+        });
+    }
     // Manual "Sync from Firestore" button: replace local products with remote list
     const syncFromFirestoreBtn = document.getElementById('sync-from-firestore');
     if(syncFromFirestoreBtn) syncFromFirestoreBtn.addEventListener('click', async ()=>{
